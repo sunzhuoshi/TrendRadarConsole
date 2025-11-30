@@ -32,20 +32,22 @@ jobs:
         env:
           SSH_HOST: ${{ secrets.SSH_HOST }}
           SSH_USER: ${{ secrets.SSH_USER }}
-          TARGET_DIR: ${{ secrets.TARGET_DIR }}
+          TARGET_DIR: ${{ vars.TARGET_DIR }}
         run: |
           # 创建时间戳备份（保留最近3份）
+          FOLDER_NAME="$(basename "$TARGET_DIR")"
           ssh -o StrictHostKeyChecking=no $SSH_USER@$SSH_HOST "
             cd $TARGET_DIR/../
             BACKUP_DIR='backup'
             TIMESTAMP=\$(date +%Y%m%d_%H%M%S)
+            FOLDER_NAME=\"$FOLDER_NAME\"
             
             # 备份当前
-            cp -r \$(basename $TARGET_DIR) \"\$BACKUP_DIR/backup_\$TIMESTAMP\"
-            echo '✅ Backup created: backup_\$TIMESTAMP'
+            cp -r \$FOLDER_NAME \"\$BACKUP_DIR/\${FOLDER_NAME}_\$TIMESTAMP\"
+            echo '✅ Backup created: \${FOLDER_NAME}_\$TIMESTAMP'
             
             # 保留最近3份备份
-            (ls -1t \$BACKUP_DIR/backup_* 2>/dev/null | tail -n +4 | xargs -r rm -rf)
+            (ls -1t \$BACKUP_DIR/\${FOLDER_NAME}_* 2>/dev/null | tail -n +4 | xargs -r rm -rf)
           "
 
           # rsync 同步（--delete 保持一致；--exclude 已在前步处理）
