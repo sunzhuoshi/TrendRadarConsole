@@ -51,10 +51,16 @@ jobs:
           # rsync 同步（--delete 保持一致；--exclude 已在前步处理）
           rsync -avz \
             --delete \
+            # 🛡️ 防止覆盖面板配置
+            --exclude='.htaccess' \
+            # 🔒 宝塔核心保护
+            --exclude='.user.ini' \
+            # 🔑 证书目录
+            --exclude='.well-known/' \
             --exclude='.env*' \
             --exclude='storage/logs/*' \
             --exclude='storage/framework/cache/*' \
-            ./dist/ \
+            ./ \
             $SSH_USER@$SSH_HOST:$TARGET_DIR/
 
       - name: ♻️ Reload Apache
