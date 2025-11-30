@@ -72,6 +72,7 @@ done
 
 # 5. 验证（仍用 config/ 测试，它不属于排除项）
 echo "   ✅ 验证 Web 用户写权限..."
+sudo mkdir -p "$TARGET_DIR/config"
 test_file="$TARGET_DIR/config/.perm_test"
 if sudo -u "$WEB_USER" touch "$test_file" 2>/dev/null && sudo -u "$WEB_USER" rm -f "$test_file"; then
   echo "   🎯 验证通过"
