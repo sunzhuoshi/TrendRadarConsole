@@ -1,0 +1,30 @@
+# Protect configuration files
+<FilesMatch "^config\.php$">
+    Order deny,allow
+    Deny from all
+</FilesMatch>
+
+# Protect includes directory
+<IfModule mod_rewrite.c>
+    RewriteEngine On
+    RewriteRule ^includes/ - [F,L]
+    RewriteRule ^sql/ - [F,L]
+</IfModule>
+
+# Disable directory listing
+Options -Indexes
+
+# Protect sensitive files
+<FilesMatch "\.(sql|md|gitignore)$">
+    Order deny,allow
+    Deny from all
+</FilesMatch>
+
+# Set default charset
+AddDefaultCharset UTF-8
+
+# PHP settings (if allowed)
+<IfModule mod_php7.c>
+    php_flag display_errors off
+    php_flag log_errors on
+</IfModule>

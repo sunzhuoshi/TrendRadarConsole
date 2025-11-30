@@ -1,0 +1,56 @@
+<?php
+/**
+ * TrendRadarConsole - Settings API
+ */
+
+session_start();
+require_once '../includes/helpers.php';
+require_once '../includes/Configuration.php';
+
+header('Content-Type: application/json; charset=utf-8');
+
+try {
+    $config = new Configuration();
+    $method = getMethod();
+    $input = getInput();
+    
+    switch ($method) {
+        case 'GET':
+            $configId = isset($_GET['config_id']) ? (int)$_GET['config_id'] : null;
+            if (!$configId) {
+                jsonError('Configuration ID is required');
+            }
+            $settings = $config->getSettings($configId);
+            jsonSuccess($settings);
+            break;
+            
+        case 'POST':
+            $configId = isset($input['config_id']) ? (int)$input['config_id'] : null;
+            
+            if (!$configId) {
+                jsonError('Configuration ID is required');
+            }
+            
+            // Handle single setting update
+            if (isset($input['key']) && isset($input['value'])) {
+                $config->saveSetting($configId, $input['key'], $input['value']);
+                jsonSuccess(null, 'Setting updated successfully');
+            }
+            
+            // Handle multiple settings update
+            if (isset($input['settings']) && is_array($input['settings'])) {
+                foreach ($input['settings'] as $key => $value) {
+                    $config->saveSetting($configId, $key, $value);
+                }
+                jsonSuccess(null, 'Settings saved successfully');
+            }
+            
+            jsonError('No settings provided');
+            break;
+            
+        default:
+            jsonError('Method not allowed', 405);
+    }
+} catch (Exception $e) {
+    jsonError($e->getMessage(), 500);
+}
