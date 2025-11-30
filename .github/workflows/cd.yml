@@ -38,7 +38,7 @@ jobs:
           # 创建时间戳备份（保留最近3份）
           FOLDER_NAME="$(basename "$TARGET_DIR")"
           ssh -o StrictHostKeyChecking=no $SSH_USER@$SSH_HOST "
-            BACKUP_DIR='$BACKUP_DIR'
+            BACKUP_DIR=\"$BACKUP_DIR\"
             TIMESTAMP=\$(date +%Y%m%d_%H%M%S)
             FOLDER_NAME=\"$FOLDER_NAME\"
             
