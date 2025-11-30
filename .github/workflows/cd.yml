@@ -56,7 +56,7 @@ jobs:
             --exclude='.env*' \
             --exclude='storage/logs/*' \
             --exclude='storage/framework/cache/*' \
-            ./ \
+            ./dist/ \
             $SSH_USER@$SSH_HOST:$TARGET_DIR/
 
       - name: ♻️ Reload Apache
