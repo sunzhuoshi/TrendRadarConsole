@@ -23,9 +23,6 @@ jobs:
                        --exclude='vendor/' \
                        ./ ./dist/
 
-      - name: 📝 List dist contents
-        run: ls -al ./dist/
-
       - name: 🔑 Setup SSH key
         uses: webfactory/ssh-agent@v0.9.0
         with:
@@ -38,31 +35,35 @@ jobs:
           TARGET_DIR: ${{ vars.TARGET_DIR }}
           BACKUP_DIR: ${{ vars.BACKUP_DIR }}
         run: |
-          # 创建时间戳备份（保留最近3份）
-          ssh -o StrictHostKeyChecking=no $SSH_USER@$SSH_HOST "
-            FOLDER_NAME=\$(basename \"$TARGET_DIR\")
+          ssh -o StrictHostKeyChecking=no "$SSH_USER@$SSH_HOST" "
+            TARGET_DIR=\$(printf '%q' '$TARGET_DIR')
+            BACKUP_DIR=\$(printf '%q' '$BACKUP_DIR')
+            FOLDER_NAME=\$(basename \"\$TARGET_DIR\")
             TIMESTAMP=\$(date +%Y%m%d_%H%M%S)
-            
-            # 备份当前
-            cp -r $TARGET_DIR \"$BACKUP_DIR/\${FOLDER_NAME}_\$TIMESTAMP\"
+          
+            # 创建备份
+            mkdir -p \"\$BACKUP_DIR\"
+            cp -r \"\$TARGET_DIR\" \"\$BACKUP_DIR/\${FOLDER_NAME}_\$TIMESTAMP\"
             echo \"✅ Backup created: \${FOLDER_NAME}_\$TIMESTAMP\"
-            
-            # 保留最近3份备份
-            (ls -1t $BACKUP_DIR/\${FOLDER_NAME}_* 2>/dev/null | tail -n +4 | xargs -r rm -rf)
+          
+            # 保留最近3份（更安全的写法）
+            (
+              cd \"\$BACKUP_DIR\" || exit
+              # 列出匹配目录，按修改时间倒序，跳过前3个
+              ls -1t \"\${FOLDER_NAME}_\"* 2>/dev/null | tail -n +4 | xargs -r rm -rf
+            )
           "
-
-          ls -al ./dist/
-  
-          # rsync 同步（--delete 保持一致；--exclude 已在前步处理）
+          
+          # rsync 同步（关键：引号 + 无空格）
           rsync -aLvz \
             --delete \
-            --exclude='.user.ini' \  # 🔒 宝塔核心保护
-            --exclude='.well-known/' \  # 🔑 证书目录
+            --exclude='.user.ini' \
+            --exclude='.well-known/' \
             --exclude='.env*' \
             --exclude='storage/logs/*' \
             --exclude='storage/framework/cache/*' \
             ./dist/ \
-            $SSH_USER@$SSH_HOST:$TARGET_DIR/
+            "${SSH_USER}@${SSH_HOST}:${TARGET_DIR}/"
 
       - name: ♻️ Reload Apache
         env:
