@@ -54,7 +54,7 @@ jobs:
           ls -al ./dist/
   
           # rsync 同步（--delete 保持一致；--exclude 已在前步处理）
-          rsync -avz \
+          rsync -aLvz \
             --delete \
             --exclude='.user.ini' \  # 🔒 宝塔核心保护
             --exclude='.well-known/' \  # 🔑 证书目录
