@@ -19,15 +19,27 @@ WRITABLE_DIRS=(
 )
 
 # ✅ 显式排除宝塔保护文件/目录（不 touch 它们）
+# Note: Using -path patterns with wildcards to match files at any depth
+# Each pattern is duplicated: one for root level, one for subdirectories
 EXCLUDE_PATTERNS=(
   ".user.ini"
+  "*/.user.ini"
   ".htaccess"
+  "*/.htaccess"
   ".well-known"
+  "*/.well-known"
+  ".well-known/*"
+  "*/.well-known/*"
   ".env"
+  "*/.env"
   ".env.*"
+  "*/.env.*"
   "index.html"        # 宝塔默认页
+  "*/index.html"
   "404.html"
+  "*/404.html"
   "phpinfo.php"
+  "*/phpinfo.php"
 )
 
 echo "🔧 修复权限（跳过宝塔敏感文件）: $TARGET_DIR"
@@ -41,10 +53,10 @@ fi
 # 2. 修复属主：仅针对非敏感文件
 echo "   📁 设置属主为 $DEPLOY_USER:$WEB_USER（跳过敏感项）..."
 
-# 构建 find 排除语句
+# 构建 find 排除语句 (using -path for pattern matching at any depth)
 EXCLUDE_ARGS=()
 for pat in "${EXCLUDE_PATTERNS[@]}"; do
-  EXCLUDE_ARGS+=(-not -name "$pat")
+  EXCLUDE_ARGS+=(-not -path "$pat")
 done
 
 # 递归修复非敏感文件/目录属主
