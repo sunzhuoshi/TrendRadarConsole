@@ -51,10 +51,8 @@ jobs:
           # rsync 同步（--delete 保持一致；--exclude 已在前步处理）
           rsync -avz \
             --delete \
-            # 🔒 宝塔核心保护
-            --exclude='.user.ini' \
-            # 🔑 证书目录
-            --exclude='.well-known/' \
+            --exclude='.user.ini' \  # 🔒 宝塔核心保护
+            --exclude='.well-known/' \  # 🔑 证书目录
             --exclude='.env*' \
             --exclude='storage/logs/*' \
             --exclude='storage/framework/cache/*' \
