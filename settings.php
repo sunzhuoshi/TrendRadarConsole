@@ -22,7 +22,7 @@ try {
     $activeConfig = $config->getActive();
     
     if (!$activeConfig) {
-        setFlash('warning', 'Please create and activate a configuration first.');
+        setFlash('warning', __('please_create_config'));
         header('Location: index.php');
         exit;
     }
@@ -55,14 +55,15 @@ $defaults = [
 // Merge with defaults
 $settings = array_merge($defaults, $settings);
 $csrfToken = generateCsrfToken();
+$currentLang = getCurrentLanguage();
 ?>
 <!DOCTYPE html>
-<html lang="en">
+<html lang="<?php echo $currentLang; ?>">
 <head>
     <meta name="csrf-token" content="<?php echo $csrfToken; ?>">
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>TrendRadarConsole - Settings</title>
+    <title>TrendRadarConsole - <?php _e('settings'); ?></title>
     <link rel="stylesheet" href="assets/css/style.css">
 </head>
 <body>
@@ -73,8 +74,8 @@ $csrfToken = generateCsrfToken();
             <input type="hidden" id="config-id" value="<?php echo $activeConfig['id']; ?>">
             
             <div class="page-header">
-                <h2>Configuration Settings</h2>
-                <p>Adjust report mode, weights, and notification settings</p>
+                <h2><?php _e('configuration_settings'); ?></h2>
+                <p><?php _e('settings_desc'); ?></p>
             </div>
             
             <?php if ($flash): ?>
@@ -91,37 +92,37 @@ $csrfToken = generateCsrfToken();
                 <!-- Report Settings -->
                 <div class="card">
                     <div class="card-header">
-                        <h3>📊 Report Settings</h3>
+                        <h3>📊 <?php _e('report_settings'); ?></h3>
                     </div>
                     <div class="card-body">
                         <div class="row">
                             <div class="col-6">
                                 <div class="form-group">
-                                    <label class="form-label">Report Mode</label>
+                                    <label class="form-label"><?php _e('report_mode'); ?></label>
                                     <select name="report_mode" class="form-control">
                                         <option value="daily" <?php echo $settings['report_mode'] === 'daily' ? 'selected' : ''; ?>>
-                                            Daily Summary (当日汇总)
+                                            <?php _e('daily_summary'); ?> (当日汇总)
                                         </option>
                                         <option value="current" <?php echo $settings['report_mode'] === 'current' ? 'selected' : ''; ?>>
-                                            Current List (当前榜单)
+                                            <?php _e('current_list'); ?> (当前榜单)
                                         </option>
                                         <option value="incremental" <?php echo $settings['report_mode'] === 'incremental' ? 'selected' : ''; ?>>
-                                            Incremental (增量监控)
+                                            <?php _e('incremental'); ?> (增量监控)
                                         </option>
                                     </select>
                                     <div class="form-text">
-                                        <strong>Daily:</strong> All matching news of the day<br>
-                                        <strong>Current:</strong> Current hot list<br>
-                                        <strong>Incremental:</strong> Only new items (no duplicates)
+                                        <strong><?php _e('daily_summary'); ?>:</strong> <?php _e('daily_desc'); ?><br>
+                                        <strong><?php _e('current_list'); ?>:</strong> <?php _e('current_desc'); ?><br>
+                                        <strong><?php _e('incremental'); ?>:</strong> <?php _e('incremental_desc'); ?>
                                     </div>
                                 </div>
                             </div>
                             <div class="col-6">
                                 <div class="form-group">
-                                    <label class="form-label">Rank Threshold</label>
+                                    <label class="form-label"><?php _e('rank_threshold'); ?></label>
                                     <input type="number" name="rank_threshold" class="form-control" 
                                            value="<?php echo sanitize($settings['rank_threshold']); ?>" min="1" max="50">
-                                    <div class="form-text">Items with rank ≤ this value will be highlighted</div>
+                                    <div class="form-text"><?php _e('rank_threshold_desc'); ?></div>
                                 </div>
                             </div>
                         </div>
@@ -129,23 +130,23 @@ $csrfToken = generateCsrfToken();
                         <div class="row">
                             <div class="col-6">
                                 <div class="form-group">
-                                    <label class="form-label">Sort Priority</label>
+                                    <label class="form-label"><?php _e('sort_priority'); ?></label>
                                     <select name="sort_by_position_first" class="form-control">
                                         <option value="false" <?php echo $settings['sort_by_position_first'] === 'false' ? 'selected' : ''; ?>>
-                                            By News Count (热点条数优先)
+                                            <?php _e('by_news_count'); ?> (热点条数优先)
                                         </option>
                                         <option value="true" <?php echo $settings['sort_by_position_first'] === 'true' ? 'selected' : ''; ?>>
-                                            By Config Position (配置顺序优先)
+                                            <?php _e('by_config_position'); ?> (配置顺序优先)
                                         </option>
                                     </select>
                                 </div>
                             </div>
                             <div class="col-6">
                                 <div class="form-group">
-                                    <label class="form-label">Max News Per Keyword</label>
+                                    <label class="form-label"><?php _e('max_news_per_keyword'); ?></label>
                                     <input type="number" name="max_news_per_keyword" class="form-control" 
                                            value="<?php echo sanitize($settings['max_news_per_keyword']); ?>" min="0">
-                                    <div class="form-text">0 = no limit</div>
+                                    <div class="form-text"><?php _e('no_limit'); ?></div>
                                 </div>
                             </div>
                         </div>
@@ -155,43 +156,43 @@ $csrfToken = generateCsrfToken();
                 <!-- Weight Settings -->
                 <div class="card">
                     <div class="card-header">
-                        <h3>⚖️ Hot Topic Weight Settings</h3>
+                        <h3>⚖️ <?php _e('weight_settings'); ?></h3>
                     </div>
                     <div class="card-body">
                         <p class="text-muted mb-3">
-                            These weights determine how news items are ranked. The sum must equal 1.0.
+                            <?php _e('weight_desc'); ?>
                         </p>
                         <div class="row">
                             <div class="col-4">
                                 <div class="form-group">
-                                    <label class="form-label">Rank Weight (排名权重)</label>
+                                    <label class="form-label"><?php _e('rank_weight'); ?></label>
                                     <input type="number" name="rank_weight" class="form-control weight-input" 
                                            value="<?php echo sanitize($settings['rank_weight']); ?>" 
                                            min="0" max="1" step="0.1">
-                                    <div class="form-text">Higher = prioritize top-ranked news</div>
+                                    <div class="form-text"><?php _e('rank_weight_desc'); ?></div>
                                 </div>
                             </div>
                             <div class="col-4">
                                 <div class="form-group">
-                                    <label class="form-label">Frequency Weight (频次权重)</label>
+                                    <label class="form-label"><?php _e('frequency_weight'); ?></label>
                                     <input type="number" name="frequency_weight" class="form-control weight-input" 
                                            value="<?php echo sanitize($settings['frequency_weight']); ?>" 
                                            min="0" max="1" step="0.1">
-                                    <div class="form-text">Higher = prioritize frequently appearing news</div>
+                                    <div class="form-text"><?php _e('frequency_weight_desc'); ?></div>
                                 </div>
                             </div>
                             <div class="col-4">
                                 <div class="form-group">
-                                    <label class="form-label">Hotness Weight (热度权重)</label>
+                                    <label class="form-label"><?php _e('hotness_weight'); ?></label>
                                     <input type="number" name="hotness_weight" class="form-control weight-input" 
                                            value="<?php echo sanitize($settings['hotness_weight']); ?>" 
                                            min="0" max="1" step="0.1">
-                                    <div class="form-text">Higher = prioritize trending topics</div>
+                                    <div class="form-text"><?php _e('hotness_weight_desc'); ?></div>
                                 </div>
                             </div>
                         </div>
                         <div id="weight-warning" class="alert alert-warning" style="display: none;">
-                            The sum of weights must equal 1.0
+                            <?php _e('weight_sum_warning'); ?>
                         </div>
                     </div>
                 </div>
@@ -199,25 +200,25 @@ $csrfToken = generateCsrfToken();
                 <!-- System Settings -->
                 <div class="card">
                     <div class="card-header">
-                        <h3>🔧 System Settings</h3>
+                        <h3>🔧 <?php _e('system_settings'); ?></h3>
                     </div>
                     <div class="card-body">
                         <div class="row">
                             <div class="col-6">
                                 <div class="form-group">
-                                    <label class="form-label">Enable Crawler</label>
+                                    <label class="form-label"><?php _e('enable_crawler'); ?></label>
                                     <select name="enable_crawler" class="form-control">
-                                        <option value="true" <?php echo $settings['enable_crawler'] === 'true' ? 'selected' : ''; ?>>Yes</option>
-                                        <option value="false" <?php echo $settings['enable_crawler'] === 'false' ? 'selected' : ''; ?>>No</option>
+                                        <option value="true" <?php echo $settings['enable_crawler'] === 'true' ? 'selected' : ''; ?>><?php _e('yes'); ?></option>
+                                        <option value="false" <?php echo $settings['enable_crawler'] === 'false' ? 'selected' : ''; ?>><?php _e('no'); ?></option>
                                     </select>
                                 </div>
                             </div>
                             <div class="col-6">
                                 <div class="form-group">
-                                    <label class="form-label">Enable Notifications</label>
+                                    <label class="form-label"><?php _e('enable_notifications'); ?></label>
                                     <select name="enable_notification" class="form-control">
-                                        <option value="true" <?php echo $settings['enable_notification'] === 'true' ? 'selected' : ''; ?>>Yes</option>
-                                        <option value="false" <?php echo $settings['enable_notification'] === 'false' ? 'selected' : ''; ?>>No</option>
+                                        <option value="true" <?php echo $settings['enable_notification'] === 'true' ? 'selected' : ''; ?>><?php _e('yes'); ?></option>
+                                        <option value="false" <?php echo $settings['enable_notification'] === 'false' ? 'selected' : ''; ?>><?php _e('no'); ?></option>
                                     </select>
                                 </div>
                             </div>
@@ -228,43 +229,43 @@ $csrfToken = generateCsrfToken();
                 <!-- Push Window Settings -->
                 <div class="card">
                     <div class="card-header">
-                        <h3>🕐 Push Time Window</h3>
+                        <h3>🕐 <?php _e('push_time_window'); ?></h3>
                     </div>
                     <div class="card-body">
                         <div class="form-group">
-                            <label class="form-label">Enable Push Time Window</label>
+                            <label class="form-label"><?php _e('enable_push_window'); ?></label>
                             <select name="push_window_enabled" class="form-control" id="push-window-toggle">
-                                <option value="false" <?php echo $settings['push_window_enabled'] === 'false' ? 'selected' : ''; ?>>Disabled</option>
-                                <option value="true" <?php echo $settings['push_window_enabled'] === 'true' ? 'selected' : ''; ?>>Enabled</option>
+                                <option value="false" <?php echo $settings['push_window_enabled'] === 'false' ? 'selected' : ''; ?>><?php _e('disabled'); ?></option>
+                                <option value="true" <?php echo $settings['push_window_enabled'] === 'true' ? 'selected' : ''; ?>><?php _e('enabled'); ?></option>
                             </select>
-                            <div class="form-text">Limit notifications to a specific time window</div>
+                            <div class="form-text"><?php _e('push_window_desc'); ?></div>
                         </div>
                         
                         <div id="push-window-options" style="<?php echo $settings['push_window_enabled'] === 'true' ? '' : 'display:none;'; ?>">
                             <div class="row">
                                 <div class="col-4">
                                     <div class="form-group">
-                                        <label class="form-label">Start Time</label>
+                                        <label class="form-label"><?php _e('start_time'); ?></label>
                                         <input type="time" name="push_window_start" class="form-control" 
                                                value="<?php echo sanitize($settings['push_window_start']); ?>">
                                     </div>
                                 </div>
                                 <div class="col-4">
                                     <div class="form-group">
-                                        <label class="form-label">End Time</label>
+                                        <label class="form-label"><?php _e('end_time'); ?></label>
                                         <input type="time" name="push_window_end" class="form-control" 
                                                value="<?php echo sanitize($settings['push_window_end']); ?>">
                                     </div>
                                 </div>
                                 <div class="col-4">
                                     <div class="form-group">
-                                        <label class="form-label">Push Frequency</label>
+                                        <label class="form-label"><?php _e('push_frequency'); ?></label>
                                         <select name="push_window_once_per_day" class="form-control">
                                             <option value="true" <?php echo $settings['push_window_once_per_day'] === 'true' ? 'selected' : ''; ?>>
-                                                Once per day
+                                                <?php _e('once_per_day'); ?>
                                             </option>
                                             <option value="false" <?php echo $settings['push_window_once_per_day'] === 'false' ? 'selected' : ''; ?>>
-                                                Every execution
+                                                <?php _e('every_execution'); ?>
                                             </option>
                                         </select>
                                     </div>
@@ -277,7 +278,7 @@ $csrfToken = generateCsrfToken();
                 <!-- Save Button -->
                 <div class="card">
                     <div class="card-body">
-                        <button type="submit" class="btn btn-primary btn-lg">Save All Settings</button>
+                        <button type="submit" class="btn btn-primary btn-lg"><?php _e('save_all_settings'); ?></button>
                     </div>
                 </div>
             </form>
@@ -286,6 +287,7 @@ $csrfToken = generateCsrfToken();
         </main>
     </div>
     
+    <script>var i18n = <?php echo getJsTranslations(); ?>;</script>
     <script src="assets/js/app.js"></script>
     <script>
         // Push window toggle
@@ -307,7 +309,7 @@ $csrfToken = generateCsrfToken();
             const warning = document.getElementById('weight-warning');
             if (Math.abs(sum - 1.0) > 0.01) {
                 warning.style.display = 'block';
-                warning.textContent = `Weight sum is ${sum.toFixed(2)} - should be 1.0`;
+                warning.textContent = `${__('weight_sum_is')} ${sum.toFixed(2)} ${__('should_be')} 1.0`;
             } else {
                 warning.style.display = 'none';
             }
@@ -330,9 +332,9 @@ $csrfToken = generateCsrfToken();
                     config_id: configId,
                     settings: settings
                 });
-                showToast('Settings saved successfully', 'success');
+                showToast(__('settings_saved'), 'success');
             } catch (error) {
-                showToast('Failed to save: ' + error.message, 'error');
+                showToast(__('failed_to_save') + error.message, 'error');
             }
         });
     </script>
