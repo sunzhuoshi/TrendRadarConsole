@@ -80,6 +80,30 @@ After installation, you'll be redirected to the dashboard where you can:
 4. Adjust report settings
 5. Export configurations for TrendRadar
 
+## Using with TrendRadar
+
+### GitHub Actions Deployment (Recommended)
+
+After exporting your configuration from TrendRadarConsole, you can deploy to TrendRadar via GitHub repository variables:
+
+1. Go to your TrendRadar fork's **Settings → Secrets and variables → Actions**
+2. Click on the **Variables** tab
+3. Create two repository variables:
+   - `CONFIG_YAML` - Paste the entire content from the exported `config.yaml`
+   - `FREQUENCY_WORDS` - Paste the content from the exported `frequency_words.txt`
+
+These variables will automatically override the config files during GitHub Actions workflow execution.
+
+**Note:** For sensitive webhook URLs, use **Secrets** (not Variables) instead:
+- `FEISHU_WEBHOOK_URL`, `DINGTALK_WEBHOOK_URL`, `WEWORK_WEBHOOK_URL`
+- `TELEGRAM_BOT_TOKEN`, `TELEGRAM_CHAT_ID`
+- `EMAIL_FROM`, `EMAIL_PASSWORD`, `EMAIL_TO`
+- etc.
+
+### Docker Deployment
+
+Place the exported files in your TrendRadar project's `config/` directory.
+
 ## Directory Structure
 
 ```

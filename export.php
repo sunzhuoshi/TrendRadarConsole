@@ -121,9 +121,19 @@ $currentPage = 'export';
                     <ol style="line-height: 2;">
                         <li>Download both <code>config.yaml</code> and <code>frequency_words.txt</code> files</li>
                         <li>Place them in your TrendRadar project's <code>config/</code> directory</li>
-                        <li>For GitHub Actions deployment, add webhook URLs to GitHub Secrets instead of the config file</li>
+                        <li>For GitHub Actions deployment, you can also use repository variables (see below)</li>
                         <li>For Docker deployment, use environment variables for sensitive data</li>
                     </ol>
+                    
+                    <div class="alert alert-success mt-3">
+                        <strong>🚀 GitHub Actions Deployment (Recommended):</strong><br>
+                        Instead of editing files directly, you can set configurations via GitHub repository variables:
+                        <ul class="mt-2 mb-0">
+                            <li><code>vars.CONFIG_YAML</code> - Paste the entire config.yaml content</li>
+                            <li><code>vars.FREQUENCY_WORDS</code> - Paste the frequency_words.txt content</li>
+                        </ul>
+                        Go to your repo's <strong>Settings → Secrets and variables → Actions → Variables tab</strong> to set these.
+                    </div>
                     
                     <div class="alert alert-info mt-3">
                         <strong>💡 Tip:</strong> For security reasons, webhook URLs in the exported config.yaml are included.
