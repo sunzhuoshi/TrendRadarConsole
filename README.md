@@ -4,12 +4,25 @@ A web-based configuration management system for [TrendRadar](https://github.com/
 
 ## Features
 
+### User Management
+- **User Authentication**: Login and registration system with secure password hashing
+- **Per-User Configurations**: Each user has their own isolated configurations
+- **Per-User GitHub Settings**: Each user can configure their own GitHub repository (owner/repo/PAT)
+
+### Configuration Management
 - **Platform Management**: Configure which platforms to monitor (Weibo, Zhihu, Toutiao, etc.)
 - **Keyword Configuration**: Set up keywords with filters, required words, and limits
 - **Notification Webhooks**: Configure multiple notification channels (WeChat Work, Feishu, DingTalk, Telegram, Email, ntfy, Bark, Slack)
 - **Report Settings**: Customize report mode, weights, and push time windows
+
+### Export & Sync
 - **Export**: Export configurations as `config.yaml` and `frequency_words.txt` for use with TrendRadar
-- **GitHub Sync**: Load and save configurations directly to your GitHub repository variables (requires PAT)
+- **GitHub Sync**: Load and save `CONFIG_YAML` and `FREQUENCY_WORDS` directly to your GitHub repository variables
+
+### Mobile Support
+- **Responsive Design**: Works on mobile browsers with hamburger menu navigation
+- **Touch-Friendly**: Optimized controls for touch screens
+- **Adaptive Layout**: Layouts adjust for small screens
 
 ## Requirements
 
@@ -68,31 +81,39 @@ CREATE DATABASE trendradar_console CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode
 3. Click "Install TrendRadarConsole"
 
 The installer will automatically:
-- Create all necessary tables
-- Set up default configuration
+- Create all necessary tables (users, configurations, platforms, keywords, webhooks, settings)
 - Generate the config file
 
-### 5. Start Using
+### 5. Register and Login
 
-After installation, you'll be redirected to the dashboard where you can:
-1. Manage platforms
-2. Configure keywords
-3. Set up notification webhooks
-4. Adjust report settings
-5. Export configurations for TrendRadar
+1. Visit `http://your-domain.com/register.php` to create your account
+2. After registration, you'll be automatically logged in
+3. Each user has their own isolated configurations
+
+### 6. Start Using
+
+After login, you can:
+1. Set up your GitHub repository in **GitHub Sync**
+2. Manage platforms
+3. Configure keywords
+4. Set up notification webhooks
+5. Adjust report settings
+6. Sync configurations to GitHub
 
 ## Using with TrendRadar
 
 ### GitHub Sync (Recommended)
 
-TrendRadarConsole can directly sync configurations to your GitHub repository:
+TrendRadarConsole can directly sync configurations to your GitHub repository. Each user stores their own GitHub settings:
 
 1. Navigate to **GitHub Sync** in the sidebar
 2. Enter your GitHub repository details (owner/repo)
 3. Create a **Fine-grained Personal Access Token** with **Variables: Read and write** permission
-4. Click **Save to GitHub** to push your configuration directly
+4. Click **Save Settings** to store your GitHub credentials
+5. Use **Load from GitHub** to import existing configurations
+6. Use **Save to GitHub** to push your configuration
 
-This automatically sets `CONFIG_YAML` and `FREQUENCY_WORDS` repository variables.
+This automatically sets `CONFIG_YAML` and `FREQUENCY_WORDS` repository variables that TrendRadar uses during GitHub Actions workflow execution.
 
 ### Manual GitHub Actions Deployment
 
@@ -130,26 +151,32 @@ TrendRadarConsole/
 │   └── webhooks.php
 ├── assets/
 │   ├── css/
-│   │   └── style.css
+│   │   └── style.css       # Responsive styles with mobile support
 │   └── js/
 │       └── app.js
 ├── config/
 │   ├── config.example.php  # Configuration template
 │   └── config.php          # Your configuration (created during install)
 ├── includes/
-│   ├── Configuration.php   # Configuration model
-│   ├── Database.php        # Database connection
+│   ├── auth.php            # Authentication class
+│   ├── configuration.php   # Configuration model
+│   ├── database.php        # Database connection
+│   ├── github.php          # GitHub API integration
 │   └── helpers.php         # Helper functions
 ├── sql/
-│   └── schema.sql          # Database schema
+│   └── schema.sql          # Database schema (users, configurations, etc.)
 ├── templates/
-│   └── sidebar.php         # Sidebar template
+│   └── sidebar.php         # Sidebar template with mobile hamburger menu
 ├── config-edit.php         # Configuration edit page
 ├── export.php              # Export page
+├── github.php              # GitHub sync page
 ├── index.php               # Dashboard
 ├── install.php             # Installation wizard
 ├── keywords.php            # Keywords management
+├── login.php               # Login page
+├── logout.php              # Logout handler
 ├── platforms.php           # Platforms management
+├── register.php            # Registration page
 ├── settings.php            # Settings page
 └── webhooks.php            # Webhooks management
 ```
@@ -217,10 +244,14 @@ firewall-cmd --reload
 
 ## Security Notes
 
-1. **Protect config.php**: Ensure `config/config.php` is not accessible directly from the web
-2. **Use HTTPS**: For production, always use HTTPS to protect sensitive data
-3. **Webhook URLs**: Never expose webhook URLs publicly
-4. **Database credentials**: Use strong passwords for database access
+1. **User Authentication**: All pages require login except installation and registration
+2. **CSRF Protection**: All API endpoints are protected with CSRF tokens
+3. **Password Security**: Passwords are hashed using PHP's `password_hash()` function
+4. **Data Isolation**: Each user can only access their own configurations
+5. **Protect config.php**: Ensure `config/config.php` is not accessible directly from the web
+6. **Use HTTPS**: For production, always use HTTPS to protect sensitive data
+7. **GitHub PAT**: Personal Access Tokens are stored per-user - use minimal permissions
+8. **Database credentials**: Use strong passwords for database access
 
 ## License
 
