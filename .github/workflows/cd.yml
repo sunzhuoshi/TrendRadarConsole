@@ -1,0 +1,86 @@
+name: CD
+
+on:
+  push:
+    branches: [ main ]
+  workflow_dispatch:
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: 🛎️ Checkout code
+        uses: actions/checkout@v4
+
+      - name: 📦 Prepare artifact (exclude .git, .github, etc.)
+        run: |
+          mkdir -p ./dist
+          rsync -av --exclude='.git/' \
+                       --exclude='.github/' \
+                       --exclude='.gitignore' \
+                       --exclude='setup-deploy-user.sh' \
+                       --exclude='deploy.yml' \
+                       --exclude='node_modules/' \
+                       --exclude='vendor/' \
+                       ./ ./dist/
+
+      - name: 🔑 Setup SSH key
+        uses: webfactory/ssh-agent@v0.9.0
+        with:
+          ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
+
+      - name: 🚚 Deploy via rsync
+        env:
+          SSH_HOST: ${{ secrets.SSH_HOST }}
+          SSH_USER: ${{ secrets.SSH_USER }}
+          TARGET_DIR: ${{ secrets.TARGET_DIR }}
+        run: |
+          # 创建时间戳备份（保留最近3份）
+          ssh -o StrictHostKeyChecking=no $SSH_USER@$SSH_HOST "
+            cd $TARGET_DIR/../
+            BACKUP_DIR='backup'
+            TIMESTAMP=\$(date +%Y%m%d_%H%M%S)
+            
+            # 备份当前
+            cp -r \$(basename $TARGET_DIR) \"\$BACKUP_DIR/backup_\$TIMESTAMP\"
+            echo '✅ Backup created: backup_\$TIMESTAMP'
+            
+            # 保留最近3份备份
+            (ls -1t \$BACKUP_DIR/backup_* 2>/dev/null | tail -n +4 | xargs -r rm -rf)
+          "
+
+          # rsync 同步（--delete 保持一致；--exclude 已在前步处理）
+          rsync -avz \
+            --delete \
+            --exclude='.env*' \
+            --exclude='storage/logs/*' \
+            --exclude='storage/framework/cache/*' \
+            ./dist/ \
+            $SSH_USER@$SSH_HOST:$TARGET_DIR/
+
+      - name: ♻️ Reload Apache
+        env:
+          SSH_HOST: ${{ secrets.SSH_HOST }}
+          SSH_USER: ${{ secrets.SSH_USER }}
+        run: |
+          ssh -o StrictHostKeyChecking=no $SSH_USER@$SSH_HOST "
+            sudo systemctl reload httpd
+            echo '✅ Apache reloaded'
+          "
+
+      # —————————— 可选：部署成功通知 ——————————
+      # 便于你后续接入「自己推送消息」系统（如企业微信 / 自建 webhook）
+      # - name: 📢 Notify success
+      #   if: success()
+      #   env:
+      #     NOTIFY_URL: ${{ secrets.NOTIFY_WEBHOOK_URL }}
+      #   run: |
+      #     curl -sfSL -X POST "$NOTIFY_URL" \
+      #       -H "Content-Type: application/json" \
+      #       -d '{
+      #         "title": "✅ Deploy Success",
+      #         "repo": "'"$GITHUB_REPOSITORY"'",
+      #         "commit": "'"$GITHUB_SHA"'",
+      #         "branch": "'"$GITHUB_REF_NAME"'",
+      #         "author": "'"$GITHUB_ACTOR"'",
+      #         "time": "'$(date -u +"%Y-%m-%dT%H:%M:%SZ")'"
+      #       }'
