@@ -73,7 +73,7 @@ jobs:
           SSH_USER: ${{ secrets.SSH_USER }}
         run: |
           ssh -o StrictHostKeyChecking=no $SSH_USER@$SSH_HOST "
-            sudo systemctl reload httpd
+            sudo systemctl restart httpd
             echo '✅ Apache reloaded'
           "
 
