@@ -67,6 +67,18 @@ jobs:
             ./dist/ \
             "${SSH_USER}@${SSH_HOST}:${TARGET_DIR}/"
 
+      - name: 🔐 Fix Permissions (Skip Sensitive Files)
+        env:
+          SSH_HOST: ${{ secrets.SSH_HOST }}
+          SSH_USER: ${{ secrets.SSH_USER }}
+        run: |
+          chmod +x .github/scripts/fix-permissions.sh
+          ssh -o StrictHostKeyChecking=no "$SSH_USER@$SSH_HOST" \
+            "mkdir -p /tmp/scripts && cat > /tmp/scripts/fix-permissions.sh" \
+            < .github/scripts/fix-permissions.sh
+          ssh -o StrictHostKeyChecking=no "$SSH_USER@$SSH_HOST" \
+            "chmod +x /tmp/scripts/fix-permissions.sh && /tmp/scripts/fix-permissions.sh"
+
       - name: ♻️ Reload Apache
         env:
           SSH_HOST: ${{ secrets.SSH_HOST }}
