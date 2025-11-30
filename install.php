@@ -3,6 +3,8 @@
  * TrendRadarConsole - Installation Page
  */
 
+require_once 'includes/helpers.php';
+
 $error = '';
 $success = false;
 
@@ -16,10 +18,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     
     // Validate inputs
     if (empty($database) || empty($username)) {
-        $error = 'Database name and username are required.';
+        $error = __('db_name_username_required');
     } elseif (!preg_match('/^[a-zA-Z_][a-zA-Z0-9_]*$/', $database)) {
         // Validate database name to prevent SQL injection
-        $error = 'Invalid database name. Use only letters, numbers, and underscores.';
+        $error = __('invalid_database_name');
     } else {
         // Test database connection
         try {
@@ -42,11 +44,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             if (file_put_contents('config/config.php', $configContent)) {
                 $success = true;
             } else {
-                $error = 'Failed to write config file. Please check directory permissions.';
+                $error = __('failed_write_config');
             }
             
         } catch (PDOException $e) {
-            $error = 'Database connection failed: ' . $e->getMessage();
+            $error = __('database_connection_failed') . $e->getMessage();
         }
     }
 }
@@ -56,13 +58,15 @@ if (file_exists('config/config.php')) {
     header('Location: index.php');
     exit;
 }
+
+$currentLang = getCurrentLanguage();
 ?>
 <!DOCTYPE html>
-<html lang="en">
+<html lang="<?php echo $currentLang; ?>">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>TrendRadarConsole - Installation</title>
+    <title>TrendRadarConsole - <?php _e('installation'); ?></title>
     <link rel="stylesheet" href="assets/css/style.css">
     <style>
         body {
@@ -99,21 +103,41 @@ if (file_exists('config/config.php')) {
             font-size: 64px;
             margin-bottom: 20px;
         }
+        .language-toggle {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+        }
+        .language-toggle select {
+            padding: 8px 12px;
+            border-radius: 6px;
+            border: none;
+            background: rgba(255,255,255,0.9);
+            cursor: pointer;
+            font-size: 14px;
+        }
     </style>
 </head>
 <body>
+    <div class="language-toggle">
+        <select onchange="switchLanguage(this.value)">
+            <option value="zh" <?php echo $currentLang === 'zh' ? 'selected' : ''; ?>><?php _e('chinese'); ?></option>
+            <option value="en" <?php echo $currentLang === 'en' ? 'selected' : ''; ?>><?php _e('english'); ?></option>
+        </select>
+    </div>
+    
     <div class="install-container">
         <?php if ($success): ?>
         <div class="success-message">
             <div class="icon">✅</div>
-            <h2>Installation Complete!</h2>
-            <p class="mt-3">TrendRadarConsole has been installed successfully.</p>
-            <a href="index.php" class="btn btn-primary btn-lg mt-4">Go to Dashboard</a>
+            <h2><?php _e('installation_complete'); ?></h2>
+            <p class="mt-3"><?php _e('installation_success_msg'); ?></p>
+            <a href="index.php" class="btn btn-primary btn-lg mt-4"><?php _e('go_to_dashboard'); ?></a>
         </div>
         <?php else: ?>
         <div class="install-header">
             <h1>🚀 TrendRadarConsole</h1>
-            <p>Configure your database connection</p>
+            <p><?php _e('configure_database'); ?></p>
         </div>
         
         <?php if ($error): ?>
@@ -122,32 +146,32 @@ if (file_exists('config/config.php')) {
         
         <form method="post" action="">
             <div class="form-group">
-                <label class="form-label">Database Host</label>
+                <label class="form-label"><?php _e('database_host'); ?></label>
                 <input type="text" name="db_host" class="form-control" value="<?php echo htmlspecialchars($_POST['db_host'] ?? 'localhost'); ?>" required>
             </div>
             
             <div class="form-group">
-                <label class="form-label">Database Port</label>
+                <label class="form-label"><?php _e('database_port'); ?></label>
                 <input type="number" name="db_port" class="form-control" value="<?php echo htmlspecialchars($_POST['db_port'] ?? '3306'); ?>" required>
             </div>
             
             <div class="form-group">
-                <label class="form-label">Database Name</label>
+                <label class="form-label"><?php _e('database_name'); ?></label>
                 <input type="text" name="db_name" class="form-control" value="<?php echo htmlspecialchars($_POST['db_name'] ?? 'trendradar_console'); ?>" required>
             </div>
             
             <div class="form-group">
-                <label class="form-label">Database Username</label>
+                <label class="form-label"><?php _e('database_username'); ?></label>
                 <input type="text" name="db_user" class="form-control" value="<?php echo htmlspecialchars($_POST['db_user'] ?? 'root'); ?>" required>
             </div>
             
             <div class="form-group">
-                <label class="form-label">Database Password</label>
+                <label class="form-label"><?php _e('database_password'); ?></label>
                 <input type="password" name="db_pass" class="form-control" value="">
             </div>
             
             <div class="form-group">
-                <label class="form-label">Timezone</label>
+                <label class="form-label"><?php _e('timezone'); ?></label>
                 <select name="timezone" class="form-control">
                     <option value="Asia/Shanghai" <?php echo ($_POST['timezone'] ?? 'Asia/Shanghai') === 'Asia/Shanghai' ? 'selected' : ''; ?>>Asia/Shanghai (UTC+8)</option>
                     <option value="Asia/Tokyo" <?php echo ($_POST['timezone'] ?? '') === 'Asia/Tokyo' ? 'selected' : ''; ?>>Asia/Tokyo (UTC+9)</option>
@@ -159,10 +183,20 @@ if (file_exists('config/config.php')) {
             </div>
             
             <button type="submit" class="btn btn-primary btn-lg" style="width: 100%;">
-                Install TrendRadarConsole
+                <?php _e('install'); ?>
             </button>
         </form>
         <?php endif; ?>
     </div>
+    
+    <script>
+        function switchLanguage(lang) {
+            fetch('api/language.php', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ lang: lang })
+            }).then(() => location.reload());
+        }
+    </script>
 </body>
 </html>

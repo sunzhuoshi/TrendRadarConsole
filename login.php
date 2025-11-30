@@ -20,7 +20,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $password = $_POST['password'] ?? '';
     
     if (empty($username) || empty($password)) {
-        $error = 'Please enter username and password';
+        $error = __('please_enter_username_password');
     } else {
         try {
             $auth = new Auth();
@@ -31,20 +31,22 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 header('Location: index.php');
                 exit;
             } else {
-                $error = 'Invalid username or password';
+                $error = __('invalid_username_password');
             }
         } catch (Exception $e) {
             $error = $e->getMessage();
         }
     }
 }
+
+$currentLang = getCurrentLanguage();
 ?>
 <!DOCTYPE html>
-<html lang="en">
+<html lang="<?php echo $currentLang; ?>">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>TrendRadarConsole - Login</title>
+    <title>TrendRadarConsole - <?php _e('login'); ?></title>
     <link rel="stylesheet" href="assets/css/style.css">
     <style>
         body {
@@ -74,13 +76,33 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         .login-header p {
             color: var(--text-muted);
         }
+        .language-toggle {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+        }
+        .language-toggle select {
+            padding: 8px 12px;
+            border-radius: 6px;
+            border: none;
+            background: rgba(255,255,255,0.9);
+            cursor: pointer;
+            font-size: 14px;
+        }
     </style>
 </head>
 <body>
+    <div class="language-toggle">
+        <select onchange="switchLanguage(this.value)">
+            <option value="zh" <?php echo $currentLang === 'zh' ? 'selected' : ''; ?>><?php _e('chinese'); ?></option>
+            <option value="en" <?php echo $currentLang === 'en' ? 'selected' : ''; ?>><?php _e('english'); ?></option>
+        </select>
+    </div>
+    
     <div class="login-container">
         <div class="login-header">
             <h1>🚀 TrendRadarConsole</h1>
-            <p>Sign in to manage your configurations</p>
+            <p><?php _e('sign_in_to_manage'); ?></p>
         </div>
         
         <?php if ($error): ?>
@@ -89,25 +111,35 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         
         <form method="post" action="">
             <div class="form-group">
-                <label class="form-label">Username</label>
+                <label class="form-label"><?php _e('username'); ?></label>
                 <input type="text" name="username" class="form-control" 
                        value="<?php echo htmlspecialchars($_POST['username'] ?? ''); ?>" 
                        required autofocus>
             </div>
             
             <div class="form-group">
-                <label class="form-label">Password</label>
+                <label class="form-label"><?php _e('password'); ?></label>
                 <input type="password" name="password" class="form-control" required>
             </div>
             
             <button type="submit" class="btn btn-primary btn-lg" style="width: 100%;">
-                Sign In
+                <?php _e('sign_in'); ?>
             </button>
         </form>
         
         <div class="text-center mt-4">
-            <p>Don't have an account? <a href="register.php">Register</a></p>
+            <p><?php _e('no_account'); ?> <a href="register.php"><?php _e('register'); ?></a></p>
         </div>
     </div>
+    
+    <script>
+        function switchLanguage(lang) {
+            fetch('api/language.php', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ lang: lang })
+            }).then(() => location.reload());
+        }
+    </script>
 </body>
 </html>
