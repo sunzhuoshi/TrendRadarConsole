@@ -55,8 +55,9 @@ jobs:
           "
           
           # rsync 同步（关键：引号 + 无空格）
-          rsync -aLvz \
+          rsync -avz \
             --delete \
+            --no-times \
             --exclude='.user.ini' \
             --exclude='.well-known/' \
             --exclude='.env*' \
