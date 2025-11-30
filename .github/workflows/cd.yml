@@ -23,6 +23,9 @@ jobs:
                        --exclude='vendor/' \
                        ./ ./dist/
 
+      - name: 📝 List dist contents
+        run: ls -al ./dist/
+
       - name: 🔑 Setup SSH key
         uses: webfactory/ssh-agent@v0.9.0
         with:
@@ -48,6 +51,8 @@ jobs:
             (ls -1t $BACKUP_DIR/\${FOLDER_NAME}_* 2>/dev/null | tail -n +4 | xargs -r rm -rf)
           "
 
+          ls -al ./dist/
+  
           # rsync 同步（--delete 保持一致；--exclude 已在前步处理）
           rsync -avz \
             --delete \
