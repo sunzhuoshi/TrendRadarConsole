@@ -205,7 +205,7 @@ function confirmDialog(message) {
 async function copyToClipboard(text) {
     try {
         await navigator.clipboard.writeText(text);
-        showToast('Copied to clipboard!', 'success');
+        showToast(__('copied_to_clipboard'), 'success');
     } catch (err) {
         // Fallback for older browsers
         const textarea = document.createElement('textarea');
@@ -214,7 +214,7 @@ async function copyToClipboard(text) {
         textarea.select();
         document.execCommand('copy');
         document.body.removeChild(textarea);
-        showToast('Copied to clipboard!', 'success');
+        showToast(__('copied_to_clipboard'), 'success');
     }
 }
 
