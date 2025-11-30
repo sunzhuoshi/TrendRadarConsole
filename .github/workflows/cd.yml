@@ -53,7 +53,8 @@ jobs:
             --delete \
             --exclude='.htaccess' \          # 🛡️ 防止覆盖面板配置
             --exclude='.user.ini' \          # 🔒 宝塔核心保护
-            --exclude='.well-known/' \       # 🔑 证书目录
+            # 🔑 证书目录
+            --exclude='.well-known/' \
             --exclude='.env*' \
             --exclude='storage/logs/*' \
             --exclude='storage/framework/cache/*' \
