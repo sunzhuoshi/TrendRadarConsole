@@ -9,10 +9,11 @@ A web-based configuration management system for [TrendRadar](https://github.com/
 - **Notification Webhooks**: Configure multiple notification channels (WeChat Work, Feishu, DingTalk, Telegram, Email, ntfy, Bark, Slack)
 - **Report Settings**: Customize report mode, weights, and push time windows
 - **Export**: Export configurations as `config.yaml` and `frequency_words.txt` for use with TrendRadar
+- **GitHub Sync**: Load and save configurations directly to your GitHub repository variables (requires PAT)
 
 ## Requirements
 
-- PHP 7.2+
+- PHP 7.2+ with cURL extension
 - MySQL 5.6+
 - Web server (Apache/Nginx)
 
@@ -82,9 +83,20 @@ After installation, you'll be redirected to the dashboard where you can:
 
 ## Using with TrendRadar
 
-### GitHub Actions Deployment (Recommended)
+### GitHub Sync (Recommended)
 
-After exporting your configuration from TrendRadarConsole, you can deploy to TrendRadar via GitHub repository variables:
+TrendRadarConsole can directly sync configurations to your GitHub repository:
+
+1. Navigate to **GitHub Sync** in the sidebar
+2. Enter your GitHub repository details (owner/repo)
+3. Create a **Fine-grained Personal Access Token** with **Variables: Read and write** permission
+4. Click **Save to GitHub** to push your configuration directly
+
+This automatically sets `CONFIG_YAML` and `FREQUENCY_WORDS` repository variables.
+
+### Manual GitHub Actions Deployment
+
+Alternatively, you can manually copy configurations:
 
 1. Go to your TrendRadar fork's **Settings → Secrets and variables → Actions**
 2. Click on the **Variables** tab
@@ -111,6 +123,7 @@ TrendRadarConsole/
 ├── api/                    # API endpoints
 │   ├── config-action.php
 │   ├── export.php
+│   ├── github.php
 │   ├── keywords.php
 │   ├── platforms.php
 │   ├── settings.php

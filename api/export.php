@@ -5,7 +5,7 @@
 
 session_start();
 require_once '../includes/helpers.php';
-require_once '../includes/Configuration.php';
+require_once '../includes/configuration.php';
 
 try {
     $configId = isset($_GET['config_id']) ? (int)$_GET['config_id'] : null;

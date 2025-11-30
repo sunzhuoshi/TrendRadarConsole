@@ -3,7 +3,7 @@
  * TrendRadarConsole - Configuration Model
  */
 
-require_once __DIR__ . '/Database.php';
+require_once __DIR__ . '/database.php';
 
 class Configuration
 {

@@ -27,5 +27,8 @@
         <a href="export.php" class="nav-item <?php echo ($currentPage ?? '') === 'export' ? 'active' : ''; ?>">
             📤 Export
         </a>
+        <a href="github.php" class="nav-item <?php echo ($currentPage ?? '') === 'github' ? 'active' : ''; ?>">
+            🐙 GitHub Sync
+        </a>
     </nav>
 </aside>

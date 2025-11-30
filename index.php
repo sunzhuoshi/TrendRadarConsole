@@ -5,7 +5,7 @@
 
 session_start();
 require_once 'includes/helpers.php';
-require_once 'includes/Configuration.php';
+require_once 'includes/configuration.php';
 
 // Check if config file exists
 if (!file_exists('config/config.php')) {
