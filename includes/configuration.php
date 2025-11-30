@@ -8,33 +8,61 @@ require_once __DIR__ . '/database.php';
 class Configuration
 {
     private $db;
+    private $userId;
     
-    public function __construct()
+    public function __construct($userId = null)
     {
         $this->db = Database::getInstance();
+        $this->userId = $userId;
     }
     
     /**
-     * Get all configurations
+     * Set user ID
+     */
+    public function setUserId($userId)
+    {
+        $this->userId = $userId;
+    }
+    
+    /**
+     * Get all configurations for current user
      */
     public function getAll()
     {
+        if ($this->userId) {
+            return $this->db->fetchAll(
+                'SELECT * FROM configurations WHERE user_id = ? ORDER BY created_at DESC',
+                [$this->userId]
+            );
+        }
         return $this->db->fetchAll('SELECT * FROM configurations ORDER BY created_at DESC');
     }
     
     /**
-     * Get configuration by ID
+     * Get configuration by ID (with user check)
      */
     public function getById($id)
     {
+        if ($this->userId) {
+            return $this->db->fetchOne(
+                'SELECT * FROM configurations WHERE id = ? AND user_id = ?',
+                [$id, $this->userId]
+            );
+        }
         return $this->db->fetchOne('SELECT * FROM configurations WHERE id = ?', [$id]);
     }
     
     /**
-     * Get active configuration
+     * Get active configuration for current user
      */
     public function getActive()
     {
+        if ($this->userId) {
+            return $this->db->fetchOne(
+                'SELECT * FROM configurations WHERE user_id = ? AND is_active = 1 LIMIT 1',
+                [$this->userId]
+            );
+        }
         return $this->db->fetchOne('SELECT * FROM configurations WHERE is_active = 1 LIMIT 1');
     }
     
@@ -43,12 +71,18 @@ class Configuration
      */
     public function create($name, $description = '')
     {
-        return $this->db->insert('configurations', [
+        $data = [
             'name' => $name,
             'description' => $description,
             'config_data' => '{}',
             'is_active' => 0
-        ]);
+        ];
+        
+        if ($this->userId) {
+            $data['user_id'] = $this->userId;
+        }
+        
+        return $this->db->insert('configurations', $data);
     }
     
     /**
@@ -56,6 +90,13 @@ class Configuration
      */
     public function update($id, $data)
     {
+        if ($this->userId) {
+            // Verify ownership
+            $config = $this->getById($id);
+            if (!$config) {
+                return false;
+            }
+        }
         return $this->db->update('configurations', $data, 'id = ?', [$id]);
     }
     
@@ -64,16 +105,33 @@ class Configuration
      */
     public function delete($id)
     {
+        if ($this->userId) {
+            // Verify ownership
+            $config = $this->getById($id);
+            if (!$config) {
+                return false;
+            }
+        }
         return $this->db->delete('configurations', 'id = ?', [$id]);
     }
     
     /**
-     * Set configuration as active
+     * Set configuration as active (for current user only)
      */
     public function setActive($id)
     {
-        // First, deactivate all
-        $this->db->query('UPDATE configurations SET is_active = 0');
+        if ($this->userId) {
+            // First, deactivate all for this user
+            $this->db->query('UPDATE configurations SET is_active = 0 WHERE user_id = ?', [$this->userId]);
+            // Verify ownership before activating
+            $config = $this->getById($id);
+            if (!$config) {
+                return false;
+            }
+        } else {
+            // First, deactivate all
+            $this->db->query('UPDATE configurations SET is_active = 0');
+        }
         // Then activate the selected one
         return $this->db->update('configurations', ['is_active' => 1], 'id = ?', [$id]);
     }

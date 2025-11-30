@@ -2,11 +2,14 @@
 /**
  * TrendRadarConsole - Sidebar Template
  */
+require_once __DIR__ . '/../includes/auth.php';
+$currentUsername = Auth::getUsername();
 ?>
+<button class="mobile-menu-toggle" onclick="toggleSidebar()">☰</button>
 <aside class="sidebar">
     <div class="sidebar-header">
         <h1>TrendRadarConsole</h1>
-        <small>Configuration Manager</small>
+        <small>👤 <?php echo htmlspecialchars($currentUsername ?? 'Guest'); ?></small>
     </div>
     <nav class="sidebar-nav">
         <a href="index.php" class="nav-item <?php echo ($currentPage ?? '') === 'dashboard' ? 'active' : ''; ?>">
@@ -30,5 +33,9 @@
         <a href="github.php" class="nav-item <?php echo ($currentPage ?? '') === 'github' ? 'active' : ''; ?>">
             🐙 GitHub Sync
         </a>
+        <a href="logout.php" class="nav-item" style="margin-top: auto; border-top: 1px solid rgba(255,255,255,0.1);">
+            🚪 Logout
+        </a>
     </nav>
 </aside>
+<div class="sidebar-overlay" onclick="toggleSidebar()"></div>

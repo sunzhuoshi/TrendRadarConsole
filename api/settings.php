@@ -6,11 +6,18 @@
 session_start();
 require_once '../includes/helpers.php';
 require_once '../includes/configuration.php';
+require_once '../includes/auth.php';
 
 header('Content-Type: application/json; charset=utf-8');
 
+// Require login for API
+if (!Auth::isLoggedIn()) {
+    jsonError('Unauthorized', 401);
+}
+$userId = Auth::getUserId();
+
 try {
-    $config = new Configuration();
+    $config = new Configuration($userId);
     $method = getMethod();
     $input = getInput();
     

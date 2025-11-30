@@ -6,9 +6,17 @@
 session_start();
 require_once '../includes/helpers.php';
 require_once '../includes/configuration.php';
+require_once '../includes/auth.php';
+
+// Require login
+if (!Auth::isLoggedIn()) {
+    header('Location: ../login.php');
+    exit;
+}
+$userId = Auth::getUserId();
 
 try {
-    $config = new Configuration();
+    $config = new Configuration($userId);
     $action = $_POST['action'] ?? '';
     $id = isset($_POST['id']) ? (int)$_POST['id'] : null;
     $csrfToken = $_POST['csrf_token'] ?? '';

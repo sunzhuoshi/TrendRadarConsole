@@ -6,6 +6,7 @@
 session_start();
 require_once 'includes/helpers.php';
 require_once 'includes/configuration.php';
+require_once 'includes/auth.php';
 
 // Check if config file exists
 if (!file_exists('config/config.php')) {
@@ -13,8 +14,12 @@ if (!file_exists('config/config.php')) {
     exit;
 }
 
+// Require login
+Auth::requireLogin();
+$userId = Auth::getUserId();
+
 try {
-    $config = new Configuration();
+    $config = new Configuration($userId);
     $configurations = $config->getAll();
     $activeConfig = $config->getActive();
 } catch (Exception $e) {

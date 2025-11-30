@@ -10,6 +10,7 @@ class Database
     
     // Whitelist of allowed table names
     private static $allowedTables = [
+        'users',
         'configurations',
         'platforms',
         'keywords',

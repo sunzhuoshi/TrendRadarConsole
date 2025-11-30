@@ -6,6 +6,15 @@
 session_start();
 require_once '../includes/helpers.php';
 require_once '../includes/configuration.php';
+require_once '../includes/auth.php';
+
+// Require login
+if (!Auth::isLoggedIn()) {
+    http_response_code(401);
+    echo 'Unauthorized';
+    exit;
+}
+$userId = Auth::getUserId();
 
 try {
     $configId = isset($_GET['config_id']) ? (int)$_GET['config_id'] : null;
@@ -17,7 +26,7 @@ try {
         exit;
     }
     
-    $config = new Configuration();
+    $config = new Configuration($userId);
     
     switch ($format) {
         case 'yaml':

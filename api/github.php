@@ -7,8 +7,15 @@ session_start();
 require_once '../includes/helpers.php';
 require_once '../includes/configuration.php';
 require_once '../includes/github.php';
+require_once '../includes/auth.php';
 
 header('Content-Type: application/json; charset=utf-8');
+
+// Require login for API
+if (!Auth::isLoggedIn()) {
+    jsonError('Unauthorized', 401);
+}
+$userId = Auth::getUserId();
 
 try {
     $method = getMethod();
@@ -31,6 +38,13 @@ try {
     $repo = $input['repo'] ?? '';
     $token = $input['token'] ?? '';
     
+    // Handle save_settings action first (doesn't need full GitHub credentials)
+    if ($action === 'save_settings') {
+        $auth = new Auth();
+        $auth->updateGitHubSettings($userId, $owner, $repo, $token ?: null);
+        jsonSuccess(null, 'GitHub settings saved');
+    }
+    
     if (!$owner || !$repo || !$token) {
         jsonError('Owner, repo, and token are required');
     }
@@ -39,6 +53,10 @@ try {
     
     switch ($action) {
         case 'test':
+            // Save settings on successful test
+            $auth = new Auth();
+            $auth->updateGitHubSettings($userId, $owner, $repo, $token);
+            
             $repoInfo = $github->testConnection();
             jsonSuccess($repoInfo, 'Connection successful');
             break;
@@ -59,7 +77,7 @@ try {
                 jsonError('Configuration ID is required');
             }
             
-            $config = new Configuration();
+            $config = new Configuration($userId);
             
             // Export configuration as YAML
             $yamlData = $config->exportAsYaml($configId);

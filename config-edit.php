@@ -6,14 +6,19 @@
 session_start();
 require_once 'includes/helpers.php';
 require_once 'includes/configuration.php';
+require_once 'includes/auth.php';
 
 if (!file_exists('config/config.php')) {
     header('Location: install.php');
     exit;
 }
 
+// Require login
+Auth::requireLogin();
+$userId = Auth::getUserId();
+
 try {
-    $config = new Configuration();
+    $config = new Configuration($userId);
     
     // Handle form submission
     if ($_SERVER['REQUEST_METHOD'] === 'POST') {

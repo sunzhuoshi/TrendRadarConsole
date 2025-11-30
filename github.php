@@ -6,14 +6,19 @@
 session_start();
 require_once 'includes/helpers.php';
 require_once 'includes/configuration.php';
+require_once 'includes/auth.php';
 
 if (!file_exists('config/config.php')) {
     header('Location: install.php');
     exit;
 }
 
+// Require login
+Auth::requireLogin();
+$userId = Auth::getUserId();
+
 try {
-    $config = new Configuration();
+    $config = new Configuration($userId);
     $activeConfig = $config->getActive();
     
     if (!$activeConfig) {
@@ -22,7 +27,9 @@ try {
         exit;
     }
     
-    $settings = $config->getSettings($activeConfig['id']);
+    // Get GitHub settings from user profile
+    $auth = new Auth();
+    $githubSettings = $auth->getGitHubSettings($userId);
 } catch (Exception $e) {
     $error = $e->getMessage();
 }
@@ -31,10 +38,10 @@ $flash = getFlash();
 $currentPage = 'github';
 $csrfToken = generateCsrfToken();
 
-// Get saved GitHub settings
-$githubOwner = $settings['github_owner'] ?? '';
-$githubRepo = $settings['github_repo'] ?? '';
-$githubToken = $settings['github_token'] ?? '';
+// Get saved GitHub settings from user profile
+$githubOwner = $githubSettings['github_owner'] ?? '';
+$githubRepo = $githubSettings['github_repo'] ?? '';
+$githubToken = $githubSettings['github_token'] ?? '';
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -186,22 +193,20 @@ $githubToken = $settings['github_token'] ?? '';
     
     <script src="assets/js/app.js"></script>
     <script>
-        // Save GitHub settings
+        // Save GitHub settings to user profile
         document.getElementById('github-settings-form').addEventListener('submit', async function(e) {
             e.preventDefault();
             
-            const configId = document.getElementById('config-id').value;
-            const formData = new FormData(this);
-            const settings = {};
-            
-            for (const [key, value] of formData.entries()) {
-                settings[key] = value;
-            }
+            const owner = document.querySelector('input[name="github_owner"]').value;
+            const repo = document.querySelector('input[name="github_repo"]').value;
+            const token = document.querySelector('input[name="github_token"]').value;
             
             try {
-                await apiRequest('api/settings.php', 'POST', {
-                    config_id: configId,
-                    settings: settings
+                await apiRequest('api/github.php', 'POST', {
+                    action: 'save_settings',
+                    owner: owner,
+                    repo: repo,
+                    token: token
                 });
                 showToast('GitHub settings saved', 'success');
             } catch (error) {
