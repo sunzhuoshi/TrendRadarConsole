@@ -8,6 +8,15 @@ class Database
     private static $instance = null;
     private $pdo;
     
+    // Whitelist of allowed table names
+    private static $allowedTables = [
+        'configurations',
+        'platforms',
+        'keywords',
+        'webhooks',
+        'settings'
+    ];
+    
     private function __construct()
     {
         $configFile = __DIR__ . '/../config/config.php';
@@ -48,6 +57,28 @@ class Database
         return $this->pdo;
     }
     
+    /**
+     * Validate table name against whitelist
+     */
+    private function validateTableName($table)
+    {
+        if (!in_array($table, self::$allowedTables, true)) {
+            throw new InvalidArgumentException('Invalid table name: ' . $table);
+        }
+        return $table;
+    }
+    
+    /**
+     * Validate column names (alphanumeric and underscore only)
+     */
+    private function validateColumnName($column)
+    {
+        if (!preg_match('/^[a-zA-Z_][a-zA-Z0-9_]*$/', $column)) {
+            throw new InvalidArgumentException('Invalid column name: ' . $column);
+        }
+        return $column;
+    }
+    
     public function query($sql, $params = [])
     {
         $stmt = $this->pdo->prepare($sql);
@@ -67,10 +98,18 @@ class Database
     
     public function insert($table, $data)
     {
-        $columns = implode(', ', array_keys($data));
+        $table = $this->validateTableName($table);
+        
+        // Validate column names
+        $columns = [];
+        foreach (array_keys($data) as $column) {
+            $columns[] = $this->validateColumnName($column);
+        }
+        
+        $columnStr = implode(', ', $columns);
         $placeholders = implode(', ', array_fill(0, count($data), '?'));
         
-        $sql = "INSERT INTO {$table} ({$columns}) VALUES ({$placeholders})";
+        $sql = "INSERT INTO {$table} ({$columnStr}) VALUES ({$placeholders})";
         $this->query($sql, array_values($data));
         
         return $this->pdo->lastInsertId();
@@ -78,7 +117,15 @@ class Database
     
     public function update($table, $data, $where, $whereParams = [])
     {
-        $set = implode(' = ?, ', array_keys($data)) . ' = ?';
+        $table = $this->validateTableName($table);
+        
+        // Validate column names and build SET clause
+        $setParts = [];
+        foreach (array_keys($data) as $column) {
+            $setParts[] = $this->validateColumnName($column) . ' = ?';
+        }
+        $set = implode(', ', $setParts);
+        
         $sql = "UPDATE {$table} SET {$set} WHERE {$where}";
         
         $params = array_merge(array_values($data), $whereParams);
@@ -87,6 +134,8 @@ class Database
     
     public function delete($table, $where, $params = [])
     {
+        $table = $this->validateTableName($table);
+        
         $sql = "DELETE FROM {$table} WHERE {$where}";
         return $this->query($sql, $params)->rowCount();
     }

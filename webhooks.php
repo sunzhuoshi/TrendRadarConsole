@@ -35,6 +35,7 @@ try {
 
 $flash = getFlash();
 $currentPage = 'webhooks';
+$csrfToken = generateCsrfToken();
 
 // Webhook types configuration
 $webhookTypes = [
@@ -68,7 +69,7 @@ $webhookTypes = [
         'icon' => '📱',
         'description' => 'Send notifications via Telegram bot',
         'fields' => [
-            ['name' => 'webhook_url', 'label' => 'Bot Token', 'type' => 'text', 'required' => true, 'placeholder' => '123456789:AAHfiqksKZ8WmR2zSjiQ7...'],
+            ['name' => 'webhook_url', 'label' => 'Bot Token', 'type' => 'password', 'required' => true, 'placeholder' => '123456789:AAHfiqksKZ8WmR2zSjiQ7...'],
             ['name' => 'chat_id', 'label' => 'Chat ID', 'type' => 'text', 'required' => true, 'placeholder' => '123456789'],
         ]
     ],
@@ -115,6 +116,7 @@ $webhookTypes = [
 <!DOCTYPE html>
 <html lang="en">
 <head>
+    <meta name="csrf-token" content="<?php echo $csrfToken; ?>">
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>TrendRadarConsole - Notifications</title>

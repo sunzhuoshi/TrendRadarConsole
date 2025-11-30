@@ -14,6 +14,14 @@ try {
     $method = getMethod();
     $input = getInput();
     
+    // CSRF protection for state-changing operations
+    if ($method === 'POST') {
+        $csrfToken = $input['csrf_token'] ?? $_SERVER['HTTP_X_CSRF_TOKEN'] ?? '';
+        if (!verifyCsrfToken($csrfToken)) {
+            jsonError('Invalid CSRF token', 403);
+        }
+    }
+    
     switch ($method) {
         case 'GET':
             $configId = isset($_GET['config_id']) ? (int)$_GET['config_id'] : null;

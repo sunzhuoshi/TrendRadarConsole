@@ -2,17 +2,31 @@
  * TrendRadarConsole - Main JavaScript
  */
 
+// Get CSRF token from meta tag or hidden input
+function getCsrfToken() {
+    const metaTag = document.querySelector('meta[name="csrf-token"]');
+    if (metaTag) return metaTag.content;
+    
+    const hiddenInput = document.querySelector('input[name="csrf_token"]');
+    if (hiddenInput) return hiddenInput.value;
+    
+    return '';
+}
+
 // API request helper
 async function apiRequest(url, method = 'GET', data = null) {
     const options = {
         method: method,
         headers: {
             'Content-Type': 'application/json',
-            'X-Requested-With': 'XMLHttpRequest'
+            'X-Requested-With': 'XMLHttpRequest',
+            'X-CSRF-TOKEN': getCsrfToken()
         }
     };
     
     if (data && method !== 'GET') {
+        // Add CSRF token to data for POST/PUT/DELETE
+        data.csrf_token = getCsrfToken();
         options.body = JSON.stringify(data);
     }
     

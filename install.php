@@ -17,6 +17,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     // Validate inputs
     if (empty($database) || empty($username)) {
         $error = 'Database name and username are required.';
+    } elseif (!preg_match('/^[a-zA-Z_][a-zA-Z0-9_]*$/', $database)) {
+        // Validate database name to prevent SQL injection
+        $error = 'Invalid database name. Use only letters, numbers, and underscores.';
     } else {
         // Test database connection
         try {
@@ -25,7 +28,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION
             ]);
             
-            // Check if database exists, create if not
+            // Database name is validated above, safe to use with backticks
             $pdo->exec("CREATE DATABASE IF NOT EXISTS `{$database}` CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci");
             $pdo->exec("USE `{$database}`");
             

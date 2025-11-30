@@ -56,10 +56,12 @@ $existingIds = array_column($platforms, 'platform_id');
 
 $flash = getFlash();
 $currentPage = 'platforms';
+$csrfToken = generateCsrfToken();
 ?>
 <!DOCTYPE html>
 <html lang="en">
 <head>
+    <meta name="csrf-token" content="<?php echo $csrfToken; ?>">
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>TrendRadarConsole - Platforms</title>
