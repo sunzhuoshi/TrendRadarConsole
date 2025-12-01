@@ -64,6 +64,7 @@ jobs:
             --exclude='.env*' \
             --exclude='storage/logs/*' \
             --exclude='storage/framework/cache/*' \
+            --exclude='config/config.php' \
             ./dist/ \
             "${SSH_USER}@${SSH_HOST}:${TARGET_DIR}/"
 
