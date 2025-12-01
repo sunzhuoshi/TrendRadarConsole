@@ -270,6 +270,7 @@ return [
     'weight_sum_warning' => 'The sum of weights must equal 1.0',
     'weight_sum_is' => 'Weight sum is',
     'should_be' => 'should be',
+    'weight_sum_message' => 'Weight sum is :sum - should be :expected',
     'system_settings' => 'System Settings',
     'enable_crawler' => 'Enable Crawler',
     'enable_notifications' => 'Enable Notifications',

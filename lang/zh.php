@@ -270,6 +270,7 @@ return [
     'weight_sum_warning' => '权重之和必须等于 1.0',
     'weight_sum_is' => '权重之和为',
     'should_be' => '应该为',
+    'weight_sum_message' => '权重之和为 :sum - 应该为 :expected',
     'system_settings' => '系统设置',
     'enable_crawler' => '启用爬虫',
     'enable_notifications' => '启用通知',
