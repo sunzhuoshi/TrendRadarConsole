@@ -872,3 +872,57 @@ pre {
 .justify-between { justify-content: space-between; }
 .gap-2 { gap: 10px; }
 .gap-3 { gap: 15px; }
+
+/* Example Configuration Cards */
+.example-config-card {
+    background: linear-gradient(135deg, var(--card-bg-start) 0%, var(--card-bg-end) 100%);
+    border-radius: 8px;
+    padding: 15px;
+    position: relative;
+    overflow: hidden;
+    height: 100%;
+}
+
+.example-config-card::before {
+    content: var(--card-icon);
+    position: absolute;
+    right: 10px;
+    top: 10px;
+    font-size: 48px;
+    opacity: 0.2;
+}
+
+.example-config-card h4 {
+    margin-bottom: 12px;
+    color: var(--card-title-color, var(--text-color));
+}
+
+.example-config-card pre {
+    background: rgba(255, 255, 255, 0.9);
+    color: var(--text-color);
+    font-size: 12px;
+    padding: 10px;
+    border-radius: 4px;
+    margin-bottom: 10px;
+}
+
+.example-config-card.tech {
+    --card-bg-start: #e3f2fd;
+    --card-bg-end: #bbdefb;
+    --card-icon: "🤖";
+    --card-title-color: #1565c0;
+}
+
+.example-config-card.finance {
+    --card-bg-start: #e8f5e9;
+    --card-bg-end: #c8e6c9;
+    --card-icon: "💹";
+    --card-title-color: #2e7d32;
+}
+
+.example-config-card.entertainment {
+    --card-bg-start: #fce4ec;
+    --card-bg-end: #f8bbd9;
+    --card-icon: "🎬";
+    --card-title-color: #c2185b;
+}
