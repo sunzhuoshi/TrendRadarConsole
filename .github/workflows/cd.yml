@@ -18,8 +18,18 @@ on:
 jobs:
   deploy:
     runs-on: ubuntu-latest
-    environment: ${{ github.event_name == 'workflow_dispatch' && inputs.environment || (github.event_name == 'pull_request' && 'development' || 'production') }}
+    environment: ${{ steps.set_env.outputs.env_name }}
     steps:
+      - name: Set deployment environment
+        id: set_env
+        run: |
+          if [[ "${{ github.event_name }}" == "workflow_dispatch" ]]; then
+            echo "env_name=${{ inputs.environment }}" >> $GITHUB_OUTPUT
+          elif [[ "${{ github.event_name }}" == "pull_request" ]]; then
+            echo "env_name=development" >> $GITHUB_OUTPUT
+          else
+            echo "env_name=production" >> $GITHUB_OUTPUT
+          fi
       - name: 🛎️ Checkout code
         uses: actions/checkout@v4
 
