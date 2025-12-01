@@ -334,7 +334,7 @@ $currentLang = getCurrentLanguage();
                 });
                 showToast(__('settings_saved'), 'success');
             } catch (error) {
-                showToast(__('failed_to_save') + error.message, 'error');
+                showToast(__('failed_to_save') + ': ' + error.message, 'error');
             }
         });
     </script>
