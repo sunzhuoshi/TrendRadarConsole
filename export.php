@@ -36,13 +36,14 @@ try {
 
 $flash = getFlash();
 $currentPage = 'export';
+$currentLang = getCurrentLanguage();
 ?>
 <!DOCTYPE html>
-<html lang="en">
+<html lang="<?php echo $currentLang; ?>">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>TrendRadarConsole - Export</title>
+    <title>TrendRadarConsole - <?php _e('export'); ?></title>
     <link rel="stylesheet" href="assets/css/style.css">
 </head>
 <body>
@@ -51,8 +52,8 @@ $currentPage = 'export';
         
         <main class="main-content">
             <div class="page-header">
-                <h2>Export Configuration</h2>
-                <p>Export your configuration as YAML and keywords files for TrendRadar</p>
+                <h2><?php _e('export_configuration'); ?></h2>
+                <p><?php _e('export_desc'); ?></p>
             </div>
             
             <?php if ($flash): ?>
@@ -64,13 +65,13 @@ $currentPage = 'export';
             <?php if (isset($error)): ?>
             <div class="alert alert-danger"><?php echo sanitize($error); ?></div>
             <?php elseif (!$selectedId): ?>
-            <div class="alert alert-warning">No configuration selected. Please create or activate a configuration first.</div>
+            <div class="alert alert-warning"><?php _e('no_config_selected'); ?></div>
             <?php else: ?>
             
             <!-- Configuration Selection -->
             <div class="card">
                 <div class="card-header">
-                    <h3>Select Configuration</h3>
+                    <h3><?php _e('select_configuration'); ?></h3>
                 </div>
                 <div class="card-body">
                     <form method="get" action="">
@@ -79,11 +80,11 @@ $currentPage = 'export';
                                 <?php foreach ($configurations as $cfg): ?>
                                 <option value="<?php echo $cfg['id']; ?>" <?php echo $cfg['id'] == $selectedId ? 'selected' : ''; ?>>
                                     <?php echo sanitize($cfg['name']); ?>
-                                    <?php echo $cfg['is_active'] ? '(Active)' : ''; ?>
+                                    <?php echo $cfg['is_active'] ? '(' . __('active') . ')' : ''; ?>
                                 </option>
                                 <?php endforeach; ?>
                             </select>
-                            <button type="submit" class="btn btn-primary">Load</button>
+                            <button type="submit" class="btn btn-primary"><?php _e('load'); ?></button>
                         </div>
                     </form>
                 </div>
@@ -94,8 +95,8 @@ $currentPage = 'export';
                 <div class="card-header">
                     <h3>config.yaml</h3>
                     <div class="btn-group">
-                        <button class="btn btn-primary btn-sm" onclick="downloadYaml()">Download</button>
-                        <button class="btn btn-secondary btn-sm" onclick="copyContent('yaml-content')">Copy</button>
+                        <button class="btn btn-primary btn-sm" onclick="downloadYaml()"><?php _e('download'); ?></button>
+                        <button class="btn btn-secondary btn-sm" onclick="copyContent('yaml-content')"><?php _e('copy'); ?></button>
                     </div>
                 </div>
                 <div class="card-body">
@@ -108,82 +109,82 @@ $currentPage = 'export';
                 <div class="card-header">
                     <h3>frequency_words.txt</h3>
                     <div class="btn-group">
-                        <button class="btn btn-primary btn-sm" onclick="downloadKeywords()">Download</button>
-                        <button class="btn btn-secondary btn-sm" onclick="copyContent('keywords-content')">Copy</button>
+                        <button class="btn btn-primary btn-sm" onclick="downloadKeywords()"><?php _e('download'); ?></button>
+                        <button class="btn btn-secondary btn-sm" onclick="copyContent('keywords-content')"><?php _e('copy'); ?></button>
                     </div>
                 </div>
                 <div class="card-body">
-                    <pre id="keywords-content"><?php echo htmlspecialchars($keywordsData ?: '# No keywords configured'); ?></pre>
+                    <pre id="keywords-content"><?php echo htmlspecialchars($keywordsData ?: __('no_keywords_configured')); ?></pre>
                 </div>
             </div>
             
             <!-- Usage Instructions -->
             <div class="card">
                 <div class="card-header">
-                    <h3>📖 Usage Instructions</h3>
+                    <h3>📖 <?php _e('usage_instructions'); ?></h3>
                 </div>
                 <div class="card-body">
                     <ol style="line-height: 2;">
-                        <li>Download both <code>config.yaml</code> and <code>frequency_words.txt</code> files</li>
-                        <li>Place them in your TrendRadar project's <code>config/</code> directory</li>
-                        <li>For GitHub Actions deployment, you can also use repository variables (see below)</li>
-                        <li>For Docker deployment, use environment variables for sensitive data</li>
+                        <li><?php echo __('usage_step1'); ?></li>
+                        <li><?php echo __('usage_step2'); ?></li>
+                        <li><?php echo __('usage_step3'); ?></li>
+                        <li><?php echo __('usage_step4'); ?></li>
                     </ol>
                     
                     <div class="alert alert-success mt-3">
-                        <strong>🚀 GitHub Actions Deployment (Recommended):</strong><br>
-                        Instead of editing files directly, you can set configurations via GitHub repository variables:
+                        <strong>🚀 <?php _e('github_actions_deployment'); ?></strong><br>
+                        <?php _e('github_actions_desc'); ?>
                         <ul class="mt-2 mb-0">
-                            <li><code>vars.CONFIG_YAML</code> - Paste the entire config.yaml content</li>
-                            <li><code>vars.FREQUENCY_WORDS</code> - Paste the frequency_words.txt content</li>
+                            <li><code>vars.CONFIG_YAML</code> - <?php _e('config_yaml_var'); ?></li>
+                            <li><code>vars.FREQUENCY_WORDS</code> - <?php _e('frequency_words_var'); ?></li>
                         </ul>
-                        Go to your repo's <strong>Settings → Secrets and variables → Actions → Variables tab</strong> to set these.
+                        <?php echo __('repo_settings_path'); ?>
                     </div>
                     
                     <div class="alert alert-info mt-3">
-                        <strong>💡 Tip:</strong> For security reasons, webhook URLs in the exported config.yaml are included.
-                        If deploying via GitHub Fork, remove them and use GitHub Secrets instead.
+                        <strong>💡 <?php _e('security_tip'); ?></strong> 
+                        <?php _e('security_tip_msg'); ?>
                     </div>
                     
-                    <h4 class="mt-4">GitHub Secrets Mapping</h4>
+                    <h4 class="mt-4"><?php _e('github_secrets_mapping'); ?></h4>
                     <table class="table">
                         <thead>
                             <tr>
-                                <th>Platform</th>
-                                <th>Secret Name(s)</th>
+                                <th><?php _e('platform'); ?></th>
+                                <th><?php _e('secret_names'); ?></th>
                             </tr>
                         </thead>
                         <tbody>
                             <tr>
-                                <td>WeChat Work</td>
+                                <td><?php _e('wework'); ?></td>
                                 <td><code>WEWORK_WEBHOOK_URL</code>, <code>WEWORK_MSG_TYPE</code></td>
                             </tr>
                             <tr>
-                                <td>Feishu</td>
+                                <td><?php _e('feishu'); ?></td>
                                 <td><code>FEISHU_WEBHOOK_URL</code></td>
                             </tr>
                             <tr>
-                                <td>DingTalk</td>
+                                <td><?php _e('dingtalk'); ?></td>
                                 <td><code>DINGTALK_WEBHOOK_URL</code></td>
                             </tr>
                             <tr>
-                                <td>Telegram</td>
+                                <td><?php _e('telegram'); ?></td>
                                 <td><code>TELEGRAM_BOT_TOKEN</code>, <code>TELEGRAM_CHAT_ID</code></td>
                             </tr>
                             <tr>
-                                <td>Email</td>
+                                <td><?php _e('email'); ?></td>
                                 <td><code>EMAIL_FROM</code>, <code>EMAIL_PASSWORD</code>, <code>EMAIL_TO</code></td>
                             </tr>
                             <tr>
-                                <td>ntfy</td>
+                                <td><?php _e('ntfy'); ?></td>
                                 <td><code>NTFY_TOPIC</code>, <code>NTFY_SERVER_URL</code>, <code>NTFY_TOKEN</code></td>
                             </tr>
                             <tr>
-                                <td>Bark</td>
+                                <td><?php _e('bark'); ?></td>
                                 <td><code>BARK_URL</code></td>
                             </tr>
                             <tr>
-                                <td>Slack</td>
+                                <td><?php _e('slack'); ?></td>
                                 <td><code>SLACK_WEBHOOK_URL</code></td>
                             </tr>
                         </tbody>
@@ -195,6 +196,7 @@ $currentPage = 'export';
         </main>
     </div>
     
+    <script>var i18n = <?php echo getJsTranslations(); ?>;</script>
     <script src="assets/js/app.js"></script>
     <script>
         function downloadYaml() {
@@ -217,7 +219,7 @@ $currentPage = 'export';
             a.click();
             document.body.removeChild(a);
             URL.revokeObjectURL(url);
-            showToast('File downloaded', 'success');
+            showToast(__('file_downloaded'), 'success');
         }
         
         function copyContent(elementId) {

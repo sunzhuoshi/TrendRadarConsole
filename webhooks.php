@@ -22,7 +22,7 @@ try {
     $activeConfig = $config->getActive();
     
     if (!$activeConfig) {
-        setFlash('warning', 'Please create and activate a configuration first.');
+        setFlash('warning', __('please_create_config'));
         header('Location: index.php');
         exit;
     }
@@ -41,90 +41,91 @@ try {
 $flash = getFlash();
 $currentPage = 'webhooks';
 $csrfToken = generateCsrfToken();
+$currentLang = getCurrentLanguage();
 
 // Webhook types configuration
 $webhookTypes = [
     'wework' => [
-        'name' => 'WeChat Work (企业微信)',
+        'name' => __('wework') . ' (企业微信)',
         'icon' => '💬',
-        'description' => 'Send notifications via WeChat Work robot',
+        'description' => __('wework_desc'),
         'fields' => [
-            ['name' => 'webhook_url', 'label' => 'Webhook URL', 'type' => 'url', 'required' => true],
-            ['name' => 'msg_type', 'label' => 'Message Type', 'type' => 'select', 'options' => ['markdown' => 'Markdown (群机器人)', 'text' => 'Text (个人微信)']],
+            ['name' => 'webhook_url', 'label' => __('webhook_url'), 'type' => 'url', 'required' => true],
+            ['name' => 'msg_type', 'label' => __('message_type'), 'type' => 'select', 'options' => ['markdown' => __('markdown_group_robot'), 'text' => __('text_personal_wechat')]],
         ]
     ],
     'feishu' => [
-        'name' => 'Feishu (飞书)',
+        'name' => __('feishu') . ' (飞书)',
         'icon' => '🐦',
-        'description' => 'Send notifications via Feishu robot',
+        'description' => __('feishu_desc'),
         'fields' => [
-            ['name' => 'webhook_url', 'label' => 'Webhook URL', 'type' => 'url', 'required' => true],
+            ['name' => 'webhook_url', 'label' => __('webhook_url'), 'type' => 'url', 'required' => true],
         ]
     ],
     'dingtalk' => [
-        'name' => 'DingTalk (钉钉)',
+        'name' => __('dingtalk') . ' (钉钉)',
         'icon' => '🔔',
-        'description' => 'Send notifications via DingTalk robot',
+        'description' => __('dingtalk_desc'),
         'fields' => [
-            ['name' => 'webhook_url', 'label' => 'Webhook URL', 'type' => 'url', 'required' => true],
+            ['name' => 'webhook_url', 'label' => __('webhook_url'), 'type' => 'url', 'required' => true],
         ]
     ],
     'telegram' => [
-        'name' => 'Telegram',
+        'name' => __('telegram'),
         'icon' => '📱',
-        'description' => 'Send notifications via Telegram bot',
+        'description' => __('telegram_desc'),
         'fields' => [
-            ['name' => 'webhook_url', 'label' => 'Bot Token', 'type' => 'password', 'required' => true, 'placeholder' => '123456789:AAHfiqksKZ8WmR2zSjiQ7...'],
-            ['name' => 'chat_id', 'label' => 'Chat ID', 'type' => 'text', 'required' => true, 'placeholder' => '123456789'],
+            ['name' => 'webhook_url', 'label' => __('bot_token'), 'type' => 'password', 'required' => true, 'placeholder' => '123456789:AAHfiqksKZ8WmR2zSjiQ7...'],
+            ['name' => 'chat_id', 'label' => __('chat_id'), 'type' => 'text', 'required' => true, 'placeholder' => '123456789'],
         ]
     ],
     'email' => [
-        'name' => 'Email',
+        'name' => __('email'),
         'icon' => '📧',
-        'description' => 'Send notifications via email',
+        'description' => __('email_desc'),
         'fields' => [
-            ['name' => 'from', 'label' => 'From Email', 'type' => 'email', 'required' => true],
-            ['name' => 'password', 'label' => 'Password/App Password', 'type' => 'password', 'required' => true],
-            ['name' => 'to', 'label' => 'To Email(s)', 'type' => 'text', 'required' => true, 'placeholder' => 'Multiple emails separated by comma'],
-            ['name' => 'smtp_server', 'label' => 'SMTP Server (optional)', 'type' => 'text', 'placeholder' => 'Auto-detected if empty'],
-            ['name' => 'smtp_port', 'label' => 'SMTP Port (optional)', 'type' => 'number', 'placeholder' => 'Auto-detected if empty'],
+            ['name' => 'from', 'label' => __('from_email'), 'type' => 'email', 'required' => true],
+            ['name' => 'password', 'label' => __('password_app_password'), 'type' => 'password', 'required' => true],
+            ['name' => 'to', 'label' => __('to_emails'), 'type' => 'text', 'required' => true, 'placeholder' => __('multiple_emails_hint')],
+            ['name' => 'smtp_server', 'label' => __('smtp_server'), 'type' => 'text', 'placeholder' => __('auto_detected')],
+            ['name' => 'smtp_port', 'label' => __('smtp_port'), 'type' => 'number', 'placeholder' => __('auto_detected')],
         ]
     ],
     'ntfy' => [
-        'name' => 'ntfy',
+        'name' => __('ntfy'),
         'icon' => '🔔',
-        'description' => 'Send notifications via ntfy.sh',
+        'description' => __('ntfy_desc'),
         'fields' => [
-            ['name' => 'webhook_url', 'label' => 'Topic Name', 'type' => 'text', 'required' => true, 'placeholder' => 'trendradar-your-topic'],
-            ['name' => 'server_url', 'label' => 'Server URL', 'type' => 'url', 'placeholder' => 'https://ntfy.sh (default)'],
-            ['name' => 'token', 'label' => 'Access Token (optional)', 'type' => 'password'],
+            ['name' => 'webhook_url', 'label' => __('topic_name'), 'type' => 'text', 'required' => true, 'placeholder' => 'trendradar-your-topic'],
+            ['name' => 'server_url', 'label' => __('server_url'), 'type' => 'url', 'placeholder' => 'https://ntfy.sh (default)'],
+            ['name' => 'token', 'label' => __('access_token'), 'type' => 'password'],
         ]
     ],
     'bark' => [
-        'name' => 'Bark (iOS)',
+        'name' => __('bark'),
         'icon' => '🍎',
-        'description' => 'Send notifications via Bark (iOS only)',
+        'description' => __('bark_desc'),
         'fields' => [
-            ['name' => 'webhook_url', 'label' => 'Bark URL', 'type' => 'url', 'required' => true, 'placeholder' => 'https://api.day.app/your_device_key'],
+            ['name' => 'webhook_url', 'label' => __('bark_url'), 'type' => 'url', 'required' => true, 'placeholder' => 'https://api.day.app/your_device_key'],
         ]
     ],
     'slack' => [
-        'name' => 'Slack',
+        'name' => __('slack'),
         'icon' => '💼',
-        'description' => 'Send notifications via Slack Incoming Webhook',
+        'description' => __('slack_desc'),
         'fields' => [
-            ['name' => 'webhook_url', 'label' => 'Webhook URL', 'type' => 'url', 'required' => true, 'placeholder' => 'https://hooks.slack.com/services/...'],
+            ['name' => 'webhook_url', 'label' => __('webhook_url'), 'type' => 'url', 'required' => true, 'placeholder' => 'https://hooks.slack.com/services/...'],
         ]
     ],
 ];
 ?>
 <!DOCTYPE html>
-<html lang="en">
+<html lang="<?php echo $currentLang; ?>">
 <head>
     <meta name="csrf-token" content="<?php echo $csrfToken; ?>">
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>TrendRadarConsole - Notifications</title>
+    <title>TrendRadarConsole - <?php _e('notifications'); ?></title>
     <link rel="stylesheet" href="assets/css/style.css">
 </head>
 <body>
@@ -135,8 +136,8 @@ $webhookTypes = [
             <input type="hidden" id="config-id" value="<?php echo $activeConfig['id']; ?>">
             
             <div class="page-header">
-                <h2>Notification Webhooks</h2>
-                <p>Configure notification channels for hot topic alerts</p>
+                <h2><?php _e('notification_webhooks'); ?></h2>
+                <p><?php _e('webhooks_desc'); ?></p>
             </div>
             
             <?php if ($flash): ?>
@@ -150,8 +151,8 @@ $webhookTypes = [
             <?php else: ?>
             
             <div class="alert alert-warning">
-                <strong>⚠️ Security Warning:</strong> Never expose your webhook URLs publicly. 
-                Keep them secure to prevent spam and abuse.
+                <strong>⚠️ <?php _e('security_warning'); ?></strong> 
+                <?php _e('webhook_security_msg'); ?>
             </div>
             
             <!-- Webhook Cards -->
@@ -213,10 +214,10 @@ $webhookTypes = [
                                 <?php endforeach; ?>
                                 
                                 <div class="btn-group">
-                                    <button type="submit" class="btn btn-primary btn-sm">Save</button>
+                                    <button type="submit" class="btn btn-primary btn-sm"><?php _e('save'); ?></button>
                                     <?php if ($existing): ?>
                                     <button type="button" class="btn btn-danger btn-sm" onclick="webhookManager.remove(<?php echo $existing['id']; ?>)">
-                                        Remove
+                                        <?php _e('remove'); ?>
                                     </button>
                                     <?php endif; ?>
                                 </div>
@@ -231,6 +232,7 @@ $webhookTypes = [
         </main>
     </div>
     
+    <script>var i18n = <?php echo getJsTranslations(); ?>;</script>
     <script src="assets/js/app.js"></script>
     <script>
         // Webhook form submissions
@@ -254,10 +256,10 @@ $webhookTypes = [
                 
                 try {
                     await apiRequest('api/webhooks.php', 'POST', data);
-                    showToast('Webhook saved successfully', 'success');
+                    showToast(__('webhook_saved'), 'success');
                     setTimeout(() => location.reload(), 1000);
                 } catch (error) {
-                    showToast('Failed to save: ' + error.message, 'error');
+                    showToast(__('failed_to_save') + ': ' + error.message, 'error');
                 }
             });
         });

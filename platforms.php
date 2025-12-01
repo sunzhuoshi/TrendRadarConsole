@@ -22,7 +22,7 @@ try {
     $activeConfig = $config->getActive();
     
     if (!$activeConfig) {
-        setFlash('warning', 'Please create and activate a configuration first.');
+        setFlash('warning', __('please_create_config'));
         header('Location: index.php');
         exit;
     }
@@ -62,14 +62,15 @@ $existingIds = array_column($platforms, 'platform_id');
 $flash = getFlash();
 $currentPage = 'platforms';
 $csrfToken = generateCsrfToken();
+$currentLang = getCurrentLanguage();
 ?>
 <!DOCTYPE html>
-<html lang="en">
+<html lang="<?php echo $currentLang; ?>">
 <head>
     <meta name="csrf-token" content="<?php echo $csrfToken; ?>">
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>TrendRadarConsole - Platforms</title>
+    <title>TrendRadarConsole - <?php _e('platforms'); ?></title>
     <link rel="stylesheet" href="assets/css/style.css">
 </head>
 <body>
@@ -80,8 +81,8 @@ $csrfToken = generateCsrfToken();
             <input type="hidden" id="config-id" value="<?php echo $activeConfig['id']; ?>">
             
             <div class="page-header">
-                <h2>Platform Management</h2>
-                <p>Configure which platforms to monitor for hot topics</p>
+                <h2><?php _e('platform_management'); ?></h2>
+                <p><?php _e('configure_platforms_desc'); ?></p>
             </div>
             
             <?php if ($flash): ?>
@@ -97,7 +98,7 @@ $csrfToken = generateCsrfToken();
             <!-- Add Platform -->
             <div class="card">
                 <div class="card-header">
-                    <h3>Add Platform</h3>
+                    <h3><?php _e('add_platform'); ?></h3>
                 </div>
                 <div class="card-body">
                     <form method="post" action="api/platforms.php" id="add-platform-form">
@@ -107,9 +108,9 @@ $csrfToken = generateCsrfToken();
                         <div class="row">
                             <div class="col-6">
                                 <div class="form-group">
-                                    <label class="form-label">Select Platform</label>
+                                    <label class="form-label"><?php _e('select_platform'); ?></label>
                                     <select name="platform_preset" class="form-control" id="platform-preset">
-                                        <option value="">-- Select a platform --</option>
+                                        <option value=""><?php _e('select_a_platform'); ?></option>
                                         <?php foreach ($availablePlatforms as $p): ?>
                                         <?php if (!in_array($p['id'], $existingIds)): ?>
                                         <option value="<?php echo htmlspecialchars($p['id']); ?>" data-name="<?php echo htmlspecialchars($p['name']); ?>">
@@ -122,16 +123,16 @@ $csrfToken = generateCsrfToken();
                             </div>
                             <div class="col-6">
                                 <div class="form-group">
-                                    <label class="form-label">Or Add Custom Platform</label>
+                                    <label class="form-label"><?php _e('or_add_custom'); ?></label>
                                     <div class="d-flex gap-2">
-                                        <input type="text" name="platform_id" class="form-control" placeholder="Platform ID (e.g., weibo)" id="platform-id">
-                                        <input type="text" name="platform_name" class="form-control" placeholder="Display Name" id="platform-name">
+                                        <input type="text" name="platform_id" class="form-control" placeholder="<?php _e('platform_id_placeholder'); ?>" id="platform-id">
+                                        <input type="text" name="platform_name" class="form-control" placeholder="<?php _e('display_name'); ?>" id="platform-name">
                                     </div>
                                 </div>
                             </div>
                         </div>
                         
-                        <button type="submit" class="btn btn-primary">Add Platform</button>
+                        <button type="submit" class="btn btn-primary"><?php _e('add_platform'); ?></button>
                     </form>
                 </div>
             </div>
@@ -139,22 +140,22 @@ $csrfToken = generateCsrfToken();
             <!-- Platforms List -->
             <div class="card">
                 <div class="card-header">
-                    <h3>Configured Platforms (<?php echo count($platforms); ?>)</h3>
+                    <h3><?php _e('configured_platforms'); ?> (<?php echo count($platforms); ?>)</h3>
                 </div>
                 <div class="card-body">
                     <?php if (empty($platforms)): ?>
                     <div class="empty-state">
-                        <p>No platforms configured yet.</p>
+                        <p><?php _e('no_platforms_configured'); ?></p>
                     </div>
                     <?php else: ?>
                     <table class="table">
                         <thead>
                             <tr>
-                                <th style="width: 50px;">Order</th>
-                                <th>Platform ID</th>
-                                <th>Display Name</th>
-                                <th style="width: 100px;">Enabled</th>
-                                <th style="width: 150px;">Actions</th>
+                                <th style="width: 50px;"><?php _e('order'); ?></th>
+                                <th><?php _e('platform_id'); ?></th>
+                                <th><?php _e('display_name'); ?></th>
+                                <th style="width: 100px;"><?php _e('enabled'); ?></th>
+                                <th style="width: 150px;"><?php _e('actions'); ?></th>
                             </tr>
                         </thead>
                         <tbody>
@@ -173,10 +174,10 @@ $csrfToken = generateCsrfToken();
                                 </td>
                                 <td class="actions">
                                     <button type="button" class="btn btn-outline btn-sm" onclick="editPlatform(<?php echo $platform['id']; ?>, '<?php echo sanitize($platform['platform_name']); ?>')">
-                                        Edit
+                                        <?php _e('edit'); ?>
                                     </button>
                                     <button type="button" class="btn btn-danger btn-sm" onclick="platformManager.remove(<?php echo $platform['id']; ?>)">
-                                        Delete
+                                        <?php _e('delete'); ?>
                                     </button>
                                 </td>
                             </tr>
@@ -190,12 +191,15 @@ $csrfToken = generateCsrfToken();
             <!-- Platform Info -->
             <div class="card">
                 <div class="card-header">
-                    <h3>Available Platforms Reference</h3>
+                    <h3><?php _e('available_platforms_ref'); ?></h3>
                 </div>
                 <div class="card-body">
                     <p class="text-muted mb-3">
-                        These are the commonly used platform IDs from the TrendRadar project. 
-                        You can find more platforms in the <a href="https://github.com/ourongxing/newsnow/tree/main/server/sources" target="_blank">newsnow source code</a>.
+                        <?php
+                            echo __('platforms_ref_desc') . ' ';
+                            echo '<a href="https://github.com/ourongxing/newsnow/tree/main/server/sources" target="_blank">' . __('newsnow_source_code') . '</a>. ';
+                            echo __('find_more_platforms');
+                        ?>
                     </p>
                     <div class="keyword-tags">
                         <?php foreach ($availablePlatforms as $p): ?>
@@ -216,25 +220,26 @@ $csrfToken = generateCsrfToken();
     <div class="modal-overlay" id="edit-modal">
         <div class="modal">
             <div class="modal-header">
-                <h3>Edit Platform</h3>
+                <h3><?php _e('edit_platform'); ?></h3>
                 <button class="modal-close" onclick="closeModal('edit-modal')">&times;</button>
             </div>
             <div class="modal-body">
                 <form id="edit-platform-form">
                     <input type="hidden" name="id" id="edit-platform-id">
                     <div class="form-group">
-                        <label class="form-label">Display Name</label>
+                        <label class="form-label"><?php _e('display_name'); ?></label>
                         <input type="text" name="platform_name" class="form-control" id="edit-platform-name" required>
                     </div>
                 </form>
             </div>
             <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" onclick="closeModal('edit-modal')">Cancel</button>
-                <button type="button" class="btn btn-primary" onclick="savePlatformEdit()">Save Changes</button>
+                <button type="button" class="btn btn-secondary" onclick="closeModal('edit-modal')"><?php _e('cancel'); ?></button>
+                <button type="button" class="btn btn-primary" onclick="savePlatformEdit()"><?php _e('save_changes'); ?></button>
             </div>
         </div>
     </div>
     
+    <script>var i18n = <?php echo getJsTranslations(); ?>;</script>
     <script src="assets/js/app.js"></script>
     <script>
         // Platform preset selection
@@ -255,7 +260,7 @@ $csrfToken = generateCsrfToken();
             const platformName = document.getElementById('platform-name').value.trim();
             
             if (!platformId || !platformName) {
-                showToast('Please enter both Platform ID and Display Name', 'error');
+                showToast(__('enter_both_id_name'), 'error');
                 return;
             }
             
@@ -273,7 +278,7 @@ $csrfToken = generateCsrfToken();
             const name = document.getElementById('edit-platform-name').value.trim();
             
             if (!name) {
-                showToast('Display name is required', 'error');
+                showToast(__('display_name_required'), 'error');
                 return;
             }
             
@@ -282,11 +287,11 @@ $csrfToken = generateCsrfToken();
                     id: id,
                     platform_name: name
                 });
-                showToast('Platform updated', 'success');
+                showToast(__('platform_updated'), 'success');
                 closeModal('edit-modal');
                 location.reload();
             } catch (error) {
-                showToast('Failed to update: ' + error.message, 'error');
+                showToast(`${__('failed_to_update')}: ${error.message}`, 'error');
             }
         }
     </script>

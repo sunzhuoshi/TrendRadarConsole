@@ -22,7 +22,7 @@ try {
     $activeConfig = $config->getActive();
     
     if (!$activeConfig) {
-        setFlash('warning', 'Please create and activate a configuration first.');
+        setFlash('warning', __('please_create_config'));
         header('Location: index.php');
         exit;
     }
@@ -37,6 +37,7 @@ try {
 $flash = getFlash();
 $currentPage = 'github';
 $csrfToken = generateCsrfToken();
+$currentLang = getCurrentLanguage();
 
 // Get saved GitHub settings from user profile
 $githubOwner = $githubSettings['github_owner'] ?? '';
@@ -44,12 +45,12 @@ $githubRepo = $githubSettings['github_repo'] ?? '';
 $githubToken = $githubSettings['github_token'] ?? '';
 ?>
 <!DOCTYPE html>
-<html lang="en">
+<html lang="<?php echo $currentLang; ?>">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="csrf-token" content="<?php echo $csrfToken; ?>">
-    <title>TrendRadarConsole - GitHub Sync</title>
+    <title>TrendRadarConsole - <?php _e('github_sync'); ?></title>
     <link rel="stylesheet" href="assets/css/style.css">
 </head>
 <body>
@@ -60,8 +61,8 @@ $githubToken = $githubSettings['github_token'] ?? '';
             <input type="hidden" id="config-id" value="<?php echo $activeConfig['id']; ?>">
             
             <div class="page-header">
-                <h2>GitHub Sync</h2>
-                <p>Load and save configurations directly to your TrendRadar GitHub repository</p>
+                <h2><?php _e('github_sync_title'); ?></h2>
+                <p><?php _e('github_sync_desc'); ?></p>
             </div>
             
             <?php if ($flash): ?>
@@ -77,17 +78,17 @@ $githubToken = $githubSettings['github_token'] ?? '';
             <!-- GitHub Connection Settings -->
             <div class="card">
                 <div class="card-header">
-                    <h3>🔑 GitHub Connection</h3>
+                    <h3>🔑 <?php _e('github_connection'); ?></h3>
                 </div>
                 <div class="card-body">
                     <div class="alert alert-info">
-                        <strong>📋 How to get a Personal Access Token (PAT):</strong>
+                        <strong>📋 <?php _e('how_to_get_pat'); ?></strong>
                         <ol class="mt-2 mb-0">
-                            <li>Go to <a href="https://github.com/settings/tokens?type=beta" target="_blank">GitHub Settings → Developer settings → Personal access tokens → Fine-grained tokens</a></li>
-                            <li>Click "Generate new token"</li>
-                            <li>Select your TrendRadar repository</li>
-                            <li>Under "Repository permissions", set <strong>Variables</strong> to <strong>Read and write</strong></li>
-                            <li>Click "Generate token" and copy it</li>
+                            <li><?php _e('pat_step1'); ?> <a href="https://github.com/settings/tokens?type=beta" target="_blank"><?php _e('pat_step1_link'); ?></a></li>
+                            <li><?php _e('pat_step2'); ?></li>
+                            <li><?php _e('pat_step3'); ?></li>
+                            <li><?php echo __('pat_step4'); ?></li>
+                            <li><?php _e('pat_step5'); ?></li>
                         </ol>
                     </div>
                     
@@ -95,35 +96,35 @@ $githubToken = $githubSettings['github_token'] ?? '';
                         <div class="row">
                             <div class="col-6">
                                 <div class="form-group">
-                                    <label class="form-label">Repository Owner <span class="text-danger">*</span></label>
+                                    <label class="form-label"><?php _e('repo_owner'); ?> <span class="text-danger">*</span></label>
                                     <input type="text" name="github_owner" class="form-control" 
                                            value="<?php echo sanitize($githubOwner); ?>"
-                                           placeholder="e.g., your-username">
-                                    <div class="form-text">Your GitHub username or organization name</div>
+                                           placeholder="<?php _e('repo_owner_placeholder'); ?>">
+                                    <div class="form-text"><?php _e('repo_owner_desc'); ?></div>
                                 </div>
                             </div>
                             <div class="col-6">
                                 <div class="form-group">
-                                    <label class="form-label">Repository Name <span class="text-danger">*</span></label>
+                                    <label class="form-label"><?php _e('repo_name'); ?> <span class="text-danger">*</span></label>
                                     <input type="text" name="github_repo" class="form-control" 
                                            value="<?php echo sanitize($githubRepo); ?>"
-                                           placeholder="e.g., TrendRadar">
-                                    <div class="form-text">Your forked TrendRadar repository name</div>
+                                           placeholder="<?php _e('repo_name_placeholder'); ?>">
+                                    <div class="form-text"><?php _e('repo_name_desc'); ?></div>
                                 </div>
                             </div>
                         </div>
                         
                         <div class="form-group">
-                            <label class="form-label">Personal Access Token (PAT) <span class="text-danger">*</span></label>
+                            <label class="form-label"><?php _e('personal_access_token'); ?> <span class="text-danger">*</span></label>
                             <input type="password" name="github_token" class="form-control" 
                                    value="<?php echo sanitize($githubToken); ?>"
-                                   placeholder="github_pat_...">
-                            <div class="form-text">Your GitHub Fine-grained Personal Access Token with Variables read/write permission</div>
+                                   placeholder="<?php _e('pat_placeholder'); ?>">
+                            <div class="form-text"><?php _e('pat_desc'); ?></div>
                         </div>
                         
                         <div class="btn-group">
-                            <button type="submit" class="btn btn-primary">Save Settings</button>
-                            <button type="button" class="btn btn-secondary" onclick="testConnection()">Test Connection</button>
+                            <button type="submit" class="btn btn-primary"><?php _e('save_settings'); ?></button>
+                            <button type="button" class="btn btn-secondary" onclick="testConnection()"><?php _e('test_connection'); ?></button>
                         </div>
                     </form>
                 </div>
@@ -132,33 +133,33 @@ $githubToken = $githubSettings['github_token'] ?? '';
             <!-- Sync Operations -->
             <div class="card">
                 <div class="card-header">
-                    <h3>🔄 Sync Operations</h3>
+                    <h3>🔄 <?php _e('sync_operations'); ?></h3>
                 </div>
                 <div class="card-body">
                     <p class="text-muted mb-4">
-                        Load configurations from your GitHub repository or push your current configuration to GitHub.
+                        <?php _e('sync_operations_desc'); ?>
                     </p>
                     
                     <div class="row">
                         <div class="col-6">
                             <div class="stat-card">
-                                <h4>📥 Load from GitHub</h4>
+                                <h4>📥 <?php _e('load_from_github'); ?></h4>
                                 <p class="text-muted">
-                                    Import CONFIG_YAML and FREQUENCY_WORDS from your GitHub repository variables.
+                                    <?php _e('load_from_github_desc'); ?>
                                 </p>
                                 <button class="btn btn-primary mt-2" onclick="loadFromGitHub()">
-                                    Load from GitHub
+                                    <?php _e('load_from_github'); ?>
                                 </button>
                             </div>
                         </div>
                         <div class="col-6">
                             <div class="stat-card">
-                                <h4>📤 Save to GitHub</h4>
+                                <h4>📤 <?php _e('save_to_github'); ?></h4>
                                 <p class="text-muted">
-                                    Push your current configuration to GitHub as repository variables.
+                                    <?php _e('save_to_github_desc'); ?>
                                 </p>
                                 <button class="btn btn-success mt-2" onclick="saveToGitHub()">
-                                    Save to GitHub
+                                    <?php _e('save_to_github'); ?>
                                 </button>
                             </div>
                         </div>
@@ -169,7 +170,7 @@ $githubToken = $githubSettings['github_token'] ?? '';
             <!-- Preview Section -->
             <div class="card" id="preview-card" style="display: none;">
                 <div class="card-header">
-                    <h3>📋 Loaded Configuration Preview</h3>
+                    <h3>📋 <?php _e('loaded_config_preview'); ?></h3>
                 </div>
                 <div class="card-body">
                     <div class="tabs" data-tab-group="preview">
@@ -191,6 +192,7 @@ $githubToken = $githubSettings['github_token'] ?? '';
         </main>
     </div>
     
+    <script>var i18n = <?php echo getJsTranslations(); ?>;</script>
     <script src="assets/js/app.js"></script>
     <script>
         // Save GitHub settings to user profile
@@ -208,9 +210,9 @@ $githubToken = $githubSettings['github_token'] ?? '';
                     repo: repo,
                     token: token
                 });
-                showToast('GitHub settings saved', 'success');
+                showToast(__('github_settings_saved'), 'success');
             } catch (error) {
-                showToast('Failed to save: ' + error.message, 'error');
+                showToast(__('failed_to_save') + ': ' + error.message, 'error');
             }
         });
         
@@ -221,7 +223,7 @@ $githubToken = $githubSettings['github_token'] ?? '';
             const token = document.querySelector('input[name="github_token"]').value;
             
             if (!owner || !repo || !token) {
-                showToast('Please fill in all fields first', 'error');
+                showToast(__('fill_all_fields'), 'error');
                 return;
             }
             
@@ -232,9 +234,9 @@ $githubToken = $githubSettings['github_token'] ?? '';
                     repo: repo,
                     token: token
                 });
-                showToast('Connection successful! Repository: ' + result.data.full_name, 'success');
+                showToast(__('connection_successful') + result.data.full_name, 'success');
             } catch (error) {
-                showToast('Connection failed: ' + error.message, 'error');
+                showToast(__('connection_failed') + error.message, 'error');
             }
         }
         
@@ -245,7 +247,7 @@ $githubToken = $githubSettings['github_token'] ?? '';
             const token = document.querySelector('input[name="github_token"]').value;
             
             if (!owner || !repo || !token) {
-                showToast('Please configure GitHub settings first', 'error');
+                showToast(__('configure_github_first'), 'error');
                 return;
             }
             
@@ -258,13 +260,13 @@ $githubToken = $githubSettings['github_token'] ?? '';
                 });
                 
                 // Show preview
-                document.getElementById('config-yaml-preview').textContent = result.data.config_yaml || '# Not found';
-                document.getElementById('frequency-words-preview').textContent = result.data.frequency_words || '# Not found';
+                document.getElementById('config-yaml-preview').textContent = result.data.config_yaml || __('not_found');
+                document.getElementById('frequency-words-preview').textContent = result.data.frequency_words || __('not_found');
                 document.getElementById('preview-card').style.display = 'block';
                 
-                showToast('Configuration loaded from GitHub', 'success');
+                showToast(__('config_loaded_from_github'), 'success');
             } catch (error) {
-                showToast('Failed to load: ' + error.message, 'error');
+                showToast(__('failed_to_load') + ': ' + error.message, 'error');
             }
         }
         
@@ -276,11 +278,11 @@ $githubToken = $githubSettings['github_token'] ?? '';
             const configId = document.getElementById('config-id').value;
             
             if (!owner || !repo || !token) {
-                showToast('Please configure GitHub settings first', 'error');
+                showToast(__('configure_github_first'), 'error');
                 return;
             }
             
-            if (!confirm('This will overwrite CONFIG_YAML and FREQUENCY_WORDS variables in your GitHub repository. Continue?')) {
+            if (!confirm(__('confirm_save_to_github'))) {
                 return;
             }
             
@@ -293,9 +295,9 @@ $githubToken = $githubSettings['github_token'] ?? '';
                     config_id: configId
                 });
                 
-                showToast('Configuration saved to GitHub successfully!', 'success');
+                showToast(__('config_saved_to_github'), 'success');
             } catch (error) {
-                showToast('Failed to save: ' + error.message, 'error');
+                showToast(__('failed_to_save') + ': ' + error.message, 'error');
             }
         }
     </script>

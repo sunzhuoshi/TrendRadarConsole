@@ -2,6 +2,24 @@
  * TrendRadarConsole - Main JavaScript
  */
 
+// Internationalization support
+let i18n = window.i18n || {};
+
+function __(key) {
+    return i18n[key] || key;
+}
+
+// Language switching
+async function switchLanguage(lang) {
+    try {
+        await apiRequest('api/language.php', 'POST', { lang: lang });
+        // Reload the page to apply the new language
+        location.reload();
+    } catch (error) {
+        console.error('Failed to switch language:', error);
+    }
+}
+
 // Mobile sidebar toggle
 function toggleSidebar() {
     const sidebar = document.querySelector('.sidebar');
@@ -187,7 +205,7 @@ function confirmDialog(message) {
 async function copyToClipboard(text) {
     try {
         await navigator.clipboard.writeText(text);
-        showToast('Copied to clipboard!', 'success');
+        showToast(__('copied_to_clipboard'), 'success');
     } catch (err) {
         // Fallback for older browsers
         const textarea = document.createElement('textarea');
@@ -196,7 +214,7 @@ async function copyToClipboard(text) {
         textarea.select();
         document.execCommand('copy');
         document.body.removeChild(textarea);
-        showToast('Copied to clipboard!', 'success');
+        showToast(__('copied_to_clipboard'), 'success');
     }
 }
 

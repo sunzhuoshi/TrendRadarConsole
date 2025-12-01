@@ -204,3 +204,150 @@ function verifyCsrfToken($token) {
     }
     return isset($_SESSION['csrf_token']) && hash_equals($_SESSION['csrf_token'], $token);
 }
+
+/**
+ * Language/Translation helpers
+ */
+
+// Global variable to store loaded translations
+$GLOBALS['__translations'] = null;
+$GLOBALS['__current_lang'] = null;
+
+/**
+ * Get current language code
+ * Priority: session > cookie > default (zh)
+ */
+function getCurrentLanguage() {
+    if (session_status() === PHP_SESSION_NONE) {
+        session_start();
+    }
+    
+    // Check session first
+    if (isset($_SESSION['lang'])) {
+        return $_SESSION['lang'];
+    }
+    
+    // Check cookie
+    if (isset($_COOKIE['lang'])) {
+        $_SESSION['lang'] = $_COOKIE['lang'];
+        return $_COOKIE['lang'];
+    }
+    
+    // Default to Chinese
+    return 'zh';
+}
+
+/**
+ * Set the current language
+ */
+function setLanguage($lang) {
+    if (session_status() === PHP_SESSION_NONE) {
+        session_start();
+    }
+    
+    // Only allow supported languages
+    $supportedLangs = ['zh', 'en'];
+    if (!in_array($lang, $supportedLangs)) {
+        $lang = 'zh';
+    }
+    
+    $_SESSION['lang'] = $lang;
+    setcookie('lang', $lang, time() + (365 * 24 * 60 * 60), '/'); // 1 year
+    $GLOBALS['__current_lang'] = $lang;
+    $GLOBALS['__translations'] = null; // Force reload translations
+    
+    return $lang;
+}
+
+/**
+ * Load translations for the current language
+ */
+function loadTranslations($lang = null) {
+    if ($lang === null) {
+        $lang = getCurrentLanguage();
+    }
+    
+    // Return cached translations if already loaded for this language
+    if ($GLOBALS['__translations'] !== null && $GLOBALS['__current_lang'] === $lang) {
+        return $GLOBALS['__translations'];
+    }
+    
+    $langFile = __DIR__ . '/../lang/' . $lang . '.php';
+    
+    // Fall back to Chinese if language file doesn't exist
+    if (!file_exists($langFile)) {
+        $langFile = __DIR__ . '/../lang/zh.php';
+        $lang = 'zh';
+    }
+    
+    $GLOBALS['__translations'] = require $langFile;
+    $GLOBALS['__current_lang'] = $lang;
+    
+    return $GLOBALS['__translations'];
+}
+
+/**
+ * Translate a string
+ * Usage: __('key') or __('key', ['param' => 'value'])
+ */
+function __($key, $params = []) {
+    $translations = loadTranslations();
+    
+    $text = isset($translations[$key]) ? $translations[$key] : $key;
+    
+    // Replace parameters if any
+    if (!empty($params)) {
+        foreach ($params as $param => $value) {
+            $text = str_replace(':' . $param, $value, $text);
+        }
+    }
+    
+    return $text;
+}
+
+/**
+ * Echo translated string (shorthand for echo __())
+ */
+function _e($key, $params = []) {
+    echo __($key, $params);
+}
+
+/**
+ * Get all JavaScript translations as JSON for client-side use
+ */
+function getJsTranslations() {
+    $translations = loadTranslations();
+    
+    // Filter only JS-related translations (those starting with 'js_')
+    $jsTranslations = [];
+    foreach ($translations as $key => $value) {
+        if (strpos($key, 'js_') === 0) {
+            // Remove 'js_' prefix for cleaner JS usage
+            $jsKey = substr($key, 3);
+            $jsTranslations[$jsKey] = $value;
+        }
+    }
+    
+    // Also add some common translations needed in JS
+    $commonKeys = [
+        'confirm_remove_platform', 'confirm_remove_webhook', 'platform_updated',
+        'platform_added', 'platform_removed', 'webhook_saved', 'webhook_updated',
+        'webhook_removed', 'settings_saved', 'setting_updated', 'keywords_saved',
+        'file_downloaded', 'copied_to_clipboard', 'failed_to_update', 'failed_to_add',
+        'failed_to_remove', 'failed_to_save', 'failed_to_load', 'example_loaded',
+        'keywords_cleared', 'replace_keywords_confirm', 'clear_keywords_confirm',
+        'github_settings_saved', 'connection_successful', 'connection_failed',
+        'config_loaded_from_github', 'confirm_save_to_github', 'config_saved_to_github',
+        'fill_all_fields', 'configure_github_first', 'display_name_required',
+        'enter_both_id_name', 'group', 'no_keywords_preview', 'weight_sum_is', 'should_be',
+        'weight_sum_message'
+    ];
+    
+    foreach ($commonKeys as $key) {
+        if (isset($translations[$key]) && !isset($jsTranslations[$key])) {
+            $jsTranslations[$key] = $translations[$key];
+        }
+    }
+    
+    return json_encode($jsTranslations, JSON_UNESCAPED_UNICODE);
+}
