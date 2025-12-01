@@ -313,6 +313,21 @@ function _e($key, $params = []) {
 }
 
 /**
+ * Get the last updated time from the version file
+ * Returns the timestamp when the application was last deployed
+ */
+function getLastUpdatedTime() {
+    $versionFile = __DIR__ . '/../version.php';
+    
+    if (file_exists($versionFile)) {
+        $version = require $versionFile;
+        return $version['updated_at'] ?? null;
+    }
+    
+    return null;
+}
+
+/**
  * Get all JavaScript translations as JSON for client-side use
  */
 function getJsTranslations() {
