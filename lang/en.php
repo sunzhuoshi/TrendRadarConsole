@@ -269,7 +269,7 @@ return [
     'hotness_weight_desc' => 'Higher = prioritize trending topics',
     'weight_sum_warning' => 'The sum of weights must equal 1.0',
     'weight_sum_is' => 'Weight sum is',
-    'should_be' => '- should be',
+    'should_be' => 'should be',
     'system_settings' => 'System Settings',
     'enable_crawler' => 'Enable Crawler',
     'enable_notifications' => 'Enable Notifications',
