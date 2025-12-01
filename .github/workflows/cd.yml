@@ -77,7 +77,7 @@ jobs:
             "mkdir -p /tmp/scripts && cat > /tmp/scripts/fix-permissions.sh" \
             < .github/scripts/fix-permissions.sh
           ssh -o StrictHostKeyChecking=no "$SSH_USER@$SSH_HOST" \
-            "chmod +x /tmp/scripts/fix-permissions.sh && /tmp/scripts/fix-permissions.sh"
+            "chmod +x /tmp/scripts/fix-permissions.sh && sudo /tmp/scripts/fix-permissions.sh"
 
       - name: ♻️ Reload Apache
         env:
