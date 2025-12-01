@@ -48,6 +48,7 @@ function getCsrfToken() {
 async function apiRequest(url, method = 'GET', data = null) {
     const options = {
         method: method,
+        credentials: 'same-origin',
         headers: {
             'Content-Type': 'application/json',
             'X-Requested-With': 'XMLHttpRequest',
@@ -366,7 +367,9 @@ const webhookManager = {
 // Export configuration
 async function exportConfig(configId, format = 'yaml') {
     try {
-        const response = await fetch(`api/export.php?config_id=${configId}&format=${format}`);
+        const response = await fetch(`api/export.php?config_id=${configId}&format=${format}`, {
+            credentials: 'same-origin'
+        });
         const data = await response.text();
         
         if (format === 'yaml') {
