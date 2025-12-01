@@ -65,6 +65,11 @@ try {
             $configYaml = $github->getConfigYaml();
             $frequencyWords = $github->getFrequencyWords();
             
+            // Return error if neither variable was found
+            if ($configYaml === null && $frequencyWords === null) {
+                jsonError('No configuration variables found. Make sure CONFIG_YAML or FREQUENCY_WORDS repository variables exist.', 404);
+            }
+            
             jsonSuccess([
                 'config_yaml' => $configYaml,
                 'frequency_words' => $frequencyWords

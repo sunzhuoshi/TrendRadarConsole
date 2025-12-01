@@ -57,6 +57,11 @@ class GitHub
         
         $decoded = json_decode($response, true);
         
+        // Check for JSON decode errors
+        if ($decoded === null && json_last_error() !== JSON_ERROR_NONE) {
+            throw new Exception('JSON decode error: ' . json_last_error_msg());
+        }
+        
         if ($httpCode >= 400) {
             $message = isset($decoded['message']) ? $decoded['message'] : 'Unknown error';
             throw new Exception('GitHub API error (' . $httpCode . '): ' . $message);
