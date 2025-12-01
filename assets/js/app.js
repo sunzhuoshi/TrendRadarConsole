@@ -402,3 +402,34 @@ document.addEventListener('DOMContentLoaded', function() {
     initToggleSwitches();
     initMobileSidebar();
 });
+
+// Button loading state helpers
+function setButtonLoading(button, isLoading) {
+    if (!button) return;
+    
+    if (isLoading) {
+        // Wrap content in span if not already wrapped
+        if (!button.querySelector('.btn-text')) {
+            const span = document.createElement('span');
+            span.className = 'btn-text';
+            // Move all child nodes into the span
+            while (button.firstChild) {
+                span.appendChild(button.firstChild);
+            }
+            button.appendChild(span);
+        }
+        button.classList.add('loading');
+        button.disabled = true;
+    } else {
+        button.classList.remove('loading');
+        button.disabled = false;
+        // Restore original content by unwrapping span
+        const span = button.querySelector('.btn-text');
+        if (span) {
+            while (span.firstChild) {
+                button.insertBefore(span.firstChild, span);
+            }
+            span.remove();
+        }
+    }
+}
