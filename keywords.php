@@ -169,9 +169,8 @@ ChatGPT
                 <div class="card-body">
                     <div class="row">
                         <div class="col-4">
-                            <div class="example-config-card tech">
-                                <h4><?php _e('tech_ai_monitoring'); ?></h4>
-                                <pre>AI
+                            <h4><?php _e('tech_ai_monitoring'); ?></h4>
+                            <pre style="background: #f5f5f5; padding: 10px; border-radius: 4px; font-size: 12px;">AI
 人工智能
 ChatGPT
 +技术
@@ -184,13 +183,11 @@ ChatGPT
 小米
 +发布
 +新品</pre>
-                                <button class="btn btn-outline btn-sm" onclick="loadExample('tech')"><?php _e('load_this_example'); ?></button>
-                            </div>
+                            <button class="btn btn-outline btn-sm mt-2" onclick="loadExample('tech')"><?php _e('load_this_example'); ?></button>
                         </div>
                         <div class="col-4">
-                            <div class="example-config-card finance">
-                                <h4><?php _e('finance_stock'); ?></h4>
-                                <pre>A股
+                            <h4><?php _e('finance_stock'); ?></h4>
+                            <pre style="background: #f5f5f5; padding: 10px; border-radius: 4px; font-size: 12px;">A股
 上证
 深证
 +涨跌
@@ -204,13 +201,11 @@ ChatGPT
 特斯拉
 比亚迪
 新能源</pre>
-                                <button class="btn btn-outline btn-sm" onclick="loadExample('finance')"><?php _e('load_this_example'); ?></button>
-                            </div>
+                            <button class="btn btn-outline btn-sm mt-2" onclick="loadExample('finance')"><?php _e('load_this_example'); ?></button>
                         </div>
                         <div class="col-4">
-                            <div class="example-config-card entertainment">
-                                <h4><?php _e('entertainment'); ?></h4>
-                                <pre>电影
+                            <h4><?php _e('entertainment'); ?></h4>
+                            <pre style="background: #f5f5f5; padding: 10px; border-radius: 4px; font-size: 12px;">电影
 电视剧
 综艺
 +热播
@@ -224,8 +219,7 @@ ChatGPT
 明星
 娱乐
 !八卦</pre>
-                                <button class="btn btn-outline btn-sm" onclick="loadExample('entertainment')"><?php _e('load_this_example'); ?></button>
-                            </div>
+                            <button class="btn btn-outline btn-sm mt-2" onclick="loadExample('entertainment')"><?php _e('load_this_example'); ?></button>
                         </div>
                     </div>
                 </div>
