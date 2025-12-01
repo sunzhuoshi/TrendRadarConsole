@@ -149,7 +149,7 @@ return [
     'available_platforms_ref' => 'Available Platforms Reference',
     'platforms_ref_desc' => 'These are the commonly used platform IDs from the TrendRadar project. You can find more platforms in the',
     'newsnow_source_code' => 'newsnow source code.',
-    'find_more_platforms' => '',
+    'find_more_platforms' => 'to find more platforms.',
     'edit_platform' => 'Edit Platform',
     'save_changes' => 'Save Changes',
     'platform_updated' => 'Platform updated',
