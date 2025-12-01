@@ -24,17 +24,20 @@ jobs:
                        ./ ./dist/
           
           # Generate version file with deployment timestamp
-          echo "<?php" > ./dist/version.php
-          echo "/**" >> ./dist/version.php
-          echo " * TrendRadarConsole - Version File" >> ./dist/version.php
-          echo " * " >> ./dist/version.php
-          echo " * This file is automatically updated during deployment." >> ./dist/version.php
-          echo " * Do not edit manually." >> ./dist/version.php
-          echo " */" >> ./dist/version.php
-          echo "" >> ./dist/version.php
-          echo "return [" >> ./dist/version.php
-          echo "    'updated_at' => '$(date -u +"%Y-%m-%dT%H:%M:%S+00:00")'," >> ./dist/version.php
-          echo "];" >> ./dist/version.php
+          DEPLOY_TIME=$(date -u +"%Y-%m-%dT%H:%M:%S+00:00")
+          printf '%s\n' \
+            '<?php' \
+            '/**' \
+            ' * TrendRadarConsole - Version File' \
+            ' * ' \
+            ' * This file is automatically updated during deployment.' \
+            ' * Do not edit manually.' \
+            ' */' \
+            '' \
+            'return [' \
+            "    'updated_at' => '$DEPLOY_TIME'," \
+            '];' \
+            > ./dist/version.php
 
       - name: 🔑 Setup SSH key
         uses: webfactory/ssh-agent@v0.9.0

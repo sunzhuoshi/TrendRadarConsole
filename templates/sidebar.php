@@ -46,11 +46,18 @@ $lastUpdated = getLastUpdatedTime();
         <a href="logout.php" class="nav-item" style="margin-top: auto; border-top: 1px solid rgba(255,255,255,0.1);">
             🚪 <?php _e('logout'); ?>
         </a>
-        <?php if ($lastUpdated): ?>
+        <?php 
+        if ($lastUpdated): 
+            $timestamp = strtotime($lastUpdated);
+            if ($timestamp !== false):
+        ?>
         <div class="nav-item version-info" style="font-size: 0.75rem; opacity: 0.7; padding-top: 10px; border-top: 1px solid rgba(255,255,255,0.1);">
-            🕐 <?php _e('last_updated'); ?>: <?php echo htmlspecialchars(date('Y-m-d H:i', strtotime($lastUpdated))); ?>
+            🕐 <?php _e('last_updated'); ?>: <?php echo htmlspecialchars(date('Y-m-d H:i', $timestamp)); ?>
         </div>
-        <?php endif; ?>
+        <?php 
+            endif;
+        endif; 
+        ?>
     </nav>
 </aside>
 <div class="sidebar-overlay" onclick="toggleSidebar()"></div>
