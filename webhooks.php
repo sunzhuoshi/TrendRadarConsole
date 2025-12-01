@@ -259,7 +259,7 @@ $webhookTypes = [
                     showToast(__('webhook_saved'), 'success');
                     setTimeout(() => location.reload(), 1000);
                 } catch (error) {
-                    showToast(__('failed_to_save') + error.message, 'error');
+                    showToast(__('failed_to_save') + ': ' + error.message, 'error');
                 }
             });
         });
