@@ -5,7 +5,7 @@
 
 return [
     // General
-    'app_name' => 'TrendRadarConsole',
+    'app_name' => 'TrendRadar控制台',
     'dashboard' => '仪表盘',
     'platforms' => '平台',
     'keywords' => '关键词',
