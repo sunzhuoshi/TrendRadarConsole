@@ -24,7 +24,8 @@ jobs:
                        ./ ./dist/
           
           # Generate version file with deployment timestamp
-          DEPLOY_TIME=$(date -u +"%Y-%m-%dT%H:%M:%S+00:00")
+          DATE_FORMAT='%Y-%m-%dT%H:%M:%S+00:00'
+          DEPLOY_TIME=$(date -u +"$DATE_FORMAT")
           printf '%s\n' \
             '<?php' \
             '/**' \
