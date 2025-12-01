@@ -170,7 +170,7 @@ ChatGPT
                     <div class="row">
                         <div class="col-4">
                             <h4><?php _e('tech_ai_monitoring'); ?></h4>
-                            <pre style="background: #f5f5f5; padding: 10px; border-radius: 4px; font-size: 12px;">AI
+                            <pre style="background: #343a40; color: #f8f8f2; padding: 10px; border-radius: 4px; font-size: 12px;">AI
 人工智能
 ChatGPT
 +技术
@@ -187,7 +187,7 @@ ChatGPT
                         </div>
                         <div class="col-4">
                             <h4><?php _e('finance_stock'); ?></h4>
-                            <pre style="background: #f5f5f5; padding: 10px; border-radius: 4px; font-size: 12px;">A股
+                            <pre style="background: #343a40; color: #f8f8f2; padding: 10px; border-radius: 4px; font-size: 12px;">A股
 上证
 深证
 +涨跌
@@ -205,7 +205,7 @@ ChatGPT
                         </div>
                         <div class="col-4">
                             <h4><?php _e('entertainment'); ?></h4>
-                            <pre style="background: #f5f5f5; padding: 10px; border-radius: 4px; font-size: 12px;">电影
+                            <pre style="background: #343a40; color: #f8f8f2; padding: 10px; border-radius: 4px; font-size: 12px;">电影
 电视剧
 综艺
 +热播
