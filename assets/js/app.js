@@ -405,6 +405,8 @@ document.addEventListener('DOMContentLoaded', function() {
 
 // Button loading state helpers
 function setButtonLoading(button, isLoading) {
+    if (!button) return;
+    
     if (isLoading) {
         // Save original text and wrap it
         if (!button.querySelector('.btn-text')) {
@@ -416,5 +418,10 @@ function setButtonLoading(button, isLoading) {
     } else {
         button.classList.remove('loading');
         button.disabled = false;
+        // Restore original text
+        if (button.dataset.originalText) {
+            button.innerHTML = button.dataset.originalText;
+            delete button.dataset.originalText;
+        }
     }
 }

@@ -739,7 +739,7 @@ select.form-control {
     border: 2px solid transparent;
     border-top-color: currentColor;
     border-radius: 50%;
-    animation: spin 0.8s linear infinite;
+    animation: spin 1s linear infinite;
 }
 
 /* Mobile Menu Toggle */
