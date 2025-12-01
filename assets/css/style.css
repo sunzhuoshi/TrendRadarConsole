@@ -872,3 +872,12 @@ pre {
 .justify-between { justify-content: space-between; }
 .gap-2 { gap: 10px; }
 .gap-3 { gap: 15px; }
+
+/* Example Configuration Block */
+.example-config-block {
+    background: var(--dark-color);
+    color: #f8f8f2;
+    padding: 10px;
+    border-radius: 4px;
+    font-size: 12px;
+}
