@@ -408,20 +408,28 @@ function setButtonLoading(button, isLoading) {
     if (!button) return;
     
     if (isLoading) {
-        // Save original text and wrap it
+        // Wrap content in span if not already wrapped
         if (!button.querySelector('.btn-text')) {
-            button.dataset.originalText = button.innerHTML;
-            button.innerHTML = '<span class="btn-text">' + button.innerHTML + '</span>';
+            const span = document.createElement('span');
+            span.className = 'btn-text';
+            // Move all child nodes into the span
+            while (button.firstChild) {
+                span.appendChild(button.firstChild);
+            }
+            button.appendChild(span);
         }
         button.classList.add('loading');
         button.disabled = true;
     } else {
         button.classList.remove('loading');
         button.disabled = false;
-        // Restore original text
-        if (button.dataset.originalText) {
-            button.innerHTML = button.dataset.originalText;
-            delete button.dataset.originalText;
+        // Restore original content by unwrapping span
+        const span = button.querySelector('.btn-text');
+        if (span) {
+            while (span.firstChild) {
+                button.insertBefore(span.firstChild, span);
+            }
+            span.remove();
         }
     }
 }

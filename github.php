@@ -124,7 +124,7 @@ $githubToken = $githubSettings['github_token'] ?? '';
                         
                         <div class="btn-group">
                             <button type="submit" class="btn btn-primary"><?php _e('save_settings'); ?></button>
-                            <button type="button" class="btn btn-secondary" onclick="testConnection()"><?php _e('test_connection'); ?></button>
+                            <button type="button" class="btn btn-secondary" data-action="test-connection" onclick="testConnection()"><?php _e('test_connection'); ?></button>
                         </div>
                     </form>
                 </div>
@@ -147,7 +147,7 @@ $githubToken = $githubSettings['github_token'] ?? '';
                                 <p class="text-muted">
                                     <?php _e('load_from_github_desc'); ?>
                                 </p>
-                                <button class="btn btn-primary mt-2" onclick="loadFromGitHub()">
+                                <button class="btn btn-primary mt-2" data-action="load-from-github" onclick="loadFromGitHub()">
                                     <?php _e('load_from_github'); ?>
                                 </button>
                             </div>
@@ -158,7 +158,7 @@ $githubToken = $githubSettings['github_token'] ?? '';
                                 <p class="text-muted">
                                     <?php _e('save_to_github_desc'); ?>
                                 </p>
-                                <button class="btn btn-success mt-2" onclick="saveToGitHub()">
+                                <button class="btn btn-success mt-2" data-action="save-to-github" onclick="saveToGitHub()">
                                     <?php _e('save_to_github'); ?>
                                 </button>
                             </div>
@@ -222,7 +222,7 @@ $githubToken = $githubSettings['github_token'] ?? '';
         
         // Test connection
         async function testConnection() {
-            const testBtn = document.querySelector('button[onclick="testConnection()"]');
+            const testBtn = document.querySelector('button[data-action="test-connection"]');
             const owner = document.querySelector('input[name="github_owner"]').value;
             const repo = document.querySelector('input[name="github_repo"]').value;
             const token = document.querySelector('input[name="github_token"]').value;
@@ -250,7 +250,7 @@ $githubToken = $githubSettings['github_token'] ?? '';
         
         // Load from GitHub
         async function loadFromGitHub() {
-            const loadBtn = document.querySelector('button[onclick="loadFromGitHub()"]');
+            const loadBtn = document.querySelector('button[data-action="load-from-github"]');
             const owner = document.querySelector('input[name="github_owner"]').value;
             const repo = document.querySelector('input[name="github_repo"]').value;
             const token = document.querySelector('input[name="github_token"]').value;
@@ -284,7 +284,7 @@ $githubToken = $githubSettings['github_token'] ?? '';
         
         // Save to GitHub
         async function saveToGitHub() {
-            const saveBtn = document.querySelector('button[onclick="saveToGitHub()"]');
+            const saveBtn = document.querySelector('button[data-action="save-to-github"]');
             const owner = document.querySelector('input[name="github_owner"]').value;
             const repo = document.querySelector('input[name="github_repo"]').value;
             const token = document.querySelector('input[name="github_token"]').value;
