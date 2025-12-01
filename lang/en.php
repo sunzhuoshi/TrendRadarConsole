@@ -43,6 +43,7 @@ return [
     'chinese' => '中文',
     'english' => 'English',
     'guest' => 'Guest',
+    'last_updated' => 'Last Updated',
     
     // Login Page
     'sign_in' => 'Sign In',

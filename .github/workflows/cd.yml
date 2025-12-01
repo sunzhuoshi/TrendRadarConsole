@@ -22,6 +22,23 @@ jobs:
                        --exclude='node_modules/' \
                        --exclude='vendor/' \
                        ./ ./dist/
+          
+          # Generate version file with deployment timestamp
+          DATE_FORMAT='%Y-%m-%dT%H:%M:%S+00:00'
+          DEPLOY_TIME=$(date -u +"$DATE_FORMAT")
+          printf '%s\n' \
+            '<?php' \
+            '/**' \
+            ' * TrendRadarConsole - Version File' \
+            ' * ' \
+            ' * This file is automatically updated during deployment.' \
+            ' * Do not edit manually.' \
+            ' */' \
+            '' \
+            'return [' \
+            "    'updated_at' => '$DEPLOY_TIME'," \
+            '];' \
+            > ./dist/version.php
 
       - name: 🔑 Setup SSH key
         uses: webfactory/ssh-agent@v0.9.0
