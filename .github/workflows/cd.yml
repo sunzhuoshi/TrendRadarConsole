@@ -3,10 +3,39 @@ name: CD
 on:
   push:
     branches: [ main ]
+  pull_request:
+    branches: [ main ]
   workflow_dispatch:
+    inputs:
+      environment:
+        description: 'Deployment environment'
+        required: true
+        default: 'production'
+        type: choice
+        options:
+          - development
+          - production
 jobs:
-  deploy:
+  choose-environment:
     runs-on: ubuntu-latest
+    outputs:
+      environment: ${{ steps.set_env.outputs.environment }}
+    steps:
+      - name: Set deployment environment
+        id: set_env
+        run: |
+          if [[ "${{ github.event_name }}" == "workflow_dispatch" ]]; then
+            echo "environment=${{ inputs.environment }}" >> $GITHUB_OUTPUT
+          elif [[ "${{ github.event_name }}" == "pull_request" ]]; then
+            echo "environment=development" >> $GITHUB_OUTPUT
+          else
+            echo "environment=production" >> $GITHUB_OUTPUT
+          fi
+
+  deploy:
+    needs: choose-environment
+    runs-on: ubuntu-latest
+    environment: ${{ needs.choose-environment.outputs.environment }}
     steps:
       - name: 🛎️ Checkout code
         uses: actions/checkout@v4
@@ -47,8 +76,8 @@ jobs:
 
       - name: 🚚 Deploy via rsync
         env:
-          SSH_HOST: ${{ secrets.SSH_HOST }}
-          SSH_USER: ${{ secrets.SSH_USER }}
+          SSH_HOST: ${{ vars.SSH_HOST }}
+          SSH_USER: ${{ vars.SSH_USER }}
           TARGET_DIR: ${{ vars.TARGET_DIR }}
           BACKUP_DIR: ${{ vars.BACKUP_DIR }}
         run: |
@@ -87,8 +116,8 @@ jobs:
 
       - name: 🔐 Fix Permissions (Skip Sensitive Files)
         env:
-          SSH_HOST: ${{ secrets.SSH_HOST }}
-          SSH_USER: ${{ secrets.SSH_USER }}
+          SSH_HOST: ${{ vars.SSH_HOST }}
+          SSH_USER: ${{ vars.SSH_USER }}
         run: |
           chmod +x .github/scripts/fix-permissions.sh
           ssh -o StrictHostKeyChecking=no "$SSH_USER@$SSH_HOST" \
@@ -99,8 +128,8 @@ jobs:
 
       - name: ♻️ Reload Apache
         env:
-          SSH_HOST: ${{ secrets.SSH_HOST }}
-          SSH_USER: ${{ secrets.SSH_USER }}
+          SSH_HOST: ${{ vars.SSH_HOST }}
+          SSH_USER: ${{ vars.SSH_USER }}
         run: |
           ssh -o StrictHostKeyChecking=no $SSH_USER@$SSH_HOST "
             sudo systemctl restart httpd
