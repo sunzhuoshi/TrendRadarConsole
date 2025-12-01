@@ -288,7 +288,7 @@ $currentLang = getCurrentLanguage();
                 closeModal('edit-modal');
                 location.reload();
             } catch (error) {
-                showToast(__('failed_to_update') + error.message, 'error');
+                showToast(`${__('failed_to_update')}: ${error.message}`, 'error');
             }
         }
     </script>
