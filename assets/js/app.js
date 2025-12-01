@@ -402,3 +402,19 @@ document.addEventListener('DOMContentLoaded', function() {
     initToggleSwitches();
     initMobileSidebar();
 });
+
+// Button loading state helpers
+function setButtonLoading(button, isLoading) {
+    if (isLoading) {
+        // Save original text and wrap it
+        if (!button.querySelector('.btn-text')) {
+            button.dataset.originalText = button.innerHTML;
+            button.innerHTML = '<span class="btn-text">' + button.innerHTML + '</span>';
+        }
+        button.classList.add('loading');
+        button.disabled = true;
+    } else {
+        button.classList.remove('loading');
+        button.disabled = false;
+    }
+}

@@ -199,10 +199,12 @@ $githubToken = $githubSettings['github_token'] ?? '';
         document.getElementById('github-settings-form').addEventListener('submit', async function(e) {
             e.preventDefault();
             
+            const submitBtn = this.querySelector('button[type="submit"]');
             const owner = document.querySelector('input[name="github_owner"]').value;
             const repo = document.querySelector('input[name="github_repo"]').value;
             const token = document.querySelector('input[name="github_token"]').value;
             
+            setButtonLoading(submitBtn, true);
             try {
                 await apiRequest('api/github.php', 'POST', {
                     action: 'save_settings',
@@ -213,11 +215,14 @@ $githubToken = $githubSettings['github_token'] ?? '';
                 showToast(__('github_settings_saved'), 'success');
             } catch (error) {
                 showToast(__('failed_to_save') + ': ' + error.message, 'error');
+            } finally {
+                setButtonLoading(submitBtn, false);
             }
         });
         
         // Test connection
         async function testConnection() {
+            const testBtn = document.querySelector('button[onclick="testConnection()"]');
             const owner = document.querySelector('input[name="github_owner"]').value;
             const repo = document.querySelector('input[name="github_repo"]').value;
             const token = document.querySelector('input[name="github_token"]').value;
@@ -227,6 +232,7 @@ $githubToken = $githubSettings['github_token'] ?? '';
                 return;
             }
             
+            setButtonLoading(testBtn, true);
             try {
                 const result = await apiRequest('api/github.php', 'POST', {
                     action: 'test',
@@ -237,11 +243,14 @@ $githubToken = $githubSettings['github_token'] ?? '';
                 showToast(__('connection_successful') + result.data.full_name, 'success');
             } catch (error) {
                 showToast(__('connection_failed') + error.message, 'error');
+            } finally {
+                setButtonLoading(testBtn, false);
             }
         }
         
         // Load from GitHub
         async function loadFromGitHub() {
+            const loadBtn = document.querySelector('button[onclick="loadFromGitHub()"]');
             const owner = document.querySelector('input[name="github_owner"]').value;
             const repo = document.querySelector('input[name="github_repo"]').value;
             const token = document.querySelector('input[name="github_token"]').value;
@@ -251,6 +260,7 @@ $githubToken = $githubSettings['github_token'] ?? '';
                 return;
             }
             
+            setButtonLoading(loadBtn, true);
             try {
                 const result = await apiRequest('api/github.php', 'POST', {
                     action: 'load',
@@ -267,11 +277,14 @@ $githubToken = $githubSettings['github_token'] ?? '';
                 showToast(__('config_loaded_from_github'), 'success');
             } catch (error) {
                 showToast(__('failed_to_load') + ': ' + error.message, 'error');
+            } finally {
+                setButtonLoading(loadBtn, false);
             }
         }
         
         // Save to GitHub
         async function saveToGitHub() {
+            const saveBtn = document.querySelector('button[onclick="saveToGitHub()"]');
             const owner = document.querySelector('input[name="github_owner"]').value;
             const repo = document.querySelector('input[name="github_repo"]').value;
             const token = document.querySelector('input[name="github_token"]').value;
@@ -286,6 +299,7 @@ $githubToken = $githubSettings['github_token'] ?? '';
                 return;
             }
             
+            setButtonLoading(saveBtn, true);
             try {
                 await apiRequest('api/github.php', 'POST', {
                     action: 'save',
@@ -298,6 +312,8 @@ $githubToken = $githubSettings['github_token'] ?? '';
                 showToast(__('config_saved_to_github'), 'success');
             } catch (error) {
                 showToast(__('failed_to_save') + ': ' + error.message, 'error');
+            } finally {
+                setButtonLoading(saveBtn, false);
             }
         }
     </script>
