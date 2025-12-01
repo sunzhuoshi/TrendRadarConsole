@@ -3,10 +3,12 @@
  */
 
 // Internationalization support
-let i18n = window.i18n || {};
+if (typeof window.i18n === 'undefined') {
+    window.i18n = {};
+}
 
 function __(key) {
-    return i18n[key] || key;
+    return window.i18n[key] || key;
 }
 
 // Language switching
