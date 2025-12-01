@@ -196,12 +196,9 @@ $currentLang = getCurrentLanguage();
                 <div class="card-body">
                     <p class="text-muted mb-3">
                         <?php
-                            printf(
-                                __(
-                                    'platforms_ref_full_sentence'
-                                ),
-                                '<a href="https://github.com/ourongxing/newsnow/tree/main/server/sources" target="_blank">' . __('newsnow_source_code') . '</a>'
-                            );
+                            echo __('platforms_ref_desc') . ' ';
+                            echo '<a href="https://github.com/ourongxing/newsnow/tree/main/server/sources" target="_blank">' . __('newsnow_source_code') . '</a>. ';
+                            echo __('find_more_platforms');
                         ?>
                     </p>
                     <div class="keyword-tags">
