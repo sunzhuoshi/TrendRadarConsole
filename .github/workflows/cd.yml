@@ -3,10 +3,22 @@ name: CD
 on:
   push:
     branches: [ main ]
+  pull_request:
+    branches: [ main ]
   workflow_dispatch:
+    inputs:
+      environment:
+        description: 'Deployment environment'
+        required: true
+        default: 'production'
+        type: choice
+        options:
+          - development
+          - production
 jobs:
   deploy:
     runs-on: ubuntu-latest
+    environment: ${{ github.event_name == 'workflow_dispatch' && inputs.environment || (github.event_name == 'pull_request' && 'development' || 'production') }}
     steps:
       - name: 🛎️ Checkout code
         uses: actions/checkout@v4
