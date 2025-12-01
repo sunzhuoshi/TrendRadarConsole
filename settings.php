@@ -309,7 +309,7 @@ $currentLang = getCurrentLanguage();
             const warning = document.getElementById('weight-warning');
             if (Math.abs(sum - 1.0) > 0.01) {
                 warning.style.display = 'block';
-                warning.textContent = `${__('weight_sum_is')} ${sum.toFixed(2)} ${__('should_be')} 1.0`;
+                warning.textContent = `${__('weight_sum_is')} ${sum.toFixed(2)} - ${__('should_be')} 1.0`;
             } else {
                 warning.style.display = 'none';
             }

@@ -212,7 +212,7 @@ $githubToken = $githubSettings['github_token'] ?? '';
                 });
                 showToast(__('github_settings_saved'), 'success');
             } catch (error) {
-                showToast(__('failed_to_save') + error.message, 'error');
+                showToast(__('failed_to_save') + ': ' + error.message, 'error');
             }
         });
         
@@ -266,7 +266,7 @@ $githubToken = $githubSettings['github_token'] ?? '';
                 
                 showToast(__('config_loaded_from_github'), 'success');
             } catch (error) {
-                showToast(__('failed_to_load') + error.message, 'error');
+                showToast(__('failed_to_load') + ': ' + error.message, 'error');
             }
         }
         
@@ -297,7 +297,7 @@ $githubToken = $githubSettings['github_token'] ?? '';
                 
                 showToast(__('config_saved_to_github'), 'success');
             } catch (error) {
-                showToast(__('failed_to_save') + error.message, 'error');
+                showToast(__('failed_to_save') + ': ' + error.message, 'error');
             }
         }
     </script>
