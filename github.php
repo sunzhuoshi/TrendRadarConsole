@@ -21,15 +21,19 @@ try {
     $config = new Configuration($userId);
     $activeConfig = $config->getActive();
     
-    if (!$activeConfig) {
-        setFlash('warning', __('please_create_config'));
-        header('Location: index.php');
-        exit;
-    }
-    
     // Get GitHub settings from user profile
     $auth = new Auth();
     $githubSettings = $auth->getGitHubSettings($userId);
+    
+    // Check if GitHub is configured - if not, redirect to setup wizard
+    $githubConfigured = !empty($githubSettings['github_owner']) && 
+                        !empty($githubSettings['github_repo']) && 
+                        !empty($githubSettings['github_token']);
+    
+    if (!$githubConfigured) {
+        header('Location: setup-github.php');
+        exit;
+    }
 } catch (Exception $e) {
     $error = $e->getMessage();
 }
@@ -58,7 +62,7 @@ $githubToken = $githubSettings['github_token'] ?? '';
         <?php include 'templates/sidebar.php'; ?>
         
         <main class="main-content">
-            <input type="hidden" id="config-id" value="<?php echo $activeConfig['id']; ?>">
+            <input type="hidden" id="config-id" value="<?php echo $activeConfig ? $activeConfig['id'] : ''; ?>">
             
             <div class="page-header">
                 <h2><?php _e('github_sync_title'); ?></h2>

@@ -22,6 +22,18 @@ try {
     $activeConfig = $config->getActive();
     $configurations = $config->getAll();
     
+    // Check if GitHub is configured
+    $auth = new Auth();
+    $githubSettings = $auth->getGitHubSettings($userId);
+    $githubConfigured = !empty($githubSettings['github_owner']) && 
+                        !empty($githubSettings['github_repo']) && 
+                        !empty($githubSettings['github_token']);
+    
+    if (!$githubConfigured) {
+        header('Location: setup-github.php');
+        exit;
+    }
+    
     // If specific config ID is provided
     $selectedId = isset($_GET['id']) ? (int)$_GET['id'] : ($activeConfig ? $activeConfig['id'] : null);
     

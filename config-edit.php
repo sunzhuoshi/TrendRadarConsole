@@ -17,6 +17,18 @@ if (!file_exists('config/config.php')) {
 Auth::requireLogin();
 $userId = Auth::getUserId();
 
+// Check if GitHub is configured
+$auth = new Auth();
+$githubSettings = $auth->getGitHubSettings($userId);
+$githubConfigured = !empty($githubSettings['github_owner']) && 
+                    !empty($githubSettings['github_repo']) && 
+                    !empty($githubSettings['github_token']);
+
+if (!$githubConfigured) {
+    header('Location: setup-github.php');
+    exit;
+}
+
 try {
     $config = new Configuration($userId);
     
@@ -100,6 +112,13 @@ try {
         if (!$configData) {
             setFlash('error', __('config_not_found'));
             header('Location: index.php');
+            exit;
+        }
+    } else {
+        // If not editing, redirect to existing configuration (only one allowed)
+        $existingConfigs = $config->getAll();
+        if (!empty($existingConfigs)) {
+            header('Location: config-edit.php?id=' . $existingConfigs[0]['id']);
             exit;
         }
     }

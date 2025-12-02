@@ -22,6 +22,13 @@ try {
     $config = new Configuration($userId);
     $configurations = $config->getAll();
     $activeConfig = $config->getActive();
+    
+    // Get GitHub settings to check if configured
+    $auth = new Auth();
+    $githubSettings = $auth->getGitHubSettings($userId);
+    $githubConfigured = !empty($githubSettings['github_owner']) && 
+                        !empty($githubSettings['github_repo']) && 
+                        !empty($githubSettings['github_token']);
 } catch (Exception $e) {
     $error = $e->getMessage();
 }
@@ -58,6 +65,18 @@ $currentLang = getCurrentLanguage();
             <div class="alert alert-danger">
                 <?php echo sanitize($error); ?>
             </div>
+            <?php elseif (!$githubConfigured): ?>
+            
+            <!-- GitHub Setup Required -->
+            <div class="card" style="border-left: 4px solid #667eea;">
+                <div class="card-body" style="text-align: center; padding: 40px 20px;">
+                    <div style="font-size: 48px; margin-bottom: 20px;">🐙</div>
+                    <h3><?php _e('github_setup_required'); ?></h3>
+                    <p style="color: #666; margin: 15px 0 25px;"><?php _e('github_setup_required_desc'); ?></p>
+                    <a href="setup-github.php" class="btn btn-primary btn-lg"><?php _e('setup_github_now'); ?></a>
+                </div>
+            </div>
+            
             <?php else: ?>
             
             <!-- Stats Cards -->
@@ -114,13 +133,13 @@ $currentLang = getCurrentLanguage();
             <div class="card">
                 <div class="card-header">
                     <h3><?php _e('configurations'); ?></h3>
-                    <a href="config-edit.php" class="btn btn-primary btn-sm"><?php _e('new_configuration'); ?></a>
+                    <!-- New configuration button hidden - only one configuration allowed -->
                 </div>
                 <div class="card-body">
                     <?php if (empty($configurations)): ?>
                     <div class="empty-state">
                         <p><?php _e('no_configurations'); ?></p>
-                        <a href="config-edit.php" class="btn btn-primary"><?php _e('create_first_config'); ?></a>
+                        <a href="github.php" class="btn btn-primary"><?php _e('load_from_github'); ?></a>
                     </div>
                     <?php else: ?>
                     <table class="table">
