@@ -236,26 +236,19 @@ $githubConfigured = !empty($githubSettings['github_owner']) &&
         <!-- Step Content -->
         <div class="step-content">
             <?php if ($step === 1): ?>
-            <!-- Step 1: Clone Repository Guide -->
+            <!-- Step 1: Fork Repository Guide -->
             <div class="info-box">
                 <h3>📦 <?php _e('step1_title'); ?></h3>
                 <p><?php _e('step1_desc'); ?></p>
                 
-                <div class="highlight-box">
-                    <strong><?php _e('fork_instructions'); ?></strong>
+                <div class="highlight-box" style="text-align: center; padding: 25px;">
+                    <p style="margin-bottom: 15px;"><?php _e('click_to_fork'); ?></p>
+                    <a href="https://github.com/sunzhuoshi/TrendRadar/fork" target="_blank" class="btn btn-primary btn-lg">
+                        🍴 <?php _e('fork_now'); ?>
+                    </a>
                 </div>
                 
-                <ol>
-                    <li><?php _e('step1_instruction1'); ?> <a href="https://github.com/sunzhuoshi/TrendRadar" target="_blank">github.com/sunzhuoshi/TrendRadar</a></li>
-                    <li><?php _e('step1_instruction2'); ?></li>
-                    <li><?php _e('step1_instruction3'); ?></li>
-                    <li><?php _e('step1_instruction4'); ?></li>
-                </ol>
-                
-                <div class="highlight-box" style="margin-top: 20px;">
-                    <strong>🔗 <?php _e('trendradar_repo_url'); ?>:</strong><br>
-                    <a href="https://github.com/sunzhuoshi/TrendRadar" target="_blank">https://github.com/sunzhuoshi/TrendRadar</a>
-                </div>
+                <p style="margin-top: 20px; color: #666;"><?php _e('fork_note'); ?></p>
             </div>
             
             <div class="btn-group-wizard">
