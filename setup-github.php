@@ -397,9 +397,28 @@ $githubConfigured = !empty($githubSettings['github_owner']) &&
                 
                 showToast(__('connection_successful') + testResult.data.full_name, 'success');
                 
-                // Redirect to load configuration from GitHub
+                // Load configuration from GitHub repo vars or use default
+                try {
+                    const loadResult = await apiRequest('api/github.php', 'POST', {
+                        action: 'load_or_create_default',
+                        owner: '<?php echo sanitize($githubSettings['github_owner'] ?? ''); ?>',
+                        repo: '<?php echo sanitize($githubSettings['github_repo'] ?? 'TrendRadar'); ?>',
+                        token: token
+                    });
+                    
+                    if (loadResult.data && loadResult.data.loaded_from_github) {
+                        showToast(__('config_loaded_from_github'), 'success');
+                    } else {
+                        showToast(__('using_default_config'), 'info');
+                    }
+                } catch (loadError) {
+                    // If loading fails, continue with default config
+                    showToast(__('using_default_config'), 'info');
+                }
+                
+                // Redirect to dashboard
                 setTimeout(function() {
-                    window.location.href = 'index.php?load_from_github=1';
+                    window.location.href = 'index.php';
                 }, 1500);
             } catch (error) {
                 showToast(__('connection_failed') + error.message, 'error');

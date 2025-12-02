@@ -379,6 +379,7 @@ return [
     'setup_github_now' => 'Set up GitHub Now',
     'github_setup_required' => 'GitHub Setup Required',
     'github_setup_required_desc' => 'TrendRadarConsole requires a GitHub connection to sync your configurations. Please complete the setup wizard.',
+    'using_default_config' => 'Using default configuration',
     
     // Flash Messages
     'please_create_config' => 'Please create and activate a configuration first.',
