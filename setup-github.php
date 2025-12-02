@@ -306,7 +306,7 @@ $githubConfigured = !empty($githubSettings['github_owner']) &&
                     <li><?php _e('pat_step1'); ?> <a href="https://github.com/settings/tokens?type=beta" target="_blank"><?php _e('pat_step1_link'); ?></a></li>
                     <li><?php _e('pat_step2'); ?></li>
                     <li><?php _e('pat_step3'); ?></li>
-                    <li><?php echo __('pat_step4'); ?></li>
+                    <li><?php _e('pat_step4'); ?></li>
                     <li><?php _e('pat_step5'); ?></li>
                 </ol>
             </div>
