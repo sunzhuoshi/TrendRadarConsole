@@ -172,7 +172,7 @@ $webhookGroups = [
             
             <!-- Webhook Cards by Group -->
             <?php foreach ($webhookGroups as $groupKey => $group): ?>
-            <h3 class="webhook-group-header" style="margin-top: 20px; margin-bottom: 15px; color: #333; border-bottom: 1px solid #ddd; padding-bottom: 8px;"><?php echo $group['label']; ?></h3>
+            <h3 class="webhook-group-header" style="margin-top: 20px; margin-bottom: 15px; color: #333; border-bottom: 1px solid #ddd; padding-bottom: 8px;"><?php echo htmlspecialchars($group['label'], ENT_QUOTES, 'UTF-8'); ?></h3>
             <div class="row">
                 <?php foreach ($group['webhooks'] as $type => $webhookInfo): ?>
                 <?php 
