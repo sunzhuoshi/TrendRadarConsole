@@ -607,11 +607,13 @@ $currentLang = getCurrentLanguage();
             if (!container) {
                 container = document.createElement('div');
                 container.className = 'workflow-progress-container';
+                // Initialize progress text with '0s / ~Xs' format
+                const estimatedSeconds = Math.round(workflowEstimatedDuration / 1000);
                 container.innerHTML = `
                     <div class="workflow-progress-bar">
                         <div class="workflow-progress-fill"></div>
                     </div>
-                    <span class="workflow-progress-text">0%</span>
+                    <span class="workflow-progress-text">0s / ~${estimatedSeconds}s</span>
                 `;
                 btn.parentElement.appendChild(container);
             }
