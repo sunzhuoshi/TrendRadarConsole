@@ -284,21 +284,41 @@ $csrfToken = generateCsrfToken();
             
             setButtonLoadingWithStatus(btn, true);
             setButtonStatusText(btn, __('crawling_triggered'));
-            startDotAnimation(btn, __('crawling_triggered').replace('...', ''));
             
             try {
+                // Get last successful run duration for progress estimation
+                const runsResult = await apiRequest('api/github.php', 'POST', {
+                    action: 'get_workflow_runs',
+                    workflow_id: 'crawler.yml',
+                    owner: '',
+                    repo: '',
+                    token: ''
+                });
+                
+                let estimatedDuration = 60000; // Default 60 seconds
+                const runs = runsResult.data?.runs || [];
+                for (const run of runs) {
+                    if (run.conclusion === 'success' && run.run_started_at && run.updated_at) {
+                        const startTime = new Date(run.run_started_at).getTime();
+                        const endTime = new Date(run.updated_at).getTime();
+                        estimatedDuration = endTime - startTime;
+                        break;
+                    }
+                }
+                
                 await apiRequest('api/github.php', 'POST', {
                     action: 'dispatch_workflow',
                     workflow_id: 'crawler.yml',
-                    owner: '',  // Will use saved settings
+                    owner: '',
                     repo: '',
                     token: ''
                 });
                 
                 // Start tracking workflow status
+                workflowStartTime = Date.now();
+                workflowEstimatedDuration = estimatedDuration;
                 setTimeout(() => trackWorkflowStatus(btn, 0), 3000);
             } catch (error) {
-                stopDotAnimation();
                 if (error.message && error.message.includes('Owner, repo, and token are required')) {
                     showToast(__('configure_github_first'), 'error');
                     setTimeout(() => window.location.href = 'settings.php', 1500);
@@ -334,6 +354,8 @@ $csrfToken = generateCsrfToken();
                     }
                     span.remove();
                 }
+                // Remove progress bar if exists
+                removeProgressBar(btn);
             }
         }
         
@@ -346,27 +368,65 @@ $csrfToken = generateCsrfToken();
             }
         }
         
-        // Dot animation variables
-        let dotAnimationInterval = null;
-        let currentDotCount = 0;
+        // Progress bar variables
+        let workflowStartTime = 0;
+        let workflowEstimatedDuration = 60000;
+        let progressInterval = null;
         
-        // Start dot animation (fast - every 300ms)
-        function startDotAnimation(btn, baseText) {
-            stopDotAnimation();
-            currentDotCount = 0;
-            dotAnimationInterval = setInterval(() => {
-                currentDotCount = (currentDotCount + 1) % 4;
-                const dots = '.'.repeat(currentDotCount);
-                setButtonStatusText(btn, baseText + dots);
-            }, 300);
+        // Create progress bar after button
+        function createProgressBar(btn) {
+            if (!btn) return;
+            let container = btn.parentElement.querySelector('.workflow-progress-container');
+            if (!container) {
+                container = document.createElement('div');
+                container.className = 'workflow-progress-container';
+                container.innerHTML = `
+                    <div class="workflow-progress-bar">
+                        <div class="workflow-progress-fill"></div>
+                    </div>
+                    <span class="workflow-progress-text">0%</span>
+                `;
+                btn.parentElement.appendChild(container);
+            }
+            return container;
         }
         
-        // Stop dot animation
-        function stopDotAnimation() {
-            if (dotAnimationInterval) {
-                clearInterval(dotAnimationInterval);
-                dotAnimationInterval = null;
+        // Update progress bar
+        function updateProgressBar(btn, percent, timeText) {
+            const container = btn.parentElement.querySelector('.workflow-progress-container');
+            if (container) {
+                const fill = container.querySelector('.workflow-progress-fill');
+                const text = container.querySelector('.workflow-progress-text');
+                if (fill) fill.style.width = Math.min(percent, 100) + '%';
+                if (text) text.textContent = timeText;
             }
+        }
+        
+        // Remove progress bar
+        function removeProgressBar(btn) {
+            if (!btn) return;
+            const container = btn.parentElement.querySelector('.workflow-progress-container');
+            if (container) {
+                container.remove();
+            }
+            if (progressInterval) {
+                clearInterval(progressInterval);
+                progressInterval = null;
+            }
+        }
+        
+        // Start progress animation
+        function startProgressAnimation(btn) {
+            createProgressBar(btn);
+            if (progressInterval) clearInterval(progressInterval);
+            
+            progressInterval = setInterval(() => {
+                const elapsed = Date.now() - workflowStartTime;
+                const percent = (elapsed / workflowEstimatedDuration) * 100;
+                const elapsedSec = Math.floor(elapsed / 1000);
+                const estimatedSec = Math.floor(workflowEstimatedDuration / 1000);
+                updateProgressBar(btn, percent, `${elapsedSec}s / ~${estimatedSec}s`);
+            }, 500);
         }
         
         // Track workflow status
@@ -375,7 +435,6 @@ $csrfToken = generateCsrfToken();
             const maxAttempts = 60; // Max 5 minutes (60 * 5 seconds)
             
             if (attempts >= maxAttempts) {
-                stopDotAnimation();
                 setButtonStatusText(btn, __('workflow_status_unknown'));
                 setTimeout(() => setButtonLoadingWithStatus(btn, false), 1500);
                 return;
@@ -397,7 +456,6 @@ $csrfToken = generateCsrfToken();
                     const conclusion = latestRun.conclusion;
                     
                     if (status === 'completed') {
-                        stopDotAnimation();
                         if (conclusion === 'success') {
                             setButtonStatusText(btn, __('workflow_status_success'));
                         } else if (conclusion === 'failure') {
@@ -410,37 +468,24 @@ $csrfToken = generateCsrfToken();
                         setTimeout(() => setButtonLoadingWithStatus(btn, false), 2000);
                         return;
                     } else if (status === 'queued') {
-                        const newBaseText = __('workflow_status_queued').replace('...', '');
-                        if (currentStatusBaseText !== newBaseText) {
-                            currentStatusBaseText = newBaseText;
-                            startDotAnimation(btn, newBaseText);
-                        }
+                        setButtonStatusText(btn, __('workflow_status_queued'));
                     } else if (status === 'in_progress') {
-                        const newBaseText = __('workflow_status_in_progress').replace('...', '');
-                        if (currentStatusBaseText !== newBaseText) {
-                            currentStatusBaseText = newBaseText;
-                            startDotAnimation(btn, newBaseText);
+                        setButtonStatusText(btn, __('workflow_status_in_progress'));
+                        // Show progress bar when running
+                        if (!btn.parentElement.querySelector('.workflow-progress-container')) {
+                            startProgressAnimation(btn);
                         }
                     } else {
-                        const newBaseText = __('workflow_checking_status').replace('...', '');
-                        if (currentStatusBaseText !== newBaseText) {
-                            currentStatusBaseText = newBaseText;
-                            startDotAnimation(btn, newBaseText);
-                        }
+                        setButtonStatusText(btn, __('workflow_checking_status'));
                     }
                 } else {
-                    const newBaseText = __('workflow_checking_status').replace('...', '');
-                    if (currentStatusBaseText !== newBaseText) {
-                        currentStatusBaseText = newBaseText;
-                        startDotAnimation(btn, newBaseText);
-                    }
+                    setButtonStatusText(btn, __('workflow_checking_status'));
                 }
                 
                 // Continue polling
                 setTimeout(() => trackWorkflowStatus(btn, attempts + 1), 5000);
             } catch (error) {
                 console.error('Error tracking workflow:', error);
-                stopDotAnimation();
                 setButtonStatusText(btn, __('workflow_status_unknown'));
                 setTimeout(() => setButtonLoadingWithStatus(btn, false), 1500);
             }
