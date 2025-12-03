@@ -182,8 +182,8 @@ $csrfToken = generateCsrfToken();
                                     </form>
                                     <?php endif; ?>
                                     <a href="export.php?id=<?php echo $cfg['id']; ?>" class="btn btn-secondary btn-sm"><?php _e('export'); ?></a>
-                                    <button type="button" class="btn btn-outline btn-sm" onclick="loadFromGitHub(<?php echo $cfg['id']; ?>)" title="<?php _e('load_from_github'); ?>">📥</button>
-                                    <button type="button" class="btn btn-outline btn-sm" onclick="saveToGitHub(<?php echo $cfg['id']; ?>)" title="<?php _e('save_to_github'); ?>">📤</button>
+                                    <button type="button" class="btn btn-outline btn-sm" onclick="loadFromGitHub(<?php echo $cfg['id']; ?>)" title="<?php _e('load_from_github'); ?>">📥 GitHub</button>
+                                    <button type="button" class="btn btn-outline btn-sm" onclick="saveToGitHub(<?php echo $cfg['id']; ?>)" title="<?php _e('save_to_github'); ?>">📤 GitHub</button>
                                 </td>
                             </tr>
                             <?php endforeach; ?>
