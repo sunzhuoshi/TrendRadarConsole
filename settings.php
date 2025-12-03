@@ -655,7 +655,7 @@ $currentLang = getCurrentLanguage();
         
         // Track workflow status
         async function trackWorkflowStatus(btn, attempts = 0) {
-            const maxAttempts = 60; // Max 5 minutes (60 * 5 seconds)
+            const maxAttempts = 60; // 60 attempts * 5 seconds = 300 seconds (5 minutes)
             
             if (attempts >= maxAttempts) {
                 setButtonStatusText(btn, __('workflow_status_unknown'));
