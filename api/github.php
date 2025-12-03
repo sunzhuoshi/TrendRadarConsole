@@ -260,7 +260,10 @@ try {
             $workflowId = isset($input['workflow_id']) ? $input['workflow_id'] : 'crawler.yml';
             $ref = isset($input['ref']) ? $input['ref'] : 'main';
             
-            $github->dispatchWorkflow($workflowId, $ref);
+            $success = $github->dispatchWorkflow($workflowId, $ref);
+            if (!$success) {
+                jsonError('Failed to dispatch workflow');
+            }
             jsonSuccess(null, 'Workflow dispatched successfully');
             break;
             
