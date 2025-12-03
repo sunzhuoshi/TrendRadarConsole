@@ -367,13 +367,16 @@ $csrfToken = generateCsrfToken();
         }
         
         // Create progress bar after button
+        // Default estimated duration in milliseconds
+        const DEFAULT_ESTIMATED_DURATION_MS = 60000;
+
         function createProgressBar(btn) {
             if (!btn) return;
             let container = btn.parentElement.querySelector('.workflow-progress-container');
             if (!container) {
                 container = document.createElement('div');
                 container.className = 'workflow-progress-container';
-                const estimatedSeconds = Math.round((parseInt(btn.dataset.estimatedDuration) || 60000) / 1000);
+                const estimatedSeconds = Math.round((parseInt(btn.dataset.estimatedDuration) || DEFAULT_ESTIMATED_DURATION_MS) / 1000);
                 container.innerHTML = `
                     <div class="workflow-progress-bar">
                         <div class="workflow-progress-fill"></div>
