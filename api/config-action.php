@@ -36,11 +36,10 @@ try {
         exit;
     }
     
-    // Get config details for logging
-    $cfg = $config->getById($id);
-    
     switch ($action) {
         case 'activate':
+            // Get config details for logging
+            $cfg = $config->getById($id);
             $config->setActive($id);
             
             // Log the operation
@@ -55,6 +54,7 @@ try {
             break;
             
         case 'delete':
+            $cfg = $config->getById($id);
             if ($cfg && $cfg['is_active']) {
                 setFlash('error', 'Cannot delete active configuration');
             } else {

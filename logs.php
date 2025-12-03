@@ -226,14 +226,14 @@ $currentLang = getCurrentLanguage();
                         }
                     ?>
                     <div class="log-entry">
-                        <div class="log-icon <?php echo $iconClass; ?>"><?php echo $icon; ?></div>
+                        <div class="log-icon <?php echo htmlspecialchars($iconClass); ?>"><?php echo $icon; ?></div>
                         <div class="log-content">
                             <div class="log-action"><?php _e($actionKey); ?></div>
                             <div class="log-details">
                                 <?php if ($targetTypeKey): ?>
                                     <span><?php _e($targetTypeKey); ?></span>
                                     <?php if ($log['target_id']): ?>
-                                        <span>#<?php echo (int)$log['target_id']; ?></span>
+                                        <span>#<?php echo htmlspecialchars((string)(int)$log['target_id']); ?></span>
                                     <?php endif; ?>
                                 <?php endif; ?>
                                 <?php if ($details): ?>
@@ -250,7 +250,7 @@ $currentLang = getCurrentLanguage();
                             </div>
                         </div>
                         <div class="log-time">
-                            <?php echo date('Y-m-d H:i:s', strtotime($log['created_at'])); ?>
+                            <?php echo htmlspecialchars(date('Y-m-d H:i:s', strtotime($log['created_at']))); ?>
                         </div>
                     </div>
                     <?php endforeach; ?>

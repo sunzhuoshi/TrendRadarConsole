@@ -54,9 +54,21 @@ class OperationLog
     
     /**
      * Log an operation
+     * 
+     * This method silently returns false when userId is not set, which is by design.
+     * Logging is non-critical functionality - if logging fails, the primary operation
+     * should still succeed. The caller can check the return value if needed.
+     * 
+     * @param string $action The action being logged
+     * @param string|null $targetType The type of entity being affected
+     * @param int|null $targetId The ID of the entity being affected
+     * @param array|null $details Additional details about the operation
+     * @return int|false The log entry ID on success, false on failure
      */
     public function log($action, $targetType = null, $targetId = null, $details = null)
     {
+        // Silently skip logging if userId is not set - this is intentional
+        // as logging is a non-critical feature that shouldn't block operations
         if (!$this->userId) {
             return false;
         }
