@@ -506,6 +506,8 @@ $currentLang = getCurrentLanguage();
             }
             
             setButtonLoading(crawlBtn, true);
+            setButtonStatusText(crawlBtn, __('crawling_triggered'));
+            
             try {
                 await apiRequest('api/github.php', 'POST', {
                     action: 'dispatch_workflow',
@@ -515,10 +517,8 @@ $currentLang = getCurrentLanguage();
                     token: ''
                 });
                 
-                showToast(__('crawling_triggered'), 'success');
-                
                 // Start tracking workflow status
-                setTimeout(() => trackWorkflowStatus(crawlBtn), 3000);
+                setTimeout(() => trackWorkflowStatus(crawlBtn, 0, 0), 3000);
             } catch (error) {
                 if (error.message && error.message.includes('Owner, repo, and token are required')) {
                     showToast(__('configure_github_first'), 'error');
@@ -529,13 +529,28 @@ $currentLang = getCurrentLanguage();
             }
         }
         
+        // Set button status text with animated dots
+        function setButtonStatusText(btn, text) {
+            if (!btn) return;
+            const textSpan = btn.querySelector('.btn-text');
+            if (textSpan) {
+                textSpan.textContent = text;
+            }
+        }
+        
+        // Get animated dots based on tick count
+        function getAnimatedDots(tick) {
+            const dotCount = tick % 4; // 0, 1, 2, 3
+            return '.'.repeat(dotCount);
+        }
+        
         // Track workflow status
-        async function trackWorkflowStatus(btn, attempts = 0) {
+        async function trackWorkflowStatus(btn, attempts = 0, dotTick = 0) {
             const maxAttempts = 60; // Max 5 minutes (60 * 5 seconds)
             
             if (attempts >= maxAttempts) {
-                showToast(__('workflow_status_unknown'), 'warning');
-                setButtonLoading(btn, false);
+                setButtonStatusText(btn, __('workflow_status_unknown'));
+                setTimeout(() => setButtonLoading(btn, false), 1500);
                 return;
             }
             
@@ -555,30 +570,34 @@ $currentLang = getCurrentLanguage();
                     const conclusion = latestRun.conclusion;
                     
                     if (status === 'completed') {
-                        setButtonLoading(btn, false);
                         if (conclusion === 'success') {
-                            showToast(__('workflow_status_success'), 'success');
+                            setButtonStatusText(btn, __('workflow_status_success'));
                         } else if (conclusion === 'failure') {
-                            showToast(__('workflow_status_failure'), 'error');
+                            setButtonStatusText(btn, __('workflow_status_failure'));
                         } else if (conclusion === 'cancelled') {
-                            showToast(__('workflow_status_cancelled'), 'warning');
+                            setButtonStatusText(btn, __('workflow_status_cancelled'));
                         } else {
-                            showToast(__('workflow_status_completed'), 'info');
+                            setButtonStatusText(btn, __('workflow_status_completed'));
                         }
+                        setTimeout(() => setButtonLoading(btn, false), 2000);
                         return;
                     } else if (status === 'queued') {
-                        showToast(__('workflow_status_queued'), 'info');
+                        setButtonStatusText(btn, __('workflow_status_queued').replace('...', '') + getAnimatedDots(dotTick));
                     } else if (status === 'in_progress') {
-                        showToast(__('workflow_status_in_progress'), 'info');
+                        setButtonStatusText(btn, __('workflow_status_in_progress').replace('...', '') + getAnimatedDots(dotTick));
+                    } else {
+                        setButtonStatusText(btn, __('workflow_checking_status').replace('...', '') + getAnimatedDots(dotTick));
                     }
+                } else {
+                    setButtonStatusText(btn, __('workflow_checking_status').replace('...', '') + getAnimatedDots(dotTick));
                 }
                 
                 // Continue polling
-                setTimeout(() => trackWorkflowStatus(btn, attempts + 1), 5000);
+                setTimeout(() => trackWorkflowStatus(btn, attempts + 1, dotTick + 1), 5000);
             } catch (error) {
                 console.error('Error tracking workflow:', error);
-                setButtonLoading(btn, false);
-                showToast(__('workflow_status_unknown'), 'warning');
+                setButtonStatusText(btn, __('workflow_status_unknown'));
+                setTimeout(() => setButtonLoading(btn, false), 1500);
             }
         }
     </script>
