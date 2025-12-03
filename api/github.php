@@ -210,6 +210,12 @@ try {
                 }
             }
             
+            // Update configuration description with GitHub repo info
+            if ($loadedFromGitHub) {
+                $description = "Loaded from GitHub: {$owner}/{$repo}";
+                $config->update($configId, ['description' => $description]);
+            }
+            
             jsonSuccess([
                 'loaded_from_github' => $loadedFromGitHub,
                 'config_id' => $configId
