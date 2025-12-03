@@ -256,6 +256,14 @@ try {
             jsonSuccess(null, 'Configuration saved to GitHub');
             break;
             
+        case 'dispatch_workflow':
+            $workflowId = isset($input['workflow_id']) ? $input['workflow_id'] : 'crawler.yml';
+            $ref = isset($input['ref']) ? $input['ref'] : 'main';
+            
+            $github->dispatchWorkflow($workflowId, $ref);
+            jsonSuccess(null, 'Workflow dispatched successfully');
+            break;
+            
         default:
             jsonError('Invalid action');
     }

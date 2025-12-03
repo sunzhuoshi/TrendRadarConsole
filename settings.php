@@ -314,6 +314,7 @@ $currentLang = getCurrentLanguage();
                             <li><?php _e('pat_step3'); ?></li>
                             <li><?php _e('pat_step4'); ?></li>
                             <li><?php _e('pat_step5'); ?></li>
+                            <li><?php _e('pat_step6'); ?></li>
                         </ol>
                     </div>
                     
@@ -351,6 +352,7 @@ $currentLang = getCurrentLanguage();
                             <button type="submit" class="btn btn-primary"><?php _e('save_settings'); ?></button>
                             <button type="button" class="btn btn-secondary" data-action="test-connection" onclick="testConnection()"><?php _e('test_connection'); ?></button>
                             <button type="button" class="btn btn-success" data-action="save-to-github" onclick="saveToGitHub()"><?php _e('save_to_github'); ?></button>
+                            <button type="button" class="btn btn-warning" data-action="test-crawling" onclick="testCrawling()"><?php _e('test_crawling'); ?></button>
                         </div>
                     </form>
                 </div>
@@ -492,6 +494,36 @@ $currentLang = getCurrentLanguage();
                 }
             } finally {
                 setButtonLoading(saveBtn, false);
+            }
+        }
+        
+        // Test Crawling
+        async function testCrawling() {
+            const crawlBtn = document.querySelector('button[data-action="test-crawling"]');
+            
+            if (!confirm(__('confirm_test_crawling'))) {
+                return;
+            }
+            
+            setButtonLoading(crawlBtn, true);
+            try {
+                await apiRequest('api/github.php', 'POST', {
+                    action: 'dispatch_workflow',
+                    workflow_id: 'crawler.yml',
+                    owner: '',  // Will use saved settings
+                    repo: '',
+                    token: ''
+                });
+                
+                showToast(__('crawling_triggered'), 'success');
+            } catch (error) {
+                if (error.message && error.message.includes('Owner, repo, and token are required')) {
+                    showToast(__('configure_github_first'), 'error');
+                } else {
+                    showToast(__('crawling_trigger_failed') + error.message, 'error');
+                }
+            } finally {
+                setButtonLoading(crawlBtn, false);
             }
         }
     </script>

@@ -183,6 +183,7 @@ $csrfToken = generateCsrfToken();
                                     <?php endif; ?>
                                     <button type="button" class="btn btn-outline btn-sm" data-action="load-github-<?php echo $cfg['id']; ?>" onclick="loadFromGitHub(<?php echo $cfg['id']; ?>, this)" title="<?php _e('load_from_github'); ?>">📥 GitHub</button>
                                     <button type="button" class="btn btn-outline btn-sm" data-action="save-github-<?php echo $cfg['id']; ?>" onclick="saveToGitHub(<?php echo $cfg['id']; ?>, this)" title="<?php _e('save_to_github'); ?>">📤 GitHub</button>
+                                    <button type="button" class="btn btn-outline btn-sm" data-action="test-crawling-<?php echo $cfg['id']; ?>" onclick="testCrawling(this)" title="<?php _e('test_crawling'); ?>">🕷️ <?php _e('test_crawling'); ?></button>
                                 </td>
                             </tr>
                             <?php endforeach; ?>
@@ -269,6 +270,35 @@ $csrfToken = generateCsrfToken();
                     setTimeout(() => window.location.href = 'settings.php', 1500);
                 } else {
                     showToast(__('failed_to_save') + ': ' + error.message, 'error');
+                }
+            } finally {
+                setButtonLoading(btn, false);
+            }
+        }
+        
+        // Test Crawling
+        async function testCrawling(btn) {
+            if (!confirm(__('confirm_test_crawling'))) {
+                return;
+            }
+            
+            setButtonLoading(btn, true);
+            try {
+                await apiRequest('api/github.php', 'POST', {
+                    action: 'dispatch_workflow',
+                    workflow_id: 'crawler.yml',
+                    owner: '',  // Will use saved settings
+                    repo: '',
+                    token: ''
+                });
+                
+                showToast(__('crawling_triggered'), 'success');
+            } catch (error) {
+                if (error.message && error.message.includes('Owner, repo, and token are required')) {
+                    showToast(__('configure_github_first'), 'error');
+                    setTimeout(() => window.location.href = 'settings.php', 1500);
+                } else {
+                    showToast(__('crawling_trigger_failed') + error.message, 'error');
                 }
             } finally {
                 setButtonLoading(btn, false);

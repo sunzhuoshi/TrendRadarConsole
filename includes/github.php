@@ -156,4 +156,21 @@ class GitHub
     {
         return $this->setVariable('FREQUENCY_WORDS', $content);
     }
+    
+    /**
+     * Dispatch a workflow
+     */
+    public function dispatchWorkflow($workflowId, $ref = 'main', $inputs = [])
+    {
+        $data = [
+            'ref' => $ref
+        ];
+        
+        if (!empty($inputs)) {
+            $data['inputs'] = $inputs;
+        }
+        
+        $result = $this->request('POST', "/repos/{$this->owner}/{$this->repo}/actions/workflows/{$workflowId}/dispatches", $data);
+        return $result['code'] === 204;
+    }
 }
