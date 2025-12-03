@@ -64,7 +64,7 @@ $webhookGroups = [
                 'name' => __('bark'),
                 'icon' => '🍎',
                 'description' => __('bark_desc'),
-                'homepage' => 'https://github.com/Finb/Bark',
+                'homepage' => 'https://bark.day.app',
                 'fields' => [
                     ['name' => 'webhook_url', 'label' => __('bark_url'), 'type' => 'url', 'required' => true, 'placeholder' => 'https://api.day.app/your_device_key'],
                 ]
