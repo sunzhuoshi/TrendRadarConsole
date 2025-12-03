@@ -516,14 +516,69 @@ $currentLang = getCurrentLanguage();
                 });
                 
                 showToast(__('crawling_triggered'), 'success');
+                
+                // Start tracking workflow status
+                setTimeout(() => trackWorkflowStatus(crawlBtn), 3000);
             } catch (error) {
                 if (error.message && error.message.includes('Owner, repo, and token are required')) {
                     showToast(__('configure_github_first'), 'error');
                 } else {
                     showToast(__('crawling_trigger_failed') + error.message, 'error');
                 }
-            } finally {
                 setButtonLoading(crawlBtn, false);
+            }
+        }
+        
+        // Track workflow status
+        async function trackWorkflowStatus(btn, attempts = 0) {
+            const maxAttempts = 60; // Max 5 minutes (60 * 5 seconds)
+            
+            if (attempts >= maxAttempts) {
+                showToast(__('workflow_status_unknown'), 'warning');
+                setButtonLoading(btn, false);
+                return;
+            }
+            
+            try {
+                const result = await apiRequest('api/github.php', 'POST', {
+                    action: 'get_workflow_runs',
+                    workflow_id: 'crawler.yml',
+                    owner: '',
+                    repo: '',
+                    token: ''
+                });
+                
+                const runs = result.data?.runs || [];
+                if (runs.length > 0) {
+                    const latestRun = runs[0];
+                    const status = latestRun.status;
+                    const conclusion = latestRun.conclusion;
+                    
+                    if (status === 'completed') {
+                        setButtonLoading(btn, false);
+                        if (conclusion === 'success') {
+                            showToast(__('workflow_status_success'), 'success');
+                        } else if (conclusion === 'failure') {
+                            showToast(__('workflow_status_failure'), 'error');
+                        } else if (conclusion === 'cancelled') {
+                            showToast(__('workflow_status_cancelled'), 'warning');
+                        } else {
+                            showToast(__('workflow_status_completed'), 'info');
+                        }
+                        return;
+                    } else if (status === 'queued') {
+                        showToast(__('workflow_status_queued'), 'info');
+                    } else if (status === 'in_progress') {
+                        showToast(__('workflow_status_in_progress'), 'info');
+                    }
+                }
+                
+                // Continue polling
+                setTimeout(() => trackWorkflowStatus(btn, attempts + 1), 5000);
+            } catch (error) {
+                console.error('Error tracking workflow:', error);
+                setButtonLoading(btn, false);
+                showToast(__('workflow_status_unknown'), 'warning');
             }
         }
     </script>

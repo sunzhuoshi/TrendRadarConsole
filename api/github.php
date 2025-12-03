@@ -267,6 +267,24 @@ try {
             jsonSuccess(null, 'Workflow dispatched successfully');
             break;
             
+        case 'get_workflow_runs':
+            $workflowId = isset($input['workflow_id']) ? $input['workflow_id'] : 'crawler.yml';
+            $runs = $github->getWorkflowRuns($workflowId, 5);
+            jsonSuccess(['runs' => $runs], 'Workflow runs retrieved');
+            break;
+            
+        case 'get_workflow_run':
+            $runId = isset($input['run_id']) ? (int)$input['run_id'] : null;
+            if (!$runId) {
+                jsonError('Run ID is required');
+            }
+            $run = $github->getWorkflowRun($runId);
+            if (!$run) {
+                jsonError('Workflow run not found');
+            }
+            jsonSuccess(['run' => $run], 'Workflow run retrieved');
+            break;
+            
         default:
             jsonError('Invalid action');
     }

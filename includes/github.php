@@ -173,4 +173,22 @@ class GitHub
         $result = $this->request('POST', "/repos/{$this->owner}/{$this->repo}/actions/workflows/{$workflowId}/dispatches", $data);
         return $result['code'] === 204;
     }
+    
+    /**
+     * Get the latest workflow runs for a specific workflow
+     */
+    public function getWorkflowRuns($workflowId, $perPage = 5)
+    {
+        $result = $this->request('GET', "/repos/{$this->owner}/{$this->repo}/actions/workflows/{$workflowId}/runs?per_page={$perPage}");
+        return $result['data']['workflow_runs'] ?? [];
+    }
+    
+    /**
+     * Get a specific workflow run by ID
+     */
+    public function getWorkflowRun($runId)
+    {
+        $result = $this->request('GET', "/repos/{$this->owner}/{$this->repo}/actions/runs/{$runId}");
+        return $result['data'] ?? null;
+    }
 }
