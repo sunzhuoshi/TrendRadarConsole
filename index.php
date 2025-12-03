@@ -289,10 +289,7 @@ $csrfToken = generateCsrfToken();
                 // Get last successful run duration for progress estimation
                 const runsResult = await apiRequest('api/github.php', 'POST', {
                     action: 'get_workflow_runs',
-                    workflow_id: 'crawler.yml',
-                    owner: '',
-                    repo: '',
-                    token: ''
+                    workflow_id: 'crawler.yml'
                 });
                 
                 let estimatedDuration = 60000; // Default 60 seconds
@@ -308,10 +305,7 @@ $csrfToken = generateCsrfToken();
                 
                 await apiRequest('api/github.php', 'POST', {
                     action: 'dispatch_workflow',
-                    workflow_id: 'crawler.yml',
-                    owner: '',
-                    repo: '',
-                    token: ''
+                    workflow_id: 'crawler.yml'
                 });
                 
                 // Start tracking workflow status - store timing data on button
@@ -449,10 +443,7 @@ $csrfToken = generateCsrfToken();
             try {
                 const result = await apiRequest('api/github.php', 'POST', {
                     action: 'get_workflow_runs',
-                    workflow_id: 'crawler.yml',
-                    owner: '',
-                    repo: '',
-                    token: ''
+                    workflow_id: 'crawler.yml'
                 });
                 
                 const runs = result.data?.runs || [];
