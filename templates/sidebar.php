@@ -30,9 +30,6 @@ $lastUpdated = getLastUpdatedTime();
         <a href="settings.php" class="nav-item <?php echo ($currentPage ?? '') === 'settings' ? 'active' : ''; ?>">
             ⚙️ <?php _e('settings'); ?>
         </a>
-        <a href="export.php" class="nav-item <?php echo ($currentPage ?? '') === 'export' ? 'active' : ''; ?>">
-            📤 <?php _e('export'); ?>
-        </a>
         <a href="github.php" class="nav-item <?php echo ($currentPage ?? '') === 'github' ? 'active' : ''; ?>">
             🐙 <?php _e('github_sync'); ?>
         </a>

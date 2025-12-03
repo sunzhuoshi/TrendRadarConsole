@@ -179,7 +179,6 @@ $currentLang = getCurrentLanguage();
                                         <button type="submit" class="btn btn-success btn-sm"><?php _e('activate'); ?></button>
                                     </form>
                                     <?php endif; ?>
-                                    <a href="export.php?id=<?php echo $cfg['id']; ?>" class="btn btn-secondary btn-sm"><?php _e('export'); ?></a>
                                 </td>
                             </tr>
                             <?php endforeach; ?>
@@ -201,7 +200,7 @@ $currentLang = getCurrentLanguage();
                         <li><?php _e('step3_keywords'); ?></li>
                         <li><?php _e('step4_webhooks'); ?></li>
                         <li><?php _e('step5_settings'); ?></li>
-                        <li><?php _e('step6_export'); ?></li>
+                        <li><?php _e('step6_github_sync'); ?></li>
                     </ol>
                 </div>
             </div>

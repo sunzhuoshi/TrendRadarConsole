@@ -11,7 +11,6 @@ return [
     'keywords' => 'Keywords',
     'notifications' => 'Notifications',
     'settings' => 'Settings',
-    'export' => 'Export',
     'github_sync' => 'GitHub Sync',
     'logout' => 'Logout',
     'login' => 'Login',
@@ -106,7 +105,7 @@ return [
     'step3_keywords' => 'Set up keywords to filter news by your interests',
     'step4_webhooks' => 'Configure webhook notifications (WeChat Work, Feishu, Telegram, etc.)',
     'step5_settings' => 'Adjust report settings (mode, weights, etc.)',
-    'step6_export' => 'Export the configuration files for use with TrendRadar',
+    'step6_github_sync' => 'Sync your configuration with your TrendRadar GitHub repository',
     
     // Configuration Edit
     'edit_configuration' => 'Edit Configuration',
@@ -292,25 +291,6 @@ return [
     'setting_updated' => 'Setting updated',
     'failed_to_update_setting' => 'Failed to update setting: ',
     
-    // Export
-    'export_configuration' => 'Export Configuration',
-    'export_desc' => 'Export your configuration as YAML and keywords files for TrendRadar',
-    'select_configuration' => 'Select Configuration',
-    'no_config_selected' => 'No configuration selected. Please create or activate a configuration first.',
-    'no_keywords_configured' => '# No keywords configured',
-    'usage_instructions' => 'Usage Instructions',
-    'usage_step1' => 'Download both <code>config.yaml</code> and <code>frequency_words.txt</code> files',
-    'usage_step2' => 'Place them in your TrendRadar project\'s <code>config/</code> directory',
-    'usage_step3' => 'For GitHub Actions deployment, you can also use repository variables (see below)',
-    'usage_step4' => 'For Docker deployment, use environment variables for sensitive data',
-    'github_actions_deployment' => 'GitHub Actions Deployment (Recommended):',
-    'github_actions_desc' => 'Instead of editing files directly, you can set configurations via GitHub repository variables:',
-    'config_yaml_var' => 'Paste the entire config.yaml content',
-    'frequency_words_var' => 'Paste the frequency_words.txt content',
-    'repo_settings_path' => 'Go to your repo\'s <strong>Settings → Secrets and variables → Actions → Variables tab</strong> to set these.',
-    'file_downloaded' => 'File downloaded',
-    'copied_to_clipboard' => 'Copied to clipboard!',
-    
     // GitHub Sync
     'github_sync_title' => 'GitHub Sync',
     'github_sync_desc' => 'Load and save configurations directly to your TrendRadar GitHub repository',
@@ -396,10 +376,8 @@ return [
     'js_setting_updated' => 'Setting updated',
     'js_keywords_saved' => 'Keywords saved successfully',
     'js_file_downloaded' => 'File downloaded',
-    'js_config_exported' => 'Configuration exported',
     'js_failed_to_update' => 'Failed to update: ',
     'js_failed_to_add' => 'Failed to add: ',
     'js_failed_to_remove' => 'Failed to remove: ',
     'js_failed_to_save' => 'Failed to save: ',
-    'js_failed_to_export' => 'Failed to export: ',
 ];
