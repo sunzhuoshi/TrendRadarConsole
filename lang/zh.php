@@ -308,11 +308,6 @@ return [
     'config_yaml_var' => '粘贴完整的 config.yaml 内容',
     'frequency_words_var' => '粘贴 frequency_words.txt 内容',
     'repo_settings_path' => '前往您仓库的 <strong>Settings → Secrets and variables → Actions → Variables 标签页</strong> 进行设置。',
-    'security_tip' => '安全提示：',
-    'security_tip_msg' => '导出的 config.yaml 中包含 webhook URL。如果通过 GitHub Fork 部署，请删除它们并使用 GitHub Secrets 代替。',
-    'github_secrets_mapping' => 'GitHub Secrets 映射',
-    'platform' => '平台',
-    'secret_names' => '密钥名称',
     'file_downloaded' => '文件已下载',
     'copied_to_clipboard' => '已复制到剪贴板！',
     

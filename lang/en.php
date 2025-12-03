@@ -308,11 +308,6 @@ return [
     'config_yaml_var' => 'Paste the entire config.yaml content',
     'frequency_words_var' => 'Paste the frequency_words.txt content',
     'repo_settings_path' => 'Go to your repo\'s <strong>Settings → Secrets and variables → Actions → Variables tab</strong> to set these.',
-    'security_tip' => 'Tip:',
-    'security_tip_msg' => 'For security reasons, webhook URLs in the exported config.yaml are included. If deploying via GitHub Fork, remove them and use GitHub Secrets instead.',
-    'github_secrets_mapping' => 'GitHub Secrets Mapping',
-    'platform' => 'Platform',
-    'secret_names' => 'Secret Name(s)',
     'file_downloaded' => 'File downloaded',
     'copied_to_clipboard' => 'Copied to clipboard!',
     

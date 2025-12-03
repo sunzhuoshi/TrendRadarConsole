@@ -153,54 +153,6 @@ $currentLang = getCurrentLanguage();
                         <?php echo __('repo_settings_path'); ?>
                     </div>
                     
-                    <div class="alert alert-info mt-3">
-                        <strong>💡 <?php _e('security_tip'); ?></strong> 
-                        <?php _e('security_tip_msg'); ?>
-                    </div>
-                    
-                    <h4 class="mt-4"><?php _e('github_secrets_mapping'); ?></h4>
-                    <table class="table">
-                        <thead>
-                            <tr>
-                                <th><?php _e('platform'); ?></th>
-                                <th><?php _e('secret_names'); ?></th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <tr>
-                                <td><?php _e('wework'); ?></td>
-                                <td><code>WEWORK_WEBHOOK_URL</code>, <code>WEWORK_MSG_TYPE</code></td>
-                            </tr>
-                            <tr>
-                                <td><?php _e('feishu'); ?></td>
-                                <td><code>FEISHU_WEBHOOK_URL</code></td>
-                            </tr>
-                            <tr>
-                                <td><?php _e('dingtalk'); ?></td>
-                                <td><code>DINGTALK_WEBHOOK_URL</code></td>
-                            </tr>
-                            <tr>
-                                <td><?php _e('telegram'); ?></td>
-                                <td><code>TELEGRAM_BOT_TOKEN</code>, <code>TELEGRAM_CHAT_ID</code></td>
-                            </tr>
-                            <tr>
-                                <td><?php _e('email'); ?></td>
-                                <td><code>EMAIL_FROM</code>, <code>EMAIL_PASSWORD</code>, <code>EMAIL_TO</code></td>
-                            </tr>
-                            <tr>
-                                <td><?php _e('ntfy'); ?></td>
-                                <td><code>NTFY_TOPIC</code>, <code>NTFY_SERVER_URL</code>, <code>NTFY_TOKEN</code></td>
-                            </tr>
-                            <tr>
-                                <td><?php _e('bark'); ?></td>
-                                <td><code>BARK_URL</code></td>
-                            </tr>
-                            <tr>
-                                <td><?php _e('slack'); ?></td>
-                                <td><code>SLACK_WEBHOOK_URL</code></td>
-                            </tr>
-                        </tbody>
-                    </table>
                 </div>
             </div>
             
