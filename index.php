@@ -219,7 +219,7 @@ $csrfToken = generateCsrfToken();
     <script>
         // Load from GitHub
         async function loadFromGitHub(configId) {
-            if (!confirm(__('confirm_load_from_github') || 'This will load configuration from GitHub and update the current configuration. Continue?')) {
+            if (!confirm(__('confirm_load_from_github'))) {
                 return;
             }
             
