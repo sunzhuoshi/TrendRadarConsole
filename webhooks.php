@@ -64,6 +64,7 @@ $webhookGroups = [
                 'name' => __('bark'),
                 'icon' => '🍎',
                 'description' => __('bark_desc'),
+                'homepage' => 'https://bark.day.app',
                 'fields' => [
                     ['name' => 'webhook_url', 'label' => __('bark_url'), 'type' => 'url', 'required' => true, 'placeholder' => 'https://api.day.app/your_device_key'],
                 ]
@@ -72,6 +73,7 @@ $webhookGroups = [
                 'name' => __('ntfy'),
                 'icon' => '🔔',
                 'description' => __('ntfy_desc'),
+                'homepage' => 'https://ntfy.sh',
                 'fields' => [
                     ['name' => 'webhook_url', 'label' => __('topic_name'), 'type' => 'text', 'required' => true, 'placeholder' => 'TrendRadar'],
                     ['name' => 'server_url', 'label' => __('server_url'), 'type' => 'url', 'placeholder' => 'https://ntfy.sh (default)'],
@@ -205,7 +207,12 @@ $webhookGroups = [
                             <?php endif; ?>
                         </div>
                         <div class="card-body">
-                            <p class="text-muted mb-3"><?php echo $webhookInfo['description']; ?></p>
+                            <p class="text-muted mb-3">
+                                <?php echo $webhookInfo['description']; ?>
+                                <?php if (!empty($webhookInfo['homepage'])): ?>
+                                <br><a href="<?php echo htmlspecialchars($webhookInfo['homepage'], ENT_QUOTES, 'UTF-8'); ?>" target="_blank" rel="noopener noreferrer">🏠 <?php _e('home_page'); ?></a>
+                                <?php endif; ?>
+                            </p>
                             
                             <form class="webhook-form" data-type="<?php echo $type; ?>">
                                 <?php foreach ($webhookInfo['fields'] as $field): ?>

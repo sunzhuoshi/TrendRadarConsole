@@ -237,6 +237,7 @@ return [
     'server_url' => 'Server URL',
     'access_token' => 'Access Token (optional)',
     'bark_url' => 'Bark URL',
+    'home_page' => 'Home Page',
     'webhook_group_recommended' => 'Recommended',
     'webhook_group_domestic' => 'Domestic (China)',
     'webhook_group_international' => 'International',
