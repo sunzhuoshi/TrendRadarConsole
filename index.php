@@ -314,9 +314,9 @@ $csrfToken = generateCsrfToken();
                     token: ''
                 });
                 
-                // Start tracking workflow status
-                workflowStartTime = Date.now();
-                workflowEstimatedDuration = estimatedDuration;
+                // Start tracking workflow status - store timing data on button
+                btn.dataset.startTime = Date.now().toString();
+                btn.dataset.estimatedDuration = estimatedDuration.toString();
                 setTimeout(() => trackWorkflowStatus(btn, 0), 3000);
             } catch (error) {
                 if (error.message && error.message.includes('Owner, repo, and token are required')) {
@@ -330,13 +330,12 @@ $csrfToken = generateCsrfToken();
         }
         
         // Button loading with visible status text
-        let originalButtonText = '';
         function setButtonLoadingWithStatus(btn, isLoading) {
             if (!btn) return;
             
             if (isLoading) {
-                // Store original button text
-                originalButtonText = btn.textContent.trim();
+                // Store original button text as data attribute
+                btn.dataset.originalText = btn.textContent.trim();
                 if (!btn.querySelector('.btn-text')) {
                     const span = document.createElement('span');
                     span.className = 'btn-text';
@@ -352,8 +351,8 @@ $csrfToken = generateCsrfToken();
                 btn.disabled = false;
                 const span = btn.querySelector('.btn-text');
                 if (span) {
-                    // Restore original button text
-                    span.textContent = originalButtonText;
+                    // Restore original button text from data attribute
+                    span.textContent = btn.dataset.originalText || '';
                     while (span.firstChild) {
                         btn.insertBefore(span.firstChild, span);
                     }
@@ -373,11 +372,6 @@ $csrfToken = generateCsrfToken();
             }
         }
         
-        // Progress bar variables
-        let workflowStartTime = 0;
-        let workflowEstimatedDuration = 60000;
-        let progressInterval = null;
-        
         // Create progress bar after button
         function createProgressBar(btn) {
             if (!btn) return;
@@ -385,7 +379,7 @@ $csrfToken = generateCsrfToken();
             if (!container) {
                 container = document.createElement('div');
                 container.className = 'workflow-progress-container';
-                const estimatedSeconds = Math.round(workflowEstimatedDuration / 1000);
+                const estimatedSeconds = Math.round((parseInt(btn.dataset.estimatedDuration) || 60000) / 1000);
                 container.innerHTML = `
                     <div class="workflow-progress-bar">
                         <div class="workflow-progress-fill"></div>
@@ -415,24 +409,31 @@ $csrfToken = generateCsrfToken();
             if (container) {
                 container.remove();
             }
-            if (progressInterval) {
-                clearInterval(progressInterval);
-                progressInterval = null;
+            // Clear interval stored on button
+            if (btn.dataset.progressIntervalId) {
+                clearInterval(parseInt(btn.dataset.progressIntervalId));
+                delete btn.dataset.progressIntervalId;
             }
         }
         
         // Start progress animation
         function startProgressAnimation(btn) {
             createProgressBar(btn);
-            if (progressInterval) clearInterval(progressInterval);
+            // Clear any existing interval
+            if (btn.dataset.progressIntervalId) {
+                clearInterval(parseInt(btn.dataset.progressIntervalId));
+            }
             
-            progressInterval = setInterval(() => {
-                const elapsed = Date.now() - workflowStartTime;
-                const percent = (elapsed / workflowEstimatedDuration) * 100;
+            const intervalId = setInterval(() => {
+                const startTime = parseInt(btn.dataset.startTime) || Date.now();
+                const estimatedDuration = parseInt(btn.dataset.estimatedDuration) || 60000;
+                const elapsed = Date.now() - startTime;
+                const percent = (elapsed / estimatedDuration) * 100;
                 const elapsedSec = Math.floor(elapsed / 1000);
-                const estimatedSec = Math.floor(workflowEstimatedDuration / 1000);
+                const estimatedSec = Math.floor(estimatedDuration / 1000);
                 updateProgressBar(btn, percent, `${elapsedSec}s / ~${estimatedSec}s`);
             }, 500);
+            btn.dataset.progressIntervalId = intervalId.toString();
         }
         
         // Track workflow status
