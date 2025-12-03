@@ -105,5 +105,13 @@ CREATE TABLE IF NOT EXISTS `operation_logs` (
     CONSTRAINT `fk_operation_logs_user` FOREIGN KEY (`user_id`) REFERENCES `users`(`id`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='Operation logs for tracking configuration changes';
 
+-- Migrations table for tracking applied database migrations
+CREATE TABLE IF NOT EXISTS `migrations` (
+    `id` INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    `migration` VARCHAR(255) NOT NULL UNIQUE COMMENT 'Migration filename',
+    `batch` INT NOT NULL COMMENT 'Batch number for grouping migrations',
+    `executed_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='Database migrations tracking';
+
 -- Note: Default user and configuration are created during registration
 -- No default data is inserted here
