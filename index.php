@@ -277,6 +277,8 @@ $csrfToken = generateCsrfToken();
         }
         
         // Test Crawling
+        const DEFAULT_ESTIMATED_DURATION_MS = 60000; // Default 60 seconds
+        
         async function testCrawling(btn) {
             if (!confirm(__('confirm_test_crawling'))) {
                 return;
@@ -292,7 +294,7 @@ $csrfToken = generateCsrfToken();
                     workflow_id: 'crawler.yml'
                 });
                 
-                let estimatedDuration = 60000; // Default 60 seconds
+                let estimatedDuration = DEFAULT_ESTIMATED_DURATION_MS;
                 const runs = runsResult.data?.runs || [];
                 for (const run of runs) {
                     if (run.conclusion === 'success' && run.run_started_at && run.updated_at) {
@@ -367,28 +369,23 @@ $csrfToken = generateCsrfToken();
         }
         
         // Create progress bar after button
-        // Encapsulate default estimated duration and related functions to avoid global scope pollution
-        (function() {
-            const DEFAULT_ESTIMATED_DURATION_MS = 60000;
-
-            window.createProgressBar = function(btn) {
-                if (!btn) return;
-                let container = btn.parentElement.querySelector('.workflow-progress-container');
-                if (!container) {
-                    container = document.createElement('div');
-                    container.className = 'workflow-progress-container';
-                    const estimatedSeconds = Math.round((parseInt(btn.dataset.estimatedDuration) || DEFAULT_ESTIMATED_DURATION_MS) / 1000);
-                    container.innerHTML = `
-                        <div class="workflow-progress-bar">
-                            <div class="workflow-progress-fill"></div>
-                        </div>
-                        <span class="workflow-progress-text">0s / ~${estimatedSeconds}s</span>
-                    `;
-                    btn.parentElement.appendChild(container);
-                }
-                return container;
-            };
-        })();
+        function createProgressBar(btn) {
+            if (!btn) return;
+            let container = btn.parentElement.querySelector('.workflow-progress-container');
+            if (!container) {
+                container = document.createElement('div');
+                container.className = 'workflow-progress-container';
+                const estimatedSeconds = Math.round((parseInt(btn.dataset.estimatedDuration) || DEFAULT_ESTIMATED_DURATION_MS) / 1000);
+                container.innerHTML = `
+                    <div class="workflow-progress-bar">
+                        <div class="workflow-progress-fill"></div>
+                    </div>
+                    <span class="workflow-progress-text">0s / ~${estimatedSeconds}s</span>
+                `;
+                btn.parentElement.appendChild(container);
+            }
+            return container;
+        }
         
         // Update progress bar
         function updateProgressBar(btn, percent, timeText) {
@@ -425,7 +422,7 @@ $csrfToken = generateCsrfToken();
             
             const intervalId = setInterval(() => {
                 const startTime = parseInt(btn.dataset.startTime) || Date.now();
-                const estimatedDuration = parseInt(btn.dataset.estimatedDuration) || 60000;
+                const estimatedDuration = parseInt(btn.dataset.estimatedDuration) || DEFAULT_ESTIMATED_DURATION_MS;
                 const elapsed = Date.now() - startTime;
                 const percent = (elapsed / estimatedDuration) * 100;
                 const elapsedSec = Math.floor(elapsed / 1000);

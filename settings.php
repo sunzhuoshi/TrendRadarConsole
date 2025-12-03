@@ -498,7 +498,53 @@ $currentLang = getCurrentLanguage();
         }
         
         // Test Crawling
-        // Workflow tracking functions are now loaded from assets/js/workflow-tracking.js
+        const DEFAULT_ESTIMATED_DURATION_MS = 60000; // Default 60 seconds
+        
+        async function testCrawling() {
+            const btn = document.querySelector('button[data-action="test-crawling"]');
+            if (!confirm(__('confirm_test_crawling'))) {
+                return;
+            }
+            
+            setButtonLoadingWithStatus(btn, true);
+            setButtonStatusText(btn, __('crawling_triggered'));
+            
+            try {
+                // Get last successful run duration for progress estimation
+                const runsResult = await apiRequest('api/github.php', 'POST', {
+                    action: 'get_workflow_runs',
+                    workflow_id: 'crawler.yml'
+                });
+                
+                let estimatedDuration = DEFAULT_ESTIMATED_DURATION_MS;
+                const runs = runsResult.data?.runs || [];
+                for (const run of runs) {
+                    if (run.conclusion === 'success' && run.run_started_at && run.updated_at) {
+                        const startTime = new Date(run.run_started_at).getTime();
+                        const endTime = new Date(run.updated_at).getTime();
+                        estimatedDuration = endTime - startTime;
+                        break;
+                    }
+                }
+                
+                await apiRequest('api/github.php', 'POST', {
+                    action: 'dispatch_workflow',
+                    workflow_id: 'crawler.yml'
+                });
+                
+                // Start tracking workflow status - store timing data on button
+                btn.dataset.startTime = Date.now().toString();
+                btn.dataset.estimatedDuration = estimatedDuration.toString();
+                setTimeout(() => trackWorkflowStatus(btn, 0), 3000);
+            } catch (error) {
+                if (error.message && error.message.includes('Owner, repo, and token are required')) {
+                    showToast(__('configure_github_first'), 'error');
+                } else {
+                    showToast(__('crawling_trigger_failed') + error.message, 'error');
+                }
+                setButtonLoadingWithStatus(btn, false);
+            }
+        }
         
         // Button loading with visible status text
         function setButtonLoadingWithStatus(btn, isLoading) {
@@ -551,7 +597,7 @@ $currentLang = getCurrentLanguage();
                 container = document.createElement('div');
                 container.className = 'workflow-progress-container';
                 // Initialize progress text with '0s / ~Xs' format
-                const estimatedSeconds = Math.round((parseInt(btn.dataset.estimatedDuration) || 60000) / 1000);
+                const estimatedSeconds = Math.round((parseInt(btn.dataset.estimatedDuration) || DEFAULT_ESTIMATED_DURATION_MS) / 1000);
                 container.innerHTML = `
                     <div class="workflow-progress-bar">
                         <div class="workflow-progress-fill"></div>
@@ -598,7 +644,7 @@ $currentLang = getCurrentLanguage();
             
             const intervalId = setInterval(() => {
                 const startTime = parseInt(btn.dataset.startTime) || Date.now();
-                const estimatedDuration = parseInt(btn.dataset.estimatedDuration) || 60000;
+                const estimatedDuration = parseInt(btn.dataset.estimatedDuration) || DEFAULT_ESTIMATED_DURATION_MS;
                 const elapsed = Date.now() - startTime;
                 const percent = (elapsed / estimatedDuration) * 100;
                 const elapsedSec = Math.floor(elapsed / 1000);
