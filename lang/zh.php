@@ -107,7 +107,7 @@ return [
     'step4_webhooks' => '配置通知渠道（企业微信、飞书、Telegram等）',
     'step5_settings' => '调整报告设置（模式、权重等）',
     'step6_export' => '导出配置文件用于 TrendRadar',
-    'step6_sync_github' => '使用 📤 GitHub 按钮将配置同步到 GitHub',
+    'step6_sync_github' => '在设置页面使用"保存到 GitHub"按钮将配置同步到 GitHub',
     
     // Configuration Edit
     'edit_configuration' => '编辑配置',

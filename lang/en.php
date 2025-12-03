@@ -107,7 +107,7 @@ return [
     'step4_webhooks' => 'Configure webhook notifications (WeChat Work, Feishu, Telegram, etc.)',
     'step5_settings' => 'Adjust report settings (mode, weights, etc.)',
     'step6_export' => 'Export the configuration files for use with TrendRadar',
-    'step6_sync_github' => 'Sync your configuration to GitHub using the 📤 GitHub button',
+    'step6_sync_github' => 'Save your configuration to GitHub using the "Save to GitHub" button in Settings',
     
     // Configuration Edit
     'edit_configuration' => 'Edit Configuration',
