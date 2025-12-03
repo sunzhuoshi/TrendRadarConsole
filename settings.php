@@ -498,52 +498,7 @@ $currentLang = getCurrentLanguage();
         }
         
         // Test Crawling
-        async function testCrawling() {
-            const crawlBtn = document.querySelector('button[data-action="test-crawling"]');
-            
-            if (!confirm(__('confirm_test_crawling'))) {
-                return;
-            }
-            
-            setButtonLoadingWithStatus(crawlBtn, true);
-            setButtonStatusText(crawlBtn, __('crawling_triggered'));
-            
-            try {
-                // Get last successful run duration for progress estimation
-                const runsResult = await apiRequest('api/github.php', 'POST', {
-                    action: 'get_workflow_runs',
-                    workflow_id: 'crawler.yml'
-                });
-                
-                let estimatedDuration = 60000; // Default 60 seconds
-                const runs = runsResult.data?.runs || [];
-                for (const run of runs) {
-                    if (run.conclusion === 'success' && run.run_started_at && run.updated_at) {
-                        const startTime = new Date(run.run_started_at).getTime();
-                        const endTime = new Date(run.updated_at).getTime();
-                        estimatedDuration = endTime - startTime;
-                        break;
-                    }
-                }
-                
-                await apiRequest('api/github.php', 'POST', {
-                    action: 'dispatch_workflow',
-                    workflow_id: 'crawler.yml'
-                });
-                
-                // Start tracking workflow status - store timing data on button
-                crawlBtn.dataset.startTime = Date.now().toString();
-                crawlBtn.dataset.estimatedDuration = estimatedDuration.toString();
-                setTimeout(() => trackWorkflowStatus(crawlBtn, 0), 3000);
-            } catch (error) {
-                if (error.message && error.message.includes('Owner, repo, and token are required')) {
-                    showToast(__('configure_github_first'), 'error');
-                } else {
-                    showToast(__('crawling_trigger_failed') + error.message, 'error');
-                }
-                setButtonLoadingWithStatus(crawlBtn, false);
-            }
-        }
+        // Workflow tracking functions are now loaded from assets/js/workflow-tracking.js
         
         // Button loading with visible status text
         function setButtonLoadingWithStatus(btn, isLoading) {
