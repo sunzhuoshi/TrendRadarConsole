@@ -131,16 +131,6 @@ jobs:
           ssh -o StrictHostKeyChecking=no "$SSH_USER@$SSH_HOST" \
             "chmod +x /tmp/scripts/fix-permissions.sh && sudo /tmp/scripts/fix-permissions.sh"
 
-      - name: ♻️ Reload Apache
-        env:
-          SSH_HOST: ${{ vars.SSH_HOST }}
-          SSH_USER: ${{ vars.SSH_USER }}
-        run: |
-          ssh -o StrictHostKeyChecking=no $SSH_USER@$SSH_HOST "
-            sudo systemctl restart httpd
-            echo '✅ Apache reloaded'
-          "
-
       # —————————— 可选：部署成功通知 ——————————
       # 便于你后续接入「自己推送消息」系统（如企业微信 / 自建 webhook）
       # - name: 📢 Notify success
