@@ -43,78 +43,93 @@ $currentPage = 'webhooks';
 $csrfToken = generateCsrfToken();
 $currentLang = getCurrentLanguage();
 
-// Webhook types configuration
-$webhookTypes = [
-    'wework' => [
-        'name' => __('wework') . ' (企业微信)',
-        'icon' => '💬',
-        'description' => __('wework_desc'),
-        'fields' => [
-            ['name' => 'webhook_url', 'label' => __('webhook_url'), 'type' => 'url', 'required' => true],
-            ['name' => 'msg_type', 'label' => __('message_type'), 'type' => 'select', 'options' => ['markdown' => __('markdown_group_robot'), 'text' => __('text_personal_wechat')]],
+// Webhook types configuration organized by groups
+$webhookGroups = [
+    'recommended' => [
+        'label' => __('webhook_group_recommended'),
+        'webhooks' => [
+            'bark' => [
+                'name' => __('bark'),
+                'icon' => '🍎',
+                'description' => __('bark_desc'),
+                'fields' => [
+                    ['name' => 'webhook_url', 'label' => __('bark_url'), 'type' => 'url', 'required' => true, 'placeholder' => 'https://api.day.app/your_device_key'],
+                ]
+            ],
+            'ntfy' => [
+                'name' => __('ntfy'),
+                'icon' => '🔔',
+                'description' => __('ntfy_desc'),
+                'fields' => [
+                    ['name' => 'webhook_url', 'label' => __('topic_name'), 'type' => 'text', 'required' => true, 'placeholder' => 'TrendRadar'],
+                    ['name' => 'server_url', 'label' => __('server_url'), 'type' => 'url', 'placeholder' => 'https://ntfy.sh (default)'],
+                    ['name' => 'token', 'label' => __('access_token'), 'type' => 'password'],
+                ]
+            ],
         ]
     ],
-    'feishu' => [
-        'name' => __('feishu') . ' (飞书)',
-        'icon' => '🐦',
-        'description' => __('feishu_desc'),
-        'fields' => [
-            ['name' => 'webhook_url', 'label' => __('webhook_url'), 'type' => 'url', 'required' => true],
+    'domestic' => [
+        'label' => __('webhook_group_domestic'),
+        'webhooks' => [
+            'wework' => [
+                'name' => __('wework') . ' (企业微信)',
+                'icon' => '💬',
+                'description' => __('wework_desc'),
+                'fields' => [
+                    ['name' => 'webhook_url', 'label' => __('webhook_url'), 'type' => 'url', 'required' => true],
+                    ['name' => 'msg_type', 'label' => __('message_type'), 'type' => 'select', 'options' => ['markdown' => __('markdown_group_robot'), 'text' => __('text_personal_wechat')]],
+                ]
+            ],
+            'feishu' => [
+                'name' => __('feishu') . ' (飞书)',
+                'icon' => '🐦',
+                'description' => __('feishu_desc'),
+                'fields' => [
+                    ['name' => 'webhook_url', 'label' => __('webhook_url'), 'type' => 'url', 'required' => true],
+                ]
+            ],
+            'dingtalk' => [
+                'name' => __('dingtalk') . ' (钉钉)',
+                'icon' => '🔔',
+                'description' => __('dingtalk_desc'),
+                'fields' => [
+                    ['name' => 'webhook_url', 'label' => __('webhook_url'), 'type' => 'url', 'required' => true],
+                ]
+            ],
         ]
     ],
-    'dingtalk' => [
-        'name' => __('dingtalk') . ' (钉钉)',
-        'icon' => '🔔',
-        'description' => __('dingtalk_desc'),
-        'fields' => [
-            ['name' => 'webhook_url', 'label' => __('webhook_url'), 'type' => 'url', 'required' => true],
-        ]
-    ],
-    'telegram' => [
-        'name' => __('telegram'),
-        'icon' => '📱',
-        'description' => __('telegram_desc'),
-        'fields' => [
-            ['name' => 'webhook_url', 'label' => __('bot_token'), 'type' => 'password', 'required' => true, 'placeholder' => '123456789:AAHfiqksKZ8WmR2zSjiQ7...'],
-            ['name' => 'chat_id', 'label' => __('chat_id'), 'type' => 'text', 'required' => true, 'placeholder' => '123456789'],
-        ]
-    ],
-    'email' => [
-        'name' => __('email'),
-        'icon' => '📧',
-        'description' => __('email_desc'),
-        'fields' => [
-            ['name' => 'from', 'label' => __('from_email'), 'type' => 'email', 'required' => true],
-            ['name' => 'password', 'label' => __('password_app_password'), 'type' => 'password', 'required' => true],
-            ['name' => 'to', 'label' => __('to_emails'), 'type' => 'text', 'required' => true, 'placeholder' => __('multiple_emails_hint')],
-            ['name' => 'smtp_server', 'label' => __('smtp_server'), 'type' => 'text', 'placeholder' => __('auto_detected')],
-            ['name' => 'smtp_port', 'label' => __('smtp_port'), 'type' => 'number', 'placeholder' => __('auto_detected')],
-        ]
-    ],
-    'ntfy' => [
-        'name' => __('ntfy'),
-        'icon' => '🔔',
-        'description' => __('ntfy_desc'),
-        'fields' => [
-            ['name' => 'webhook_url', 'label' => __('topic_name'), 'type' => 'text', 'required' => true, 'placeholder' => 'trendradar-your-topic'],
-            ['name' => 'server_url', 'label' => __('server_url'), 'type' => 'url', 'placeholder' => 'https://ntfy.sh (default)'],
-            ['name' => 'token', 'label' => __('access_token'), 'type' => 'password'],
-        ]
-    ],
-    'bark' => [
-        'name' => __('bark'),
-        'icon' => '🍎',
-        'description' => __('bark_desc'),
-        'fields' => [
-            ['name' => 'webhook_url', 'label' => __('bark_url'), 'type' => 'url', 'required' => true, 'placeholder' => 'https://api.day.app/your_device_key'],
-        ]
-    ],
-    'slack' => [
-        'name' => __('slack'),
-        'icon' => '💼',
-        'description' => __('slack_desc'),
-        'fields' => [
-            ['name' => 'webhook_url', 'label' => __('webhook_url'), 'type' => 'url', 'required' => true, 'placeholder' => 'https://hooks.slack.com/services/...'],
+    'international' => [
+        'label' => __('webhook_group_international'),
+        'webhooks' => [
+            'telegram' => [
+                'name' => __('telegram'),
+                'icon' => '📱',
+                'description' => __('telegram_desc'),
+                'fields' => [
+                    ['name' => 'webhook_url', 'label' => __('bot_token'), 'type' => 'password', 'required' => true, 'placeholder' => '123456789:AAHfiqksKZ8WmR2zSjiQ7...'],
+                    ['name' => 'chat_id', 'label' => __('chat_id'), 'type' => 'text', 'required' => true, 'placeholder' => '123456789'],
+                ]
+            ],
+            'email' => [
+                'name' => __('email'),
+                'icon' => '📧',
+                'description' => __('email_desc'),
+                'fields' => [
+                    ['name' => 'from', 'label' => __('from_email'), 'type' => 'email', 'required' => true],
+                    ['name' => 'password', 'label' => __('password_app_password'), 'type' => 'password', 'required' => true],
+                    ['name' => 'to', 'label' => __('to_emails'), 'type' => 'text', 'required' => true, 'placeholder' => __('multiple_emails_hint')],
+                    ['name' => 'smtp_server', 'label' => __('smtp_server'), 'type' => 'text', 'placeholder' => __('auto_detected')],
+                    ['name' => 'smtp_port', 'label' => __('smtp_port'), 'type' => 'number', 'placeholder' => __('auto_detected')],
+                ]
+            ],
+            'slack' => [
+                'name' => __('slack'),
+                'icon' => '💼',
+                'description' => __('slack_desc'),
+                'fields' => [
+                    ['name' => 'webhook_url', 'label' => __('webhook_url'), 'type' => 'url', 'required' => true, 'placeholder' => 'https://hooks.slack.com/services/...'],
+                ]
+            ],
         ]
     ],
 ];
@@ -155,9 +170,11 @@ $webhookTypes = [
                 <?php _e('webhook_security_msg'); ?>
             </div>
             
-            <!-- Webhook Cards -->
+            <!-- Webhook Cards by Group -->
+            <?php foreach ($webhookGroups as $groupKey => $group): ?>
+            <h3 class="webhook-group-header"><?php echo htmlspecialchars($group['label'], ENT_QUOTES, 'UTF-8'); ?></h3>
             <div class="row">
-                <?php foreach ($webhookTypes as $type => $webhookInfo): ?>
+                <?php foreach ($group['webhooks'] as $type => $webhookInfo): ?>
                 <?php 
                 $existing = $webhooksByType[$type] ?? null;
                 $additionalConfig = $existing && $existing['additional_config'] ? json_decode($existing['additional_config'], true) : [];
@@ -227,6 +244,7 @@ $webhookTypes = [
                 </div>
                 <?php endforeach; ?>
             </div>
+            <?php endforeach; ?>
             
             <?php endif; ?>
         </main>
