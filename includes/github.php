@@ -160,7 +160,7 @@ class GitHub
     /**
      * Dispatch a workflow
      */
-    public function dispatchWorkflow($workflowId, $ref = 'main', $inputs = [])
+    public function dispatchWorkflow($workflowId, $ref = 'master', $inputs = [])
     {
         $data = [
             'ref' => $ref

@@ -258,7 +258,7 @@ try {
             
         case 'dispatch_workflow':
             $workflowId = isset($input['workflow_id']) ? $input['workflow_id'] : 'crawler.yml';
-            $ref = isset($input['ref']) ? $input['ref'] : 'main';
+            $ref = isset($input['ref']) ? $input['ref'] : 'master';
             
             $success = $github->dispatchWorkflow($workflowId, $ref);
             if (!$success) {
