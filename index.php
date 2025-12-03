@@ -282,8 +282,9 @@ $csrfToken = generateCsrfToken();
                 return;
             }
             
-            setButtonLoading(btn, true);
+            setButtonLoadingWithStatus(btn, true);
             setButtonStatusText(btn, __('crawling_triggered'));
+            startDotAnimation(btn, __('crawling_triggered').replace('...', ''));
             
             try {
                 await apiRequest('api/github.php', 'POST', {
@@ -295,19 +296,48 @@ $csrfToken = generateCsrfToken();
                 });
                 
                 // Start tracking workflow status
-                setTimeout(() => trackWorkflowStatus(btn, 0, 0), 3000);
+                setTimeout(() => trackWorkflowStatus(btn, 0), 3000);
             } catch (error) {
+                stopDotAnimation();
                 if (error.message && error.message.includes('Owner, repo, and token are required')) {
                     showToast(__('configure_github_first'), 'error');
                     setTimeout(() => window.location.href = 'settings.php', 1500);
                 } else {
                     showToast(__('crawling_trigger_failed') + error.message, 'error');
                 }
-                setButtonLoading(btn, false);
+                setButtonLoadingWithStatus(btn, false);
             }
         }
         
-        // Set button status text with animated dots
+        // Button loading with visible status text
+        function setButtonLoadingWithStatus(btn, isLoading) {
+            if (!btn) return;
+            
+            if (isLoading) {
+                if (!btn.querySelector('.btn-text')) {
+                    const span = document.createElement('span');
+                    span.className = 'btn-text';
+                    while (btn.firstChild) {
+                        span.appendChild(btn.firstChild);
+                    }
+                    btn.appendChild(span);
+                }
+                btn.classList.add('loading-with-status');
+                btn.disabled = true;
+            } else {
+                btn.classList.remove('loading-with-status');
+                btn.disabled = false;
+                const span = btn.querySelector('.btn-text');
+                if (span) {
+                    while (span.firstChild) {
+                        btn.insertBefore(span.firstChild, span);
+                    }
+                    span.remove();
+                }
+            }
+        }
+        
+        // Set button status text
         function setButtonStatusText(btn, text) {
             if (!btn) return;
             const textSpan = btn.querySelector('.btn-text');
@@ -316,19 +346,38 @@ $csrfToken = generateCsrfToken();
             }
         }
         
-        // Get animated dots based on tick count
-        function getAnimatedDots(tick) {
-            const dotCount = tick % 4; // 0, 1, 2, 3
-            return '.'.repeat(dotCount);
+        // Dot animation variables
+        let dotAnimationInterval = null;
+        let currentDotCount = 0;
+        
+        // Start dot animation (fast - every 300ms)
+        function startDotAnimation(btn, baseText) {
+            stopDotAnimation();
+            currentDotCount = 0;
+            dotAnimationInterval = setInterval(() => {
+                currentDotCount = (currentDotCount + 1) % 4;
+                const dots = '.'.repeat(currentDotCount);
+                setButtonStatusText(btn, baseText + dots);
+            }, 300);
+        }
+        
+        // Stop dot animation
+        function stopDotAnimation() {
+            if (dotAnimationInterval) {
+                clearInterval(dotAnimationInterval);
+                dotAnimationInterval = null;
+            }
         }
         
         // Track workflow status
-        async function trackWorkflowStatus(btn, attempts = 0, dotTick = 0) {
+        let currentStatusBaseText = '';
+        async function trackWorkflowStatus(btn, attempts = 0) {
             const maxAttempts = 60; // Max 5 minutes (60 * 5 seconds)
             
             if (attempts >= maxAttempts) {
+                stopDotAnimation();
                 setButtonStatusText(btn, __('workflow_status_unknown'));
-                setTimeout(() => setButtonLoading(btn, false), 1500);
+                setTimeout(() => setButtonLoadingWithStatus(btn, false), 1500);
                 return;
             }
             
@@ -348,6 +397,7 @@ $csrfToken = generateCsrfToken();
                     const conclusion = latestRun.conclusion;
                     
                     if (status === 'completed') {
+                        stopDotAnimation();
                         if (conclusion === 'success') {
                             setButtonStatusText(btn, __('workflow_status_success'));
                         } else if (conclusion === 'failure') {
@@ -357,25 +407,42 @@ $csrfToken = generateCsrfToken();
                         } else {
                             setButtonStatusText(btn, __('workflow_status_completed'));
                         }
-                        setTimeout(() => setButtonLoading(btn, false), 2000);
+                        setTimeout(() => setButtonLoadingWithStatus(btn, false), 2000);
                         return;
                     } else if (status === 'queued') {
-                        setButtonStatusText(btn, __('workflow_status_queued').replace('...', '') + getAnimatedDots(dotTick));
+                        const newBaseText = __('workflow_status_queued').replace('...', '');
+                        if (currentStatusBaseText !== newBaseText) {
+                            currentStatusBaseText = newBaseText;
+                            startDotAnimation(btn, newBaseText);
+                        }
                     } else if (status === 'in_progress') {
-                        setButtonStatusText(btn, __('workflow_status_in_progress').replace('...', '') + getAnimatedDots(dotTick));
+                        const newBaseText = __('workflow_status_in_progress').replace('...', '');
+                        if (currentStatusBaseText !== newBaseText) {
+                            currentStatusBaseText = newBaseText;
+                            startDotAnimation(btn, newBaseText);
+                        }
                     } else {
-                        setButtonStatusText(btn, __('workflow_checking_status').replace('...', '') + getAnimatedDots(dotTick));
+                        const newBaseText = __('workflow_checking_status').replace('...', '');
+                        if (currentStatusBaseText !== newBaseText) {
+                            currentStatusBaseText = newBaseText;
+                            startDotAnimation(btn, newBaseText);
+                        }
                     }
                 } else {
-                    setButtonStatusText(btn, __('workflow_checking_status').replace('...', '') + getAnimatedDots(dotTick));
+                    const newBaseText = __('workflow_checking_status').replace('...', '');
+                    if (currentStatusBaseText !== newBaseText) {
+                        currentStatusBaseText = newBaseText;
+                        startDotAnimation(btn, newBaseText);
+                    }
                 }
                 
                 // Continue polling
-                setTimeout(() => trackWorkflowStatus(btn, attempts + 1, dotTick + 1), 5000);
+                setTimeout(() => trackWorkflowStatus(btn, attempts + 1), 5000);
             } catch (error) {
                 console.error('Error tracking workflow:', error);
+                stopDotAnimation();
                 setButtonStatusText(btn, __('workflow_status_unknown'));
-                setTimeout(() => setButtonLoading(btn, false), 1500);
+                setTimeout(() => setButtonLoadingWithStatus(btn, false), 1500);
             }
         }
     </script>

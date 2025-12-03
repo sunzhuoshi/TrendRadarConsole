@@ -742,6 +742,32 @@ select.form-control {
     animation: spin 1s linear infinite;
 }
 
+/* Button Loading with Status Text */
+.btn.loading-with-status {
+    position: relative;
+    pointer-events: none;
+    opacity: 0.9;
+}
+
+.btn.loading-with-status .btn-text {
+    visibility: visible;
+    padding-left: 20px;
+}
+
+.btn.loading-with-status::before {
+    content: '';
+    position: absolute;
+    width: 14px;
+    height: 14px;
+    top: 50%;
+    left: 10px;
+    margin-top: -7px;
+    border: 2px solid transparent;
+    border-top-color: currentColor;
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+}
+
 /* Mobile Menu Toggle */
 .mobile-menu-toggle {
     display: none;
