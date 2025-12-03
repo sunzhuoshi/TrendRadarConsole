@@ -385,11 +385,12 @@ $csrfToken = generateCsrfToken();
             if (!container) {
                 container = document.createElement('div');
                 container.className = 'workflow-progress-container';
+                const estimatedSeconds = Math.round(workflowEstimatedDuration / 1000);
                 container.innerHTML = `
                     <div class="workflow-progress-bar">
                         <div class="workflow-progress-fill"></div>
                     </div>
-                    <span class="workflow-progress-text">0%</span>
+                    <span class="workflow-progress-text">0s / ~${estimatedSeconds}s</span>
                 `;
                 btn.parentElement.appendChild(container);
             }
