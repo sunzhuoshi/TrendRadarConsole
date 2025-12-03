@@ -355,7 +355,7 @@ function getJsTranslations() {
         'config_loaded_from_github', 'confirm_save_to_github', 'config_saved_to_github',
         'fill_all_fields', 'configure_github_first', 'display_name_required',
         'enter_both_id_name', 'group', 'no_keywords_preview', 'weight_sum_is', 'should_be',
-        'weight_sum_message'
+        'weight_sum_message', 'using_default_config'
     ];
     
     foreach ($commonKeys as $key) {
