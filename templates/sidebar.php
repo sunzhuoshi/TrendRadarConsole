@@ -30,12 +30,6 @@ $lastUpdated = getLastUpdatedTime();
         <a href="settings.php" class="nav-item <?php echo ($currentPage ?? '') === 'settings' ? 'active' : ''; ?>">
             ⚙️ <?php _e('settings'); ?>
         </a>
-        <a href="export.php" class="nav-item <?php echo ($currentPage ?? '') === 'export' ? 'active' : ''; ?>">
-            📤 <?php _e('export'); ?>
-        </a>
-        <a href="github.php" class="nav-item <?php echo ($currentPage ?? '') === 'github' ? 'active' : ''; ?>">
-            🐙 <?php _e('github_sync'); ?>
-        </a>
         <div class="nav-item language-switcher" style="border-top: 1px solid rgba(255,255,255,0.1); padding-top: 10px; margin-top: 10px;">
             🌐 <?php _e('language'); ?>:
             <select id="language-select" onchange="switchLanguage(this.value)" style="margin-left: 8px; padding: 4px 8px; border-radius: 4px; border: none; background: rgba(255,255,255,0.1); color: inherit; cursor: pointer;">
