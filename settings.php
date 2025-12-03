@@ -609,8 +609,9 @@ $currentLang = getCurrentLanguage();
         }
         
         // Track workflow status
+        const POLL_INTERVAL_MS = 5000; // Poll every 5 seconds
         async function trackWorkflowStatus(btn, attempts = 0) {
-            const maxAttempts = 60; // 60 attempts * 5 seconds = 300 seconds (5 minutes)
+            const maxAttempts = 60; // 60 attempts * POLL_INTERVAL_MS = 300 seconds (5 minutes)
             
             if (attempts >= maxAttempts) {
                 setButtonStatusText(btn, __('workflow_status_unknown'));
@@ -658,7 +659,7 @@ $currentLang = getCurrentLanguage();
                 }
                 
                 // Continue polling
-                setTimeout(() => trackWorkflowStatus(btn, attempts + 1), 5000);
+                setTimeout(() => trackWorkflowStatus(btn, attempts + 1), POLL_INTERVAL_MS);
             } catch (error) {
                 console.error('Error tracking workflow:', error);
                 setButtonStatusText(btn, __('workflow_status_unknown'));
