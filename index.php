@@ -181,8 +181,8 @@ $csrfToken = generateCsrfToken();
                                         <button type="submit" class="btn btn-success btn-sm"><?php _e('activate'); ?></button>
                                     </form>
                                     <?php endif; ?>
-                                    <button type="button" class="btn btn-outline btn-sm" onclick="loadFromGitHub(<?php echo $cfg['id']; ?>)" title="<?php _e('load_from_github'); ?>">📥 GitHub</button>
-                                    <button type="button" class="btn btn-outline btn-sm" onclick="saveToGitHub(<?php echo $cfg['id']; ?>)" title="<?php _e('save_to_github'); ?>">📤 GitHub</button>
+                                    <button type="button" class="btn btn-outline btn-sm" data-action="load-github-<?php echo $cfg['id']; ?>" onclick="loadFromGitHub(<?php echo $cfg['id']; ?>, this)" title="<?php _e('load_from_github'); ?>">📥 GitHub</button>
+                                    <button type="button" class="btn btn-outline btn-sm" data-action="save-github-<?php echo $cfg['id']; ?>" onclick="saveToGitHub(<?php echo $cfg['id']; ?>, this)" title="<?php _e('save_to_github'); ?>">📤 GitHub</button>
                                 </td>
                             </tr>
                             <?php endforeach; ?>
@@ -217,11 +217,12 @@ $csrfToken = generateCsrfToken();
     <script src="assets/js/app.js"></script>
     <script>
         // Load from GitHub
-        async function loadFromGitHub(configId) {
+        async function loadFromGitHub(configId, btn) {
             if (!confirm(__('confirm_load_from_github'))) {
                 return;
             }
             
+            setButtonLoading(btn, true);
             try {
                 const result = await apiRequest('api/github.php', 'POST', {
                     action: 'load_or_create_default',
@@ -240,15 +241,18 @@ $csrfToken = generateCsrfToken();
                 } else {
                     showToast(__('failed_to_load') + ': ' + error.message, 'error');
                 }
+            } finally {
+                setButtonLoading(btn, false);
             }
         }
         
         // Save to GitHub
-        async function saveToGitHub(configId) {
+        async function saveToGitHub(configId, btn) {
             if (!confirm(__('confirm_save_to_github'))) {
                 return;
             }
             
+            setButtonLoading(btn, true);
             try {
                 await apiRequest('api/github.php', 'POST', {
                     action: 'save',
@@ -266,6 +270,8 @@ $csrfToken = generateCsrfToken();
                 } else {
                     showToast(__('failed_to_save') + ': ' + error.message, 'error');
                 }
+            } finally {
+                setButtonLoading(btn, false);
             }
         }
     </script>
