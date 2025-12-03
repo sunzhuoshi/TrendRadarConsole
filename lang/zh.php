@@ -351,6 +351,7 @@ return [
     'config_loaded_from_github' => '配置已从 GitHub 加载',
     'failed_to_load' => '加载失败：',
     'confirm_save_to_github' => '这将覆盖 GitHub 仓库中的 CONFIG_YAML 和 FREQUENCY_WORDS 变量。继续吗？',
+    'confirm_load_from_github' => '这将从 GitHub 加载配置并更新当前配置。继续吗？',
     'config_saved_to_github' => '配置已成功保存到 GitHub！',
     'fill_all_fields' => '请先填写所有字段',
     'configure_github_first' => '请先配置 GitHub 设置',

@@ -45,6 +45,15 @@ try {
         jsonSuccess(null, 'GitHub settings saved');
     }
     
+    // If owner/repo/token are empty, try to get from saved settings
+    if (!$owner || !$repo || !$token) {
+        $auth = new Auth();
+        $savedSettings = $auth->getGitHubSettings($userId);
+        if (!$owner) $owner = $savedSettings['github_owner'] ?? '';
+        if (!$repo) $repo = $savedSettings['github_repo'] ?? '';
+        if (!$token) $token = $savedSettings['github_token'] ?? '';
+    }
+    
     if (!$owner || !$repo || !$token) {
         jsonError('Owner, repo, and token are required');
     }

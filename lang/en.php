@@ -351,6 +351,7 @@ return [
     'config_loaded_from_github' => 'Configuration loaded from GitHub',
     'failed_to_load' => 'Failed to load: ',
     'confirm_save_to_github' => 'This will overwrite CONFIG_YAML and FREQUENCY_WORDS variables in your GitHub repository. Continue?',
+    'confirm_load_from_github' => 'This will load configuration from GitHub and update the current configuration. Continue?',
     'config_saved_to_github' => 'Configuration saved to GitHub successfully!',
     'fill_all_fields' => 'Please fill in all fields first',
     'configure_github_first' => 'Please configure GitHub settings first',
