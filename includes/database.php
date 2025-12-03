@@ -15,7 +15,8 @@ class Database
         'platforms',
         'keywords',
         'webhooks',
-        'settings'
+        'settings',
+        'operation_logs'
     ];
     
     private function __construct()

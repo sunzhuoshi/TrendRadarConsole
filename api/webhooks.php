@@ -7,6 +7,7 @@ session_start();
 require_once '../includes/helpers.php';
 require_once '../includes/configuration.php';
 require_once '../includes/auth.php';
+require_once '../includes/operation_log.php';
 
 header('Content-Type: application/json; charset=utf-8');
 
@@ -18,6 +19,7 @@ $userId = Auth::getUserId();
 
 try {
     $config = new Configuration($userId);
+    $opLog = new OperationLog($userId);
     $method = getMethod();
     $input = getInput();
     
@@ -103,6 +105,14 @@ try {
                 1
             );
             
+            // Log the operation
+            $opLog->log(
+                OperationLog::ACTION_WEBHOOK_SAVE,
+                OperationLog::TARGET_WEBHOOK,
+                $configId,
+                ['type' => $type]
+            );
+            
             jsonSuccess(null, 'Webhook saved successfully');
             break;
             
@@ -113,8 +123,10 @@ try {
             }
             
             $data = [];
+            $logDetails = [];
             if (isset($input['is_enabled'])) {
                 $data['is_enabled'] = $input['is_enabled'] ? 1 : 0;
+                $logDetails['is_enabled'] = $data['is_enabled'];
             }
             
             if (empty($data)) {
@@ -124,6 +136,14 @@ try {
             // Direct database update for webhook
             $db = Database::getInstance();
             $db->update('webhooks', $data, 'id = ?', [$id]);
+            
+            // Log the operation
+            $opLog->log(
+                OperationLog::ACTION_WEBHOOK_UPDATE,
+                OperationLog::TARGET_WEBHOOK,
+                $id,
+                $logDetails
+            );
             
             jsonSuccess(null, 'Webhook updated successfully');
             break;
@@ -135,6 +155,15 @@ try {
             }
             
             $config->deleteWebhook($id);
+            
+            // Log the operation
+            $opLog->log(
+                OperationLog::ACTION_WEBHOOK_DELETE,
+                OperationLog::TARGET_WEBHOOK,
+                $id,
+                null
+            );
+            
             jsonSuccess(null, 'Webhook deleted successfully');
             break;
             

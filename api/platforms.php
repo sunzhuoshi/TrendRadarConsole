@@ -7,6 +7,7 @@ session_start();
 require_once '../includes/helpers.php';
 require_once '../includes/configuration.php';
 require_once '../includes/auth.php';
+require_once '../includes/operation_log.php';
 
 header('Content-Type: application/json; charset=utf-8');
 
@@ -18,6 +19,7 @@ $userId = Auth::getUserId();
 
 try {
     $config = new Configuration($userId);
+    $opLog = new OperationLog($userId);
     $method = getMethod();
     $input = getInput();
     
@@ -58,6 +60,15 @@ try {
             
             $sortOrder = count($existing) + 1;
             $id = $config->addPlatform($configId, $platformId, $platformName, $sortOrder);
+            
+            // Log the operation
+            $opLog->log(
+                OperationLog::ACTION_PLATFORM_ADD,
+                OperationLog::TARGET_PLATFORM,
+                $id,
+                ['platform_id' => $platformId, 'name' => $platformName]
+            );
+            
             jsonSuccess(['id' => $id], 'Platform added successfully');
             break;
             
@@ -68,14 +79,18 @@ try {
             }
             
             $data = [];
+            $logDetails = [];
             if (isset($input['platform_name'])) {
                 $data['platform_name'] = trim($input['platform_name']);
+                $logDetails['name'] = $data['platform_name'];
             }
             if (isset($input['is_enabled'])) {
                 $data['is_enabled'] = $input['is_enabled'] ? 1 : 0;
+                $logDetails['is_enabled'] = $data['is_enabled'];
             }
             if (isset($input['sort_order'])) {
                 $data['sort_order'] = (int)$input['sort_order'];
+                $logDetails['sort_order'] = $data['sort_order'];
             }
             
             if (empty($data)) {
@@ -83,6 +98,15 @@ try {
             }
             
             $config->updatePlatform($id, $data);
+            
+            // Log the operation
+            $opLog->log(
+                OperationLog::ACTION_PLATFORM_UPDATE,
+                OperationLog::TARGET_PLATFORM,
+                $id,
+                $logDetails
+            );
+            
             jsonSuccess(null, 'Platform updated successfully');
             break;
             
@@ -93,6 +117,15 @@ try {
             }
             
             $config->deletePlatform($id);
+            
+            // Log the operation
+            $opLog->log(
+                OperationLog::ACTION_PLATFORM_DELETE,
+                OperationLog::TARGET_PLATFORM,
+                $id,
+                null
+            );
+            
             jsonSuccess(null, 'Platform deleted successfully');
             break;
             

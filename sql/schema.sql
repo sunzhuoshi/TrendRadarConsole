@@ -87,5 +87,20 @@ CREATE TABLE IF NOT EXISTS `settings` (
     CONSTRAINT `fk_settings_config` FOREIGN KEY (`config_id`) REFERENCES `configurations`(`id`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='General settings';
 
+-- Operation logs table for tracking configuration changes
+CREATE TABLE IF NOT EXISTS `operation_logs` (
+    `id` INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    `user_id` INT UNSIGNED NOT NULL COMMENT 'Reference to user who performed the action',
+    `action` VARCHAR(50) NOT NULL COMMENT 'Action type (e.g., load_from_github, save_to_github, update_platform)',
+    `target_type` VARCHAR(50) COMMENT 'Target entity type (e.g., configuration, platform, keyword, webhook, setting)',
+    `target_id` INT UNSIGNED COMMENT 'ID of the target entity',
+    `details` TEXT COMMENT 'JSON formatted additional details',
+    `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    INDEX `idx_user_id` (`user_id`),
+    INDEX `idx_action` (`action`),
+    INDEX `idx_created_at` (`created_at`),
+    CONSTRAINT `fk_operation_logs_user` FOREIGN KEY (`user_id`) REFERENCES `users`(`id`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='Operation logs for tracking configuration changes';
+
 -- Note: Default user and configuration are created during registration
 -- No default data is inserted here

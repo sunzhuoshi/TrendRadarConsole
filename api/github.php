@@ -8,6 +8,7 @@ require_once '../includes/helpers.php';
 require_once '../includes/configuration.php';
 require_once '../includes/github.php';
 require_once '../includes/auth.php';
+require_once '../includes/operation_log.php';
 
 header('Content-Type: application/json; charset=utf-8');
 
@@ -38,10 +39,22 @@ try {
     $repo = $input['repo'] ?? '';
     $token = $input['token'] ?? '';
     
+    // Initialize operation logger
+    $opLog = new OperationLog($userId);
+    
     // Handle save_settings action first (doesn't need full GitHub credentials)
     if ($action === 'save_settings') {
         $auth = new Auth();
         $auth->updateGitHubSettings($userId, $owner, $repo, $token ?: null);
+        
+        // Log the operation
+        $opLog->log(
+            OperationLog::ACTION_SAVE_GITHUB_SETTINGS,
+            OperationLog::TARGET_GITHUB,
+            null,
+            ['owner' => $owner, 'repo' => $repo]
+        );
+        
         jsonSuccess(null, 'GitHub settings saved');
     }
     
@@ -58,12 +71,29 @@ try {
             $auth->updateGitHubSettings($userId, $owner, $repo, $token);
             
             $repoInfo = $github->testConnection();
+            
+            // Log the operation
+            $opLog->log(
+                OperationLog::ACTION_TEST_CONNECTION,
+                OperationLog::TARGET_GITHUB,
+                null,
+                ['owner' => $owner, 'repo' => $repo, 'full_name' => $repoInfo['full_name'] ?? '']
+            );
+            
             jsonSuccess($repoInfo, 'Connection successful');
             break;
             
         case 'load':
             $configYaml = $github->getConfigYaml();
             $frequencyWords = $github->getFrequencyWords();
+            
+            // Log the operation
+            $opLog->log(
+                OperationLog::ACTION_LOAD_FROM_GITHUB,
+                OperationLog::TARGET_GITHUB,
+                null,
+                ['owner' => $owner, 'repo' => $repo, 'has_config' => !empty($configYaml), 'has_keywords' => !empty($frequencyWords)]
+            );
             
             jsonSuccess([
                 'config_yaml' => $configYaml,
@@ -216,6 +246,14 @@ try {
                 $config->update($configId, ['description' => $description]);
             }
             
+            // Log the operation
+            $opLog->log(
+                OperationLog::ACTION_LOAD_FROM_GITHUB,
+                OperationLog::TARGET_CONFIGURATION,
+                $configId,
+                ['owner' => $owner, 'repo' => $repo, 'loaded_from_github' => $loadedFromGitHub]
+            );
+            
             jsonSuccess([
                 'loaded_from_github' => $loadedFromGitHub,
                 'config_id' => $configId
@@ -243,6 +281,14 @@ try {
             // Save to GitHub
             $github->setConfigYaml($yamlString);
             $github->setFrequencyWords($keywordsString);
+            
+            // Log the operation
+            $opLog->log(
+                OperationLog::ACTION_SAVE_TO_GITHUB,
+                OperationLog::TARGET_CONFIGURATION,
+                $configId,
+                ['owner' => $owner, 'repo' => $repo]
+            );
             
             jsonSuccess(null, 'Configuration saved to GitHub');
             break;
