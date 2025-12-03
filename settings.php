@@ -350,6 +350,7 @@ $currentLang = getCurrentLanguage();
                         <div class="btn-group">
                             <button type="submit" class="btn btn-primary"><?php _e('save_settings'); ?></button>
                             <button type="button" class="btn btn-secondary" data-action="test-connection" onclick="testConnection()"><?php _e('test_connection'); ?></button>
+                            <button type="button" class="btn btn-success" data-action="save-to-github" onclick="saveToGitHub()"><?php _e('save_to_github'); ?></button>
                         </div>
                     </form>
                 </div>
@@ -460,6 +461,37 @@ $currentLang = getCurrentLanguage();
                 showToast(__('connection_failed') + error.message, 'error');
             } finally {
                 setButtonLoading(testBtn, false);
+            }
+        }
+        
+        // Save to GitHub
+        async function saveToGitHub() {
+            const saveBtn = document.querySelector('button[data-action="save-to-github"]');
+            const configId = document.getElementById('config-id').value;
+            
+            if (!confirm(__('confirm_save_to_github'))) {
+                return;
+            }
+            
+            setButtonLoading(saveBtn, true);
+            try {
+                await apiRequest('api/github.php', 'POST', {
+                    action: 'save',
+                    owner: '',  // Will use saved settings
+                    repo: '',
+                    token: '',
+                    config_id: configId
+                });
+                
+                showToast(__('config_saved_to_github'), 'success');
+            } catch (error) {
+                if (error.message && error.message.includes('Owner, repo, and token are required')) {
+                    showToast(__('configure_github_first'), 'error');
+                } else {
+                    showToast(__('failed_to_save') + ': ' + error.message, 'error');
+                }
+            } finally {
+                setButtonLoading(saveBtn, false);
             }
         }
     </script>
