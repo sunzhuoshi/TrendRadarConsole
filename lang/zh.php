@@ -237,6 +237,7 @@ return [
     'server_url' => '服务器 URL',
     'access_token' => '访问令牌（可选）',
     'bark_url' => 'Bark URL',
+    'home_page' => '主页',
     'webhook_group_recommended' => '推荐',
     'webhook_group_domestic' => '国内平台',
     'webhook_group_international' => '国际平台',
