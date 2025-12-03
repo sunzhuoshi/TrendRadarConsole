@@ -657,7 +657,6 @@ $currentLang = getCurrentLanguage();
         }
         
         // Track workflow status
-        let currentStatusBaseText = '';
         async function trackWorkflowStatus(btn, attempts = 0) {
             const maxAttempts = 60; // Max 5 minutes (60 * 5 seconds)
             
