@@ -552,10 +552,13 @@ $currentLang = getCurrentLanguage();
         }
         
         // Button loading with visible status text
+        let originalButtonText = '';
         function setButtonLoadingWithStatus(btn, isLoading) {
             if (!btn) return;
             
             if (isLoading) {
+                // Store original button text
+                originalButtonText = btn.textContent.trim();
                 if (!btn.querySelector('.btn-text')) {
                     const span = document.createElement('span');
                     span.className = 'btn-text';
@@ -571,6 +574,8 @@ $currentLang = getCurrentLanguage();
                 btn.disabled = false;
                 const span = btn.querySelector('.btn-text');
                 if (span) {
+                    // Restore original button text
+                    span.textContent = originalButtonText;
                     while (span.firstChild) {
                         btn.insertBefore(span.firstChild, span);
                     }
