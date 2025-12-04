@@ -129,6 +129,7 @@ function startProgressAnimation(btn) {
 
 /**
  * Track workflow status with polling
+ * Uses btn.dataset.dispatchTime to only track runs that started after dispatch
  */
 async function trackWorkflowStatus(btn, attempts = 0) {
     const maxAttempts = 60; // 60 attempts * POLL_INTERVAL_MS = 300 seconds (5 minutes)
@@ -146,10 +147,22 @@ async function trackWorkflowStatus(btn, attempts = 0) {
         });
         
         const runs = result.data?.runs || [];
-        if (runs.length > 0) {
-            const latestRun = runs[0];
-            const status = latestRun.status;
-            const conclusion = latestRun.conclusion;
+        const dispatchTime = parseInt(btn.dataset.dispatchTime) || 0;
+        
+        // Find a run that started after our dispatch time
+        let targetRun = null;
+        for (const run of runs) {
+            const runCreatedAt = new Date(run.created_at).getTime();
+            // Allow 10 second buffer before dispatch time to account for clock differences
+            if (runCreatedAt >= dispatchTime - 10000) {
+                targetRun = run;
+                break;
+            }
+        }
+        
+        if (targetRun) {
+            const status = targetRun.status;
+            const conclusion = targetRun.conclusion;
             
             if (status === 'completed') {
                 if (conclusion === 'success') {
@@ -175,6 +188,7 @@ async function trackWorkflowStatus(btn, attempts = 0) {
                 setButtonStatusText(btn, __('workflow_checking_status'));
             }
         } else {
+            // New run hasn't appeared yet, keep waiting
             setButtonStatusText(btn, __('workflow_checking_status'));
         }
         

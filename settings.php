@@ -526,13 +526,17 @@ $currentLang = getCurrentLanguage();
                     }
                 }
                 
+                // Store dispatch time BEFORE calling dispatch
+                const dispatchTime = Date.now();
+                
                 await apiRequest('api/github.php', 'POST', {
                     action: 'dispatch_workflow',
                     workflow_id: 'crawler.yml'
                 });
                 
                 // Start tracking workflow status - store timing data on button
-                btn.dataset.startTime = Date.now().toString();
+                btn.dataset.dispatchTime = dispatchTime.toString();
+                btn.dataset.startTime = dispatchTime.toString();
                 btn.dataset.estimatedDuration = estimatedDuration.toString();
                 setTimeout(() => trackWorkflowStatus(btn, 0), 3000);
             } catch (error) {
