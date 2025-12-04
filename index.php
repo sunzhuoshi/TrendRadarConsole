@@ -369,23 +369,7 @@ $csrfToken = generateCsrfToken();
         }
         
         // Create progress bar after button
-        function createProgressBar(btn) {
-            if (!btn) return;
-            let container = btn.parentElement.querySelector('.workflow-progress-container');
-            if (!container) {
-                container = document.createElement('div');
-                container.className = 'workflow-progress-container';
-                const estimatedSeconds = Math.round((parseInt(btn.dataset.estimatedDuration) || DEFAULT_ESTIMATED_DURATION_MS) / 1000);
-                container.innerHTML = `
-                    <div class="workflow-progress-bar">
-                        <div class="workflow-progress-fill"></div>
-                    </div>
-                    <span class="workflow-progress-text">0s / ~${estimatedSeconds}s</span>
-                `;
-                btn.parentElement.appendChild(container);
-            }
-            return container;
-        }
+        // See assets/js/shared.js for createProgressBar definition.
         
         // Update progress bar
         function updateProgressBar(btn, percent, timeText) {
