@@ -221,6 +221,99 @@ sudo ./setup-docker-worker.sh</code></pre>
                             🗑️ <?php _e('remove_container'); ?>
                         </button>
                     </div>
+                    
+                    <!-- Environment Variables for new container -->
+                    <div id="env-vars-section" class="mt-4" style="display: none;">
+                        <h4><?php _e('environment_variables'); ?> <small class="text-muted">(<?php _e('optional'); ?>)</small></h4>
+                        
+                        <div class="row">
+                            <div class="col-6">
+                                <div class="form-group">
+                                    <label class="form-label"><small>FEISHU_WEBHOOK_URL</small></label>
+                                    <input type="text" id="env-feishu" class="form-control env-var" placeholder="<?php _e('feishu_webhook_placeholder'); ?>">
+                                </div>
+                            </div>
+                            <div class="col-6">
+                                <div class="form-group">
+                                    <label class="form-label"><small>DINGTALK_WEBHOOK_URL</small></label>
+                                    <input type="text" id="env-dingtalk" class="form-control env-var" placeholder="<?php _e('dingtalk_webhook_placeholder'); ?>">
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="row">
+                            <div class="col-6">
+                                <div class="form-group">
+                                    <label class="form-label"><small>WEWORK_WEBHOOK_URL</small></label>
+                                    <input type="text" id="env-wework" class="form-control env-var" placeholder="<?php _e('wework_webhook_placeholder'); ?>">
+                                </div>
+                            </div>
+                            <div class="col-6">
+                                <div class="form-group">
+                                    <label class="form-label"><small>TELEGRAM_BOT_TOKEN</small></label>
+                                    <input type="text" id="env-telegram-token" class="form-control env-var" placeholder="<?php _e('telegram_token_placeholder'); ?>">
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="row">
+                            <div class="col-6">
+                                <div class="form-group">
+                                    <label class="form-label"><small>TELEGRAM_CHAT_ID</small></label>
+                                    <input type="text" id="env-telegram-chat" class="form-control env-var" placeholder="<?php _e('telegram_chat_id_placeholder'); ?>">
+                                </div>
+                            </div>
+                            <div class="col-6">
+                                <div class="form-group">
+                                    <label class="form-label"><small>EMAIL_FROM</small></label>
+                                    <input type="text" id="env-email-from" class="form-control env-var" placeholder="<?php _e('email_from_placeholder'); ?>">
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="row">
+                            <div class="col-6">
+                                <div class="form-group">
+                                    <label class="form-label"><small>EMAIL_PASSWORD</small></label>
+                                    <input type="password" id="env-email-password" class="form-control env-var" placeholder="<?php _e('email_password_placeholder'); ?>">
+                                </div>
+                            </div>
+                            <div class="col-6">
+                                <div class="form-group">
+                                    <label class="form-label"><small>EMAIL_TO</small></label>
+                                    <input type="text" id="env-email-to" class="form-control env-var" placeholder="<?php _e('email_to_placeholder'); ?>">
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="row">
+                            <div class="col-4">
+                                <div class="form-group">
+                                    <label class="form-label"><small>CRON_SCHEDULE</small></label>
+                                    <input type="text" id="env-cron" class="form-control env-var" value="*/30 * * * *" placeholder="*/30 * * * *">
+                                    <div class="form-text"><?php _e('cron_schedule_desc'); ?></div>
+                                </div>
+                            </div>
+                            <div class="col-4">
+                                <div class="form-group">
+                                    <label class="form-label"><small>RUN_MODE</small></label>
+                                    <select id="env-run-mode" class="form-control env-var">
+                                        <option value="cron"><?php _e('cron_mode'); ?></option>
+                                        <option value="once"><?php _e('once_mode'); ?></option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="col-4">
+                                <div class="form-group">
+                                    <label class="form-label"><small>IMMEDIATE_RUN</small></label>
+                                    <select id="env-immediate-run" class="form-control env-var">
+                                        <option value="true"><?php _e('yes'); ?></option>
+                                        <option value="false"><?php _e('no'); ?></option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
             
@@ -435,6 +528,7 @@ sudo ./setup-docker-worker.sh</code></pre>
             const btnStop = document.getElementById('btn-stop');
             const btnRestart = document.getElementById('btn-restart');
             const btnRemove = document.getElementById('btn-remove');
+            const envSection = document.getElementById('env-vars-section');
             
             // Check if elements exist before accessing them
             if (!btnRun || !btnStart || !btnStop || !btnRestart || !btnRemove) {
@@ -448,6 +542,7 @@ sudo ./setup-docker-worker.sh</code></pre>
                 btnStop.style.display = 'none';
                 btnRestart.style.display = 'none';
                 btnRemove.style.display = 'none';
+                if (envSection) envSection.style.display = 'block';
             } else if (containerRunning) {
                 // Container is running
                 btnRun.style.display = 'none';
@@ -455,6 +550,7 @@ sudo ./setup-docker-worker.sh</code></pre>
                 btnStop.style.display = 'inline-flex';
                 btnRestart.style.display = 'inline-flex';
                 btnRemove.style.display = 'none';
+                if (envSection) envSection.style.display = 'none';
             } else {
                 // Container exists but stopped
                 btnRun.style.display = 'none';
@@ -462,6 +558,7 @@ sudo ./setup-docker-worker.sh</code></pre>
                 btnStop.style.display = 'none';
                 btnRestart.style.display = 'none';
                 btnRemove.style.display = 'inline-flex';
+                if (envSection) envSection.style.display = 'none';
             }
         }
         
@@ -473,10 +570,19 @@ sudo ./setup-docker-worker.sh</code></pre>
             setButtonLoading(btn, true);
             
             try {
-                // Environment variables are no longer passed from UI
-                // They are handled server-side or not needed
                 const result = await apiRequest('api/docker.php', 'POST', {
-                    action: 'run'
+                    action: 'run',
+                    feishu_webhook_url: document.getElementById('env-feishu').value,
+                    dingtalk_webhook_url: document.getElementById('env-dingtalk').value,
+                    wework_webhook_url: document.getElementById('env-wework').value,
+                    telegram_bot_token: document.getElementById('env-telegram-token').value,
+                    telegram_chat_id: document.getElementById('env-telegram-chat').value,
+                    email_from: document.getElementById('env-email-from').value,
+                    email_password: document.getElementById('env-email-password').value,
+                    email_to: document.getElementById('env-email-to').value,
+                    cron_schedule: document.getElementById('env-cron').value,
+                    run_mode: document.getElementById('env-run-mode').value,
+                    immediate_run: document.getElementById('env-immediate-run').value
                 });
                 
                 showToast('<?php _e('container_started_success'); ?>', 'success');
