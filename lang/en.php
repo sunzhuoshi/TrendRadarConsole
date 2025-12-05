@@ -381,4 +381,40 @@ return [
     'js_failed_to_add' => 'Failed to add: ',
     'js_failed_to_remove' => 'Failed to remove: ',
     'js_failed_to_save' => 'Failed to save: ',
+    
+    // Operation Logs
+    'operation_logs' => 'Operation Logs',
+    'operation_logs_desc' => 'Track all configuration changes and operations',
+    'total_logs' => 'Total Operations',
+    'recent_operations' => 'Recent Operations',
+    'no_logs_yet' => 'No operation logs yet',
+    
+    // Log action translations
+    'log_action_load_from_github' => 'Loaded configuration from GitHub',
+    'log_action_save_to_github' => 'Saved configuration to GitHub',
+    'log_action_test_connection' => 'Tested GitHub connection',
+    'log_action_save_github_settings' => 'Saved GitHub settings',
+    'log_action_config_activate' => 'Activated configuration',
+    'log_action_config_delete' => 'Deleted configuration',
+    'log_action_config_update' => 'Updated configuration',
+    'log_action_config_create' => 'Created configuration',
+    'log_action_platform_add' => 'Added platform',
+    'log_action_platform_update' => 'Updated platform',
+    'log_action_platform_delete' => 'Deleted platform',
+    'log_action_keyword_save' => 'Saved keywords',
+    'log_action_keyword_clear' => 'Cleared keywords',
+    'log_action_webhook_save' => 'Saved webhook',
+    'log_action_webhook_update' => 'Updated webhook',
+    'log_action_webhook_delete' => 'Deleted webhook',
+    'log_action_setting_update' => 'Updated setting',
+    'log_action_settings_save' => 'Saved all settings',
+    'log_action_unknown' => 'Unknown action',
+    
+    // Log target translations
+    'log_target_configuration' => 'Configuration',
+    'log_target_platform' => 'Platform',
+    'log_target_keyword' => 'Keywords',
+    'log_target_webhook' => 'Webhook',
+    'log_target_setting' => 'Setting',
+    'log_target_github' => 'GitHub',
 ];

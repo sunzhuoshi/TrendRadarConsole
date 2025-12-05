@@ -381,4 +381,40 @@ return [
     'js_failed_to_add' => '添加失败：',
     'js_failed_to_remove' => '删除失败：',
     'js_failed_to_save' => '保存失败：',
+    
+    // Operation Logs
+    'operation_logs' => '操作日志',
+    'operation_logs_desc' => '跟踪所有配置更改和操作',
+    'total_logs' => '总操作数',
+    'recent_operations' => '最近操作',
+    'no_logs_yet' => '暂无操作日志',
+    
+    // Log action translations
+    'log_action_load_from_github' => '从 GitHub 加载配置',
+    'log_action_save_to_github' => '保存配置到 GitHub',
+    'log_action_test_connection' => '测试 GitHub 连接',
+    'log_action_save_github_settings' => '保存 GitHub 设置',
+    'log_action_config_activate' => '激活配置',
+    'log_action_config_delete' => '删除配置',
+    'log_action_config_update' => '更新配置',
+    'log_action_config_create' => '创建配置',
+    'log_action_platform_add' => '添加平台',
+    'log_action_platform_update' => '更新平台',
+    'log_action_platform_delete' => '删除平台',
+    'log_action_keyword_save' => '保存关键词',
+    'log_action_keyword_clear' => '清空关键词',
+    'log_action_webhook_save' => '保存 Webhook',
+    'log_action_webhook_update' => '更新 Webhook',
+    'log_action_webhook_delete' => '删除 Webhook',
+    'log_action_setting_update' => '更新设置',
+    'log_action_settings_save' => '保存所有设置',
+    'log_action_unknown' => '未知操作',
+    
+    // Log target translations
+    'log_target_configuration' => '配置',
+    'log_target_platform' => '平台',
+    'log_target_keyword' => '关键词',
+    'log_target_webhook' => 'Webhook',
+    'log_target_setting' => '设置',
+    'log_target_github' => 'GitHub',
 ];
