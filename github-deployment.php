@@ -384,12 +384,27 @@ $csrfToken = generateCsrfToken();
                 </div>
             </div>
             
-            <!-- Test Crawling -->
+            <!-- Crawler Workflow -->
             <div class="card">
                 <div class="card-header">
                     <h3>🕷️ <?php _e('test_crawling'); ?></h3>
                 </div>
                 <div class="card-body">
+                    <!-- Workflow Status -->
+                    <div class="mb-4">
+                        <label class="form-label"><strong><?php _e('workflow_status'); ?>:</strong></label>
+                        <div class="d-flex align-items-center gap-2" style="display: flex; align-items: center; gap: 10px;">
+                            <span id="workflow-status-badge" class="badge badge-secondary"><?php _e('workflow_status_loading'); ?></span>
+                            <button type="button" id="workflow-toggle-btn" class="btn btn-sm btn-outline" onclick="toggleWorkflow()" style="display: none;">
+                                <span id="workflow-toggle-text"><?php _e('workflow_disable'); ?></span>
+                            </button>
+                            <button type="button" class="btn btn-sm btn-outline" onclick="refreshWorkflowStatus()">🔄</button>
+                        </div>
+                    </div>
+                    
+                    <hr>
+                    
+                    <!-- Test Crawling Button -->
                     <p class="text-muted mb-3"><?php _e('test_crawling_desc'); ?></p>
                     <button type="button" class="btn btn-warning" data-action="test-crawling" onclick="testCrawling()"><?php _e('test_crawling'); ?></button>
                 </div>
@@ -662,6 +677,83 @@ $csrfToken = generateCsrfToken();
                 setButtonLoadingWithStatus(btn, false);
             }
         }
+        
+        // Workflow status management
+        let currentWorkflowState = null;
+        
+        async function refreshWorkflowStatus() {
+            const badge = document.getElementById('workflow-status-badge');
+            const toggleBtn = document.getElementById('workflow-toggle-btn');
+            const toggleText = document.getElementById('workflow-toggle-text');
+            
+            badge.textContent = __('workflow_status_loading');
+            badge.className = 'badge badge-secondary';
+            
+            try {
+                const result = await apiRequest('api/github.php', 'POST', {
+                    action: 'get_workflow',
+                    workflow_id: 'crawler.yml'
+                });
+                
+                const workflow = result.data?.workflow;
+                if (workflow) {
+                    currentWorkflowState = workflow.state;
+                    
+                    if (workflow.state === 'active') {
+                        badge.textContent = __('workflow_enabled');
+                        badge.className = 'badge badge-success';
+                        toggleText.textContent = __('workflow_disable');
+                        toggleBtn.className = 'btn btn-sm btn-outline btn-danger';
+                    } else {
+                        badge.textContent = __('workflow_disabled');
+                        badge.className = 'badge badge-danger';
+                        toggleText.textContent = __('workflow_enable');
+                        toggleBtn.className = 'btn btn-sm btn-outline btn-success';
+                    }
+                    toggleBtn.style.display = '';
+                }
+            } catch (error) {
+                badge.textContent = 'Error';
+                badge.className = 'badge badge-warning';
+                console.error('Failed to get workflow status:', error);
+            }
+        }
+        
+        async function toggleWorkflow() {
+            const toggleBtn = document.getElementById('workflow-toggle-btn');
+            const isEnabled = currentWorkflowState === 'active';
+            
+            const confirmMsg = isEnabled ? __('workflow_disable_confirm') : __('workflow_enable_confirm');
+            if (!confirm(confirmMsg)) {
+                return;
+            }
+            
+            setButtonLoading(toggleBtn, true);
+            
+            try {
+                const action = isEnabled ? 'disable_workflow' : 'enable_workflow';
+                await apiRequest('api/github.php', 'POST', {
+                    action: action,
+                    workflow_id: 'crawler.yml'
+                });
+                
+                const successMsg = isEnabled ? __('workflow_disabled_success') : __('workflow_enabled_success');
+                showToast(successMsg, 'success');
+                
+                // Refresh status after a short delay
+                setTimeout(() => refreshWorkflowStatus(), 500);
+            } catch (error) {
+                const failMsg = isEnabled ? __('workflow_disable_failed') : __('workflow_enable_failed');
+                showToast(failMsg + error.message, 'error');
+            } finally {
+                setButtonLoading(toggleBtn, false);
+            }
+        }
+        
+        // Load workflow status on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            refreshWorkflowStatus();
+        });
         
         <?php endif; ?>
     </script>
