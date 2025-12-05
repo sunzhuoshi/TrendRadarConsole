@@ -227,66 +227,6 @@ sudo ./setup-docker-worker.sh</code></pre>
                         <h4><?php _e('environment_variables'); ?> <small class="text-muted">(<?php _e('optional'); ?>)</small></h4>
                         
                         <div class="row">
-                            <div class="col-6">
-                                <div class="form-group">
-                                    <label class="form-label"><small>FEISHU_WEBHOOK_URL</small></label>
-                                    <input type="text" id="env-feishu" class="form-control env-var" placeholder="<?php _e('feishu_webhook_placeholder'); ?>">
-                                </div>
-                            </div>
-                            <div class="col-6">
-                                <div class="form-group">
-                                    <label class="form-label"><small>DINGTALK_WEBHOOK_URL</small></label>
-                                    <input type="text" id="env-dingtalk" class="form-control env-var" placeholder="<?php _e('dingtalk_webhook_placeholder'); ?>">
-                                </div>
-                            </div>
-                        </div>
-                        
-                        <div class="row">
-                            <div class="col-6">
-                                <div class="form-group">
-                                    <label class="form-label"><small>WEWORK_WEBHOOK_URL</small></label>
-                                    <input type="text" id="env-wework" class="form-control env-var" placeholder="<?php _e('wework_webhook_placeholder'); ?>">
-                                </div>
-                            </div>
-                            <div class="col-6">
-                                <div class="form-group">
-                                    <label class="form-label"><small>TELEGRAM_BOT_TOKEN</small></label>
-                                    <input type="text" id="env-telegram-token" class="form-control env-var" placeholder="<?php _e('telegram_token_placeholder'); ?>">
-                                </div>
-                            </div>
-                        </div>
-                        
-                        <div class="row">
-                            <div class="col-6">
-                                <div class="form-group">
-                                    <label class="form-label"><small>TELEGRAM_CHAT_ID</small></label>
-                                    <input type="text" id="env-telegram-chat" class="form-control env-var" placeholder="<?php _e('telegram_chat_id_placeholder'); ?>">
-                                </div>
-                            </div>
-                            <div class="col-6">
-                                <div class="form-group">
-                                    <label class="form-label"><small>EMAIL_FROM</small></label>
-                                    <input type="text" id="env-email-from" class="form-control env-var" placeholder="<?php _e('email_from_placeholder'); ?>">
-                                </div>
-                            </div>
-                        </div>
-                        
-                        <div class="row">
-                            <div class="col-6">
-                                <div class="form-group">
-                                    <label class="form-label"><small>EMAIL_PASSWORD</small></label>
-                                    <input type="password" id="env-email-password" class="form-control env-var" placeholder="<?php _e('email_password_placeholder'); ?>">
-                                </div>
-                            </div>
-                            <div class="col-6">
-                                <div class="form-group">
-                                    <label class="form-label"><small>EMAIL_TO</small></label>
-                                    <input type="text" id="env-email-to" class="form-control env-var" placeholder="<?php _e('email_to_placeholder'); ?>">
-                                </div>
-                            </div>
-                        </div>
-                        
-                        <div class="row">
                             <div class="col-4">
                                 <div class="form-group">
                                     <label class="form-label"><small>CRON_SCHEDULE</small></label>
