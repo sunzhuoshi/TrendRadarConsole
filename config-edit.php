@@ -7,6 +7,7 @@ session_start();
 require_once 'includes/helpers.php';
 require_once 'includes/configuration.php';
 require_once 'includes/auth.php';
+require_once 'includes/operation_log.php';
 
 if (!file_exists('config/config.php')) {
     header('Location: install.php');
@@ -31,6 +32,7 @@ if (!$githubConfigured) {
 
 try {
     $config = new Configuration($userId);
+    $opLog = new OperationLog($userId);
     
     // Handle form submission
     if ($_SERVER['REQUEST_METHOD'] === 'POST') {
@@ -52,6 +54,15 @@ try {
                         'name' => $name,
                         'description' => $description
                     ]);
+                    
+                    // Log the operation
+                    $opLog->log(
+                        OperationLog::ACTION_CONFIG_UPDATE,
+                        OperationLog::TARGET_CONFIGURATION,
+                        $id,
+                        ['name' => $name]
+                    );
+                    
                     setFlash('success', __('config_updated_success'));
                 } else {
                     // Create new
@@ -96,6 +107,14 @@ try {
                     foreach ($defaultSettings as $key => $value) {
                         $config->saveSetting($newId, $key, $value);
                     }
+                    
+                    // Log the operation
+                    $opLog->log(
+                        OperationLog::ACTION_CONFIG_CREATE,
+                        OperationLog::TARGET_CONFIGURATION,
+                        $newId,
+                        ['name' => $name]
+                    );
                     
                     setFlash('success', __('config_created_success'));
                     header('Location: config-edit.php?id=' . $newId);

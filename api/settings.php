@@ -7,6 +7,7 @@ session_start();
 require_once '../includes/helpers.php';
 require_once '../includes/configuration.php';
 require_once '../includes/auth.php';
+require_once '../includes/operation_log.php';
 
 header('Content-Type: application/json; charset=utf-8');
 
@@ -18,6 +19,7 @@ $userId = Auth::getUserId();
 
 try {
     $config = new Configuration($userId);
+    $opLog = new OperationLog($userId);
     $method = getMethod();
     $input = getInput();
     
@@ -49,6 +51,15 @@ try {
             // Handle single setting update
             if (isset($input['key']) && isset($input['value'])) {
                 $config->saveSetting($configId, $input['key'], $input['value']);
+                
+                // Log the operation
+                $opLog->log(
+                    OperationLog::ACTION_SETTING_UPDATE,
+                    OperationLog::TARGET_SETTING,
+                    $configId,
+                    ['key' => $input['key']]
+                );
+                
                 jsonSuccess(null, 'Setting updated successfully');
             }
             
@@ -57,6 +68,15 @@ try {
                 foreach ($input['settings'] as $key => $value) {
                     $config->saveSetting($configId, $key, $value);
                 }
+                
+                // Log the operation
+                $opLog->log(
+                    OperationLog::ACTION_SETTINGS_SAVE,
+                    OperationLog::TARGET_SETTING,
+                    $configId,
+                    ['count' => count($input['settings'])]
+                );
+                
                 jsonSuccess(null, 'Settings saved successfully');
             }
             

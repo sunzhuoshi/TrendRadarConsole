@@ -7,6 +7,7 @@ session_start();
 require_once '../includes/helpers.php';
 require_once '../includes/configuration.php';
 require_once '../includes/auth.php';
+require_once '../includes/operation_log.php';
 
 header('Content-Type: application/json; charset=utf-8');
 
@@ -18,6 +19,7 @@ $userId = Auth::getUserId();
 
 try {
     $config = new Configuration($userId);
+    $opLog = new OperationLog($userId);
     $method = getMethod();
     $input = getInput();
     
@@ -64,6 +66,7 @@ try {
             $currentGroup = 0;
             $sortOrder = 0;
             $previousWasEmpty = false;
+            $keywordCount = 0;
             
             foreach ($lines as $line) {
                 $line = trim($line);
@@ -99,8 +102,18 @@ try {
                 if ($keyword !== '' || $type === 'limit') {
                     $config->addKeyword($configId, $keyword, $type, $currentGroup, $sortOrder, $limitValue);
                     $sortOrder++;
+                    $keywordCount++;
                 }
             }
+            
+            // Log the operation
+            $action = $keywordCount > 0 ? OperationLog::ACTION_KEYWORD_SAVE : OperationLog::ACTION_KEYWORD_CLEAR;
+            $opLog->log(
+                $action,
+                OperationLog::TARGET_KEYWORD,
+                $configId,
+                ['count' => $keywordCount, 'groups' => $currentGroup + 1]
+            );
             
             jsonSuccess(null, 'Keywords saved successfully');
             break;
