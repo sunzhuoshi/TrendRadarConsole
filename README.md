@@ -135,7 +135,55 @@ These variables will automatically override the config files during GitHub Actio
 
 ### Docker Deployment
 
-Place the exported files in your TrendRadar project's `config/` directory.
+TrendRadarConsole now supports local Docker deployment as an alternative to GitHub Actions. Navigate to **Docker Deployment** in the sidebar to:
+
+1. **Configure Docker Settings**: Set your container name, Docker image, and volume paths
+2. **Monitor Container Status**: View real-time status of your Docker container
+3. **View Container Logs**: Access container logs directly from the web interface
+4. **Generate Docker Commands**: Automatically generate `docker run` commands with your settings
+
+#### Quick Start with Docker
+
+```bash
+# Create directories for config and output
+mkdir -p ./config ./output
+
+# Run the container
+docker run -d --name trend-radar \
+  -v ./config:/app/config:ro \
+  -v ./output:/app/output \
+  -e FEISHU_WEBHOOK_URL="your_feishu_webhook" \
+  -e DINGTALK_WEBHOOK_URL="your_dingtalk_webhook" \
+  -e WEWORK_WEBHOOK_URL="your_wework_webhook" \
+  -e TELEGRAM_BOT_TOKEN="your_telegram_bot_token" \
+  -e TELEGRAM_CHAT_ID="your_telegram_chat_id" \
+  -e EMAIL_FROM="your_email" \
+  -e EMAIL_PASSWORD="your_email_password" \
+  -e EMAIL_TO="recipient_email" \
+  -e CRON_SCHEDULE="*/30 * * * *" \
+  -e RUN_MODE="cron" \
+  -e IMMEDIATE_RUN="true" \
+  wantcat/trendradar:latest
+```
+
+#### Useful Docker Commands
+
+```bash
+# Check container status
+docker inspect trend-radar
+
+# View container logs
+docker logs --tail 100 trend-radar
+
+# Stop container
+docker stop trend-radar
+
+# Start container
+docker start trend-radar
+
+# Remove container
+docker rm trend-radar
+```
 
 ## Directory Structure
 
@@ -143,6 +191,7 @@ Place the exported files in your TrendRadar project's `config/` directory.
 TrendRadarConsole/
 ├── api/                    # API endpoints
 │   ├── config-action.php
+│   ├── docker.php          # Docker management API
 │   ├── export.php
 │   ├── github.php
 │   ├── keywords.php
@@ -164,12 +213,12 @@ TrendRadarConsole/
 │   ├── github.php          # GitHub API integration
 │   └── helpers.php         # Helper functions
 ├── sql/
+│   ├── migrations/         # Database migrations
 │   └── schema.sql          # Database schema (users, configurations, etc.)
 ├── templates/
 │   └── sidebar.php         # Sidebar template with mobile hamburger menu
 ├── config-edit.php         # Configuration edit page
-├── export.php              # Export page
-├── github.php              # GitHub sync page
+├── docker.php              # Docker deployment management page
 ├── index.php               # Dashboard
 ├── install.php             # Installation wizard
 ├── keywords.php            # Keywords management

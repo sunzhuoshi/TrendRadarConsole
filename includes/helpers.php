@@ -355,7 +355,8 @@ function getJsTranslations() {
         'confirm_test_crawling', 'crawling_triggered', 'crawling_trigger_failed',
         'workflow_status_queued', 'workflow_status_in_progress', 'workflow_status_completed',
         'workflow_status_success', 'workflow_status_failure', 'workflow_status_cancelled',
-        'workflow_status_unknown', 'workflow_checking_status'
+        'workflow_status_unknown', 'workflow_checking_status',
+        'docker_settings_saved', 'failed_to_inspect', 'failed_to_fetch_logs', 'failed_to_generate'
     ];
     
     foreach ($commonKeys as $key) {

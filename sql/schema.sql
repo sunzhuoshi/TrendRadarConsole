@@ -10,6 +10,10 @@ CREATE TABLE IF NOT EXISTS `users` (
     `github_owner` VARCHAR(100) COMMENT 'GitHub repository owner',
     `github_repo` VARCHAR(100) COMMENT 'GitHub repository name',
     `github_token` VARCHAR(255) COMMENT 'GitHub PAT (encrypted)',
+    `docker_container_name` VARCHAR(100) COMMENT 'Docker container name for local deployment',
+    `docker_config_path` VARCHAR(255) COMMENT 'Path to config directory for Docker',
+    `docker_output_path` VARCHAR(255) COMMENT 'Path to output directory for Docker',
+    `docker_image` VARCHAR(255) DEFAULT 'wantcat/trendradar:latest' COMMENT 'Docker image to use',
     `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     `last_login` TIMESTAMP NULL,
     `updated_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
