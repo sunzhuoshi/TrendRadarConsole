@@ -44,6 +44,16 @@ try {
     $error = $e->getMessage();
 }
 
+// Helper function to determine step class
+function getStepClass($currentStep, $targetStep) {
+    if ($currentStep > $targetStep) {
+        return 'completed';
+    } elseif ($currentStep === $targetStep) {
+        return 'active';
+    }
+    return '';
+}
+
 $flash = getFlash();
 $currentPage = 'github-deployment';
 $currentLang = getCurrentLanguage();
@@ -181,21 +191,21 @@ $csrfToken = generateCsrfToken();
                     <!-- Wizard Steps -->
                     <div class="wizard-steps">
                         <div class="wizard-step">
-                            <div class="step-number <?php echo $step >= 1 ? ($step > 1 ? 'completed' : 'active') : ''; ?>">
+                            <div class="step-number <?php echo getStepClass($step, 1); ?>">
                                 <?php echo $step > 1 ? '✓' : '1'; ?>
                             </div>
                             <span class="step-label"><?php _e('clone_repo'); ?></span>
                         </div>
                         <div class="step-connector <?php echo $step > 1 ? 'completed' : ''; ?>"></div>
                         <div class="wizard-step">
-                            <div class="step-number <?php echo $step >= 2 ? ($step > 2 ? 'completed' : 'active') : ''; ?>">
+                            <div class="step-number <?php echo getStepClass($step, 2); ?>">
                                 <?php echo $step > 2 ? '✓' : '2'; ?>
                             </div>
                             <span class="step-label"><?php _e('repo_settings'); ?></span>
                         </div>
                         <div class="step-connector <?php echo $step > 2 ? 'completed' : ''; ?>"></div>
                         <div class="wizard-step">
-                            <div class="step-number <?php echo $step >= 3 ? 'active' : ''; ?>">3</div>
+                            <div class="step-number <?php echo getStepClass($step, 3); ?>">3</div>
                             <span class="step-label"><?php _e('setup_pat'); ?></span>
                         </div>
                     </div>
@@ -456,16 +466,16 @@ $csrfToken = generateCsrfToken();
                 // Save token
                 await apiRequest('api/github.php', 'POST', {
                     action: 'save_settings',
-                    owner: '<?php echo sanitize($githubSettings['github_owner'] ?? ''); ?>',
-                    repo: '<?php echo sanitize($githubSettings['github_repo'] ?? 'TrendRadar'); ?>',
+                    owner: <?php echo json_encode($githubSettings['github_owner'] ?? ''); ?>,
+                    repo: <?php echo json_encode($githubSettings['github_repo'] ?? 'TrendRadar'); ?>,
                     token: token
                 });
                 
                 // Test connection
                 const testResult = await apiRequest('api/github.php', 'POST', {
                     action: 'test',
-                    owner: '<?php echo sanitize($githubSettings['github_owner'] ?? ''); ?>',
-                    repo: '<?php echo sanitize($githubSettings['github_repo'] ?? 'TrendRadar'); ?>',
+                    owner: <?php echo json_encode($githubSettings['github_owner'] ?? ''); ?>,
+                    repo: <?php echo json_encode($githubSettings['github_repo'] ?? 'TrendRadar'); ?>,
                     token: token
                 });
                 
@@ -475,8 +485,8 @@ $csrfToken = generateCsrfToken();
                 try {
                     const loadResult = await apiRequest('api/github.php', 'POST', {
                         action: 'load_or_create_default',
-                        owner: '<?php echo sanitize($githubSettings['github_owner'] ?? ''); ?>',
-                        repo: '<?php echo sanitize($githubSettings['github_repo'] ?? 'TrendRadar'); ?>',
+                        owner: <?php echo json_encode($githubSettings['github_owner'] ?? ''); ?>,
+                        repo: <?php echo json_encode($githubSettings['github_repo'] ?? 'TrendRadar'); ?>,
                         token: token
                     });
                     
@@ -595,7 +605,7 @@ $csrfToken = generateCsrfToken();
                     owner: '',  // Will use saved settings
                     repo: '',
                     token: '',
-                    config_id: <?php echo isset($activeConfig['id']) ? $activeConfig['id'] : 'null'; ?>
+                    config_id: <?php echo json_encode(isset($activeConfig['id']) ? $activeConfig['id'] : null); ?>
                 });
                 
                 showToast(__('config_saved_to_github'), 'success');
