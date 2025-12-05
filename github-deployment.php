@@ -390,15 +390,13 @@ $csrfToken = generateCsrfToken();
                     <h3>🕷️ <?php _e('test_crawling'); ?></h3>
                 </div>
                 <div class="card-body">
-                    <!-- Workflow Status -->
+                    <!-- Workflow Status Toggle -->
                     <div class="mb-4">
                         <label class="form-label"><strong><?php _e('workflow_status'); ?>:</strong></label>
-                        <div class="d-flex align-items-center gap-2" style="display: flex; align-items: center; gap: 10px;">
-                            <span id="workflow-status-badge" class="badge badge-secondary"><?php _e('workflow_status_loading'); ?></span>
-                            <button type="button" id="workflow-toggle-btn" class="btn btn-sm btn-outline" onclick="toggleWorkflow()" style="display: none;">
-                                <span id="workflow-toggle-text"><?php _e('workflow_disable'); ?></span>
+                        <div>
+                            <button type="button" id="workflow-toggle-btn" class="btn btn-secondary" onclick="toggleWorkflow()">
+                                <?php _e('workflow_status_loading'); ?>
                             </button>
-                            <button type="button" class="btn btn-sm btn-outline" onclick="refreshWorkflowStatus()">🔄</button>
                         </div>
                     </div>
                     
@@ -682,12 +680,11 @@ $csrfToken = generateCsrfToken();
         let currentWorkflowState = null;
         
         async function refreshWorkflowStatus() {
-            const badge = document.getElementById('workflow-status-badge');
             const toggleBtn = document.getElementById('workflow-toggle-btn');
-            const toggleText = document.getElementById('workflow-toggle-text');
             
-            badge.textContent = __('workflow_status_loading');
-            badge.className = 'badge badge-secondary';
+            toggleBtn.textContent = __('workflow_status_loading');
+            toggleBtn.className = 'btn btn-secondary';
+            toggleBtn.disabled = true;
             
             try {
                 const result = await apiRequest('api/github.php', 'POST', {
@@ -698,29 +695,33 @@ $csrfToken = generateCsrfToken();
                 const workflow = result.data?.workflow;
                 if (workflow) {
                     currentWorkflowState = workflow.state;
+                    toggleBtn.disabled = false;
                     
                     if (workflow.state === 'active') {
-                        badge.textContent = __('workflow_enabled');
-                        badge.className = 'badge badge-success';
-                        toggleText.textContent = __('workflow_disable');
-                        toggleBtn.className = 'btn btn-sm btn-outline btn-danger';
+                        toggleBtn.textContent = '✅ ' + __('workflow_enabled') + ' (' + __('workflow_disable') + ')';
+                        toggleBtn.className = 'btn btn-success';
                     } else {
-                        badge.textContent = __('workflow_disabled');
-                        badge.className = 'badge badge-danger';
-                        toggleText.textContent = __('workflow_enable');
-                        toggleBtn.className = 'btn btn-sm btn-outline btn-success';
+                        toggleBtn.textContent = '⏸️ ' + __('workflow_disabled') + ' (' + __('workflow_enable') + ')';
+                        toggleBtn.className = 'btn btn-secondary';
                     }
-                    toggleBtn.style.display = '';
                 }
             } catch (error) {
-                badge.textContent = 'Error';
-                badge.className = 'badge badge-warning';
+                toggleBtn.textContent = '⚠️ Error';
+                toggleBtn.className = 'btn btn-warning';
+                toggleBtn.disabled = false;
                 console.error('Failed to get workflow status:', error);
             }
         }
         
         async function toggleWorkflow() {
             const toggleBtn = document.getElementById('workflow-toggle-btn');
+            
+            // If state is unknown, just refresh
+            if (currentWorkflowState === null) {
+                refreshWorkflowStatus();
+                return;
+            }
+            
             const isEnabled = currentWorkflowState === 'active';
             
             const confirmMsg = isEnabled ? __('workflow_disable_confirm') : __('workflow_enable_confirm');
@@ -745,7 +746,6 @@ $csrfToken = generateCsrfToken();
             } catch (error) {
                 const failMsg = isEnabled ? __('workflow_disable_failed') : __('workflow_enable_failed');
                 showToast(failMsg + error.message, 'error');
-            } finally {
                 setButtonLoading(toggleBtn, false);
             }
         }
