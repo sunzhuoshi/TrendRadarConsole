@@ -8,6 +8,7 @@ session_start();
 require_once '../includes/helpers.php';
 require_once '../includes/auth.php';
 require_once '../includes/ssh.php';
+require_once '../includes/configuration.php';
 
 header('Content-Type: application/json; charset=utf-8');
 
@@ -234,6 +235,9 @@ try {
             $escapedOutputPath = escapeshellarg($outputPath);
             $ssh->exec("mkdir -p {$escapedConfigPath} {$escapedOutputPath}");
             
+            // Generate config files from current configuration
+            generateConfigFiles($userId, $ssh, $configPath);
+            
             // Build environment variables
             $envArgs = [];
             $envKeys = [
@@ -340,6 +344,12 @@ try {
             
         case 'restart':
             // Restart a container via SSH
+            // Generate config files from current configuration before restart
+            $escapedConfigPath = escapeshellarg($configPath);
+            $escapedOutputPath = escapeshellarg($outputPath);
+            $ssh->exec("mkdir -p {$escapedConfigPath} {$escapedOutputPath}");
+            generateConfigFiles($userId, $ssh, $configPath);
+            
             $escapedName = escapeshellarg($containerName);
             $result = $ssh->exec("docker restart {$escapedName} 2>&1");
             
@@ -359,4 +369,109 @@ try {
     
 } catch (Exception $e) {
     jsonError($e->getMessage(), 500);
+}
+
+/**
+ * Generate config.yaml and frequency_words.txt files on remote server
+ * 
+ * @param int $userId User ID
+ * @param SSHHelper $ssh SSH helper instance
+ * @param string $configPath Path to config directory on remote server
+ */
+function generateConfigFiles($userId, $ssh, $configPath) {
+    try {
+        $config = new Configuration($userId);
+        $activeConfig = $config->getActive();
+        
+        if (!$activeConfig) {
+            // No active configuration, skip generating files
+            return;
+        }
+        
+        $configId = $activeConfig['id'];
+        
+        // Generate config.yaml content
+        $yamlData = $config->exportAsYaml($configId);
+        if ($yamlData) {
+            $yamlContent = convertToYaml($yamlData);
+            $escapedYaml = escapeshellarg($yamlContent);
+            $escapedPath = escapeshellarg($configPath . '/config.yaml');
+            $ssh->exec("echo {$escapedYaml} > {$escapedPath}");
+        }
+        
+        // Generate frequency_words.txt content
+        $keywordsContent = $config->exportKeywords($configId);
+        if ($keywordsContent) {
+            $escapedKeywords = escapeshellarg($keywordsContent);
+            $escapedPath = escapeshellarg($configPath . '/frequency_words.txt');
+            $ssh->exec("echo {$escapedKeywords} > {$escapedPath}");
+        }
+    } catch (Exception $e) {
+        // Log error but don't fail the operation
+        error_log('Failed to generate config files: ' . $e->getMessage());
+    }
+}
+
+/**
+ * Convert array to YAML format string
+ * 
+ * @param array $data Data to convert
+ * @param int $indent Current indentation level
+ * @return string YAML formatted string
+ */
+function convertToYaml($data, $indent = 0) {
+    $yaml = '';
+    $prefix = str_repeat('  ', $indent);
+    
+    foreach ($data as $key => $value) {
+        if (is_array($value)) {
+            if (empty($value)) {
+                $yaml .= $prefix . $key . ": []\n";
+            } elseif (isset($value[0])) {
+                // Indexed array
+                $yaml .= $prefix . $key . ":\n";
+                foreach ($value as $item) {
+                    if (is_array($item)) {
+                        $yaml .= $prefix . "  -\n";
+                        foreach ($item as $k => $v) {
+                            $yaml .= $prefix . "    " . $k . ": " . formatYamlValue($v) . "\n";
+                        }
+                    } else {
+                        $yaml .= $prefix . "  - " . formatYamlValue($item) . "\n";
+                    }
+                }
+            } else {
+                // Associative array
+                $yaml .= $prefix . $key . ":\n";
+                $yaml .= convertToYaml($value, $indent + 1);
+            }
+        } else {
+            $yaml .= $prefix . $key . ": " . formatYamlValue($value) . "\n";
+        }
+    }
+    
+    return $yaml;
+}
+
+/**
+ * Format a single value for YAML output
+ * 
+ * @param mixed $value Value to format
+ * @return string Formatted value
+ */
+function formatYamlValue($value) {
+    if (is_bool($value)) {
+        return $value ? 'true' : 'false';
+    } elseif (is_numeric($value)) {
+        return (string)$value;
+    } elseif (is_string($value)) {
+        // Quote strings that contain special characters
+        if (preg_match('/[:\{\}\[\],&\*#\?\|\-<>=!%@\\\\]/', $value) || $value === '' || $value === 'true' || $value === 'false') {
+            return '"' . addslashes($value) . '"';
+        }
+        return $value;
+    } elseif (is_null($value)) {
+        return '""';
+    }
+    return (string)$value;
 }

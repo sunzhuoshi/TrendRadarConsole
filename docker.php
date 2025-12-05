@@ -96,7 +96,7 @@ $isDevMode = $auth->isDevModeEnabled($userId);
                     <div class="alert alert-info mb-3">
                         <strong>💡 <?php _e('setup_ssh_account_title'); ?></strong><br>
                         <?php _e('setup_ssh_account_desc'); ?>
-                        <pre style="margin-top: 10px; background: #f5f5f5; padding: 10px; border-radius: 4px;"><code>curl -O https://trendingnews.cn/scripts/setup-docker-worker.sh
+                        <pre style="margin-top: 10px; background: #2d3748; color: #e2e8f0; padding: 10px; border-radius: 4px;"><code>curl -O https://trendingnews.cn/scripts/setup-docker-worker.sh
 chmod +x setup-docker-worker.sh
 sudo ./setup-docker-worker.sh</code></pre>
                     </div>
@@ -111,7 +111,7 @@ sudo ./setup-docker-worker.sh</code></pre>
                                            placeholder="192.168.1.100">
                                 </div>
                             </div>
-                            <div class="col-2">
+                            <div class="col-3">
                                 <div class="form-group">
                                     <label class="form-label"><?php _e('ssh_port'); ?></label>
                                     <input type="number" id="ssh-port" class="form-control" 
@@ -123,11 +123,11 @@ sudo ./setup-docker-worker.sh</code></pre>
                                 <div class="form-group">
                                     <label class="form-label"><?php _e('ssh_username'); ?> <span class="text-danger">*</span></label>
                                     <input type="text" id="ssh-username" class="form-control" 
-                                           value="<?php echo sanitize($sshSettings['docker_ssh_username'] ?? ''); ?>" 
-                                           placeholder="trendradarsrv">
+                                           value="<?php echo sanitize($sshSettings['docker_ssh_username'] ?? 'trendradarsrv'); ?>" 
+                                           placeholder="trendradarsrv" readonly>
                                 </div>
                             </div>
-                            <div class="col-3">
+                            <div class="col-2">
                                 <div class="form-group">
                                     <label class="form-label"><?php _e('ssh_password'); ?></label>
                                     <input type="password" id="ssh-password" class="form-control" 
@@ -224,10 +224,6 @@ sudo ./setup-docker-worker.sh</code></pre>
                     <h3>🎮 <?php _e('container_control'); ?></h3>
                 </div>
                 <div class="card-body">
-                    <div id="container-status-summary" class="mb-3">
-                        <span class="badge badge-secondary"><?php _e('status_unknown'); ?></span>
-                    </div>
-                    
                     <div class="btn-group">
                         <button type="button" class="btn btn-success" onclick="runContainer()" id="btn-run">
                             ▶️ <?php _e('run_container'); ?>
@@ -553,7 +549,6 @@ sudo ./setup-docker-worker.sh</code></pre>
             const btnRestart = document.getElementById('btn-restart');
             const btnRemove = document.getElementById('btn-remove');
             const envSection = document.getElementById('env-vars-section');
-            const statusSummary = document.getElementById('container-status-summary');
             
             if (!containerExists) {
                 // Container doesn't exist - only show Run button
@@ -563,7 +558,6 @@ sudo ./setup-docker-worker.sh</code></pre>
                 btnRestart.style.display = 'none';
                 btnRemove.style.display = 'none';
                 envSection.style.display = 'block';
-                statusSummary.innerHTML = '<span class="badge badge-secondary"><?php _e('not_created'); ?></span>';
             } else if (containerRunning) {
                 // Container is running
                 btnRun.style.display = 'none';
@@ -572,7 +566,6 @@ sudo ./setup-docker-worker.sh</code></pre>
                 btnRestart.style.display = 'inline-flex';
                 btnRemove.style.display = 'none';
                 envSection.style.display = 'none';
-                statusSummary.innerHTML = '<span class="badge badge-success"><?php _e('running'); ?></span>';
             } else {
                 // Container exists but stopped
                 btnRun.style.display = 'none';
@@ -581,7 +574,6 @@ sudo ./setup-docker-worker.sh</code></pre>
                 btnRestart.style.display = 'none';
                 btnRemove.style.display = 'inline-flex';
                 envSection.style.display = 'none';
-                statusSummary.innerHTML = '<span class="badge badge-warning"><?php _e('stopped'); ?></span>';
             }
         }
         
@@ -747,7 +739,7 @@ sudo ./setup-docker-worker.sh</code></pre>
                                 </div>
                             </div>
                         </div>
-                        ${data.mounts.length > 0 ? `
+                        ${isDevMode && data.mounts.length > 0 ? `
                         <div class="mt-3">
                             <h4><?php _e('volume_mounts'); ?></h4>
                             <table class="table">
