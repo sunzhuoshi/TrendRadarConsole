@@ -65,7 +65,16 @@ async function apiRequest(url, method = 'GET', data = null) {
     
     try {
         const response = await fetch(url, options);
-        const result = await response.json();
+        const responseText = await response.text();
+        
+        // Try to parse as JSON
+        let result;
+        try {
+            result = JSON.parse(responseText);
+        } catch (jsonError) {
+            // If JSON parsing fails, throw error with the raw text response
+            throw new Error(responseText || 'Request failed with invalid response');
+        }
         
         if (!response.ok) {
             throw new Error(result.message || 'Request failed');
