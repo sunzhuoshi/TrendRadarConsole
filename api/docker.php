@@ -25,7 +25,9 @@ $userId = (int)$userId;
 
 // Docker settings are calculated based on user ID (not user-configurable)
 // User ID is validated to be numeric, so it's safe for shell commands
-$containerName = 'trend-radar-' . $userId;
+// Environment suffix: '-dev' for development, '' for production
+$envSuffix = getEnvironmentSuffix();
+$containerName = 'trend-radar-' . $userId . $envSuffix;
 // Use absolute paths for Docker volume mounts
 $basePath = dirname(dirname(__FILE__));
 $configPath = $basePath . '/workspace/' . $userId . '/config';

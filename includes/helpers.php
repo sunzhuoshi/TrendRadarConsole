@@ -75,6 +75,41 @@ function baseUrl($path = '') {
 }
 
 /**
+ * Get application environment
+ * @return string 'development' or 'production'
+ */
+function getAppEnvironment() {
+    // First check config file
+    $configFile = __DIR__ . '/../config/config.php';
+    if (file_exists($configFile)) {
+        $config = require $configFile;
+        if (isset($config['app']['environment'])) {
+            return $config['app']['environment'];
+        }
+    }
+    
+    // Fallback to version.php (set during CD deployment)
+    $versionFile = __DIR__ . '/../version.php';
+    if (file_exists($versionFile)) {
+        $version = require $versionFile;
+        if (isset($version['environment'])) {
+            return $version['environment'];
+        }
+    }
+    
+    return 'production';
+}
+
+/**
+ * Get environment suffix for Docker container names
+ * @return string '-dev' for development, '' for production
+ */
+function getEnvironmentSuffix() {
+    $env = getAppEnvironment();
+    return $env === 'development' ? '-dev' : '';
+}
+
+/**
  * Check if request is AJAX
  */
 function isAjax() {

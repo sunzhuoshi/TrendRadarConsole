@@ -441,6 +441,7 @@ return [
     'docker_image' => 'Docker 镜像',
     'config_path' => '配置目录',
     'output_path' => '输出目录',
+    'environment' => '环境',
     'container_control' => '容器控制',
     'container_status' => '容器状态',
     'refresh' => '刷新',

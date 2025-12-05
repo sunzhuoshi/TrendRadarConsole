@@ -38,11 +38,14 @@ $currentPage = 'docker';
 
 // Docker settings are calculated based on user ID (not user-configurable)
 // User ID is validated to be numeric, so it's safe for display
-$containerName = 'trend-radar-' . $userId;
+// Environment suffix: '-dev' for development, '' for production
+$envSuffix = getEnvironmentSuffix();
+$containerName = 'trend-radar-' . $userId . $envSuffix;
 $basePath = dirname(__FILE__);
 $configPath = $basePath . '/workspace/' . $userId . '/config';
 $outputPath = $basePath . '/workspace/' . $userId . '/output';
 $dockerImage = 'wantcat/trendradar:latest';
+$appEnvironment = getAppEnvironment();
 
 $csrfToken = generateCsrfToken();
 $currentLang = getCurrentLanguage();
@@ -84,16 +87,22 @@ $currentLang = getCurrentLanguage();
                 <div class="card-body">
                     <p class="text-muted mb-3"><?php _e('docker_settings_auto_desc'); ?></p>
                     <div class="row">
-                        <div class="col-6">
+                        <div class="col-4">
                             <div class="form-group">
                                 <label class="form-label"><?php _e('container_name'); ?></label>
                                 <input type="text" class="form-control" value="<?php echo sanitize($containerName); ?>" readonly>
                             </div>
                         </div>
-                        <div class="col-6">
+                        <div class="col-4">
                             <div class="form-group">
                                 <label class="form-label"><?php _e('docker_image'); ?></label>
                                 <input type="text" class="form-control" value="<?php echo sanitize($dockerImage); ?>" readonly>
+                            </div>
+                        </div>
+                        <div class="col-4">
+                            <div class="form-group">
+                                <label class="form-label"><?php _e('environment'); ?></label>
+                                <input type="text" class="form-control" value="<?php echo sanitize($appEnvironment); ?>" readonly>
                             </div>
                         </div>
                     </div>

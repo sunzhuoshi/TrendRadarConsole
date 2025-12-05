@@ -441,6 +441,7 @@ return [
     'docker_image' => 'Docker Image',
     'config_path' => 'Config Path',
     'output_path' => 'Output Path',
+    'environment' => 'Environment',
     'container_control' => 'Container Control',
     'container_status' => 'Container Status',
     'refresh' => 'Refresh',
