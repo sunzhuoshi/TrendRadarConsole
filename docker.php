@@ -84,7 +84,8 @@ $isDevMode = $auth->isDevModeEnabled($userId);
             <div class="alert alert-danger"><?php echo sanitize($error); ?></div>
             <?php else: ?>
             
-            <!-- SSH Connection Settings -->
+            <!-- SSH Connection Settings (only available in development mode) -->
+            <?php if ($isDevMode): ?>
             <div class="card">
                 <div class="card-header">
                     <h3>🔐 <?php _e('ssh_connection_settings'); ?></h3>
@@ -129,7 +130,6 @@ sudo ./setup-docker-worker.sh</code></pre>
                                        placeholder="<?php _e('leave_empty_to_keep'); ?>">
                             </div>
                         </div>
-                        <?php if ($isDevMode): ?>
                         <div class="row">
                             <div class="col-6">
                                 <div class="form-group">
@@ -151,25 +151,11 @@ sudo ./setup-docker-worker.sh</code></pre>
                                 </div>
                             </div>
                         </div>
-                        <?php else: ?>
-                        <input type="hidden" id="workspace-path" value="<?php echo sanitize($sshSettings['docker_workspace_path'] ?? '/srv/trendradar'); ?>">
-                        <div class="row">
-                            <div class="col-12">
-                                <div class="btn-group">
-                                    <button type="button" class="btn btn-primary" onclick="saveSSHSettings()">
-                                        💾 <?php _e('save_settings'); ?>
-                                    </button>
-                                    <button type="button" class="btn btn-outline" onclick="testConnection()">
-                                        🔗 <?php _e('test_connection'); ?>
-                                    </button>
-                                </div>
-                            </div>
-                        </div>
-                        <?php endif; ?>
                     </form>
                     <div id="connection-status" class="mt-3" style="display: none;"></div>
                 </div>
             </div>
+            <?php endif; ?>
             
             <!-- Docker Settings (Auto-calculated) - Only visible in development mode -->
             <?php if ($isDevMode): ?>
@@ -449,7 +435,11 @@ sudo ./setup-docker-worker.sh</code></pre>
             const btnStop = document.getElementById('btn-stop');
             const btnRestart = document.getElementById('btn-restart');
             const btnRemove = document.getElementById('btn-remove');
-            const envSection = document.getElementById('env-vars-section');
+            
+            // Check if elements exist before accessing them
+            if (!btnRun || !btnStart || !btnStop || !btnRestart || !btnRemove) {
+                return;
+            }
             
             if (!containerExists) {
                 // Container doesn't exist - only show Run button
@@ -458,7 +448,6 @@ sudo ./setup-docker-worker.sh</code></pre>
                 btnStop.style.display = 'none';
                 btnRestart.style.display = 'none';
                 btnRemove.style.display = 'none';
-                envSection.style.display = 'block';
             } else if (containerRunning) {
                 // Container is running
                 btnRun.style.display = 'none';
@@ -466,7 +455,6 @@ sudo ./setup-docker-worker.sh</code></pre>
                 btnStop.style.display = 'inline-flex';
                 btnRestart.style.display = 'inline-flex';
                 btnRemove.style.display = 'none';
-                envSection.style.display = 'none';
             } else {
                 // Container exists but stopped
                 btnRun.style.display = 'none';
@@ -474,7 +462,6 @@ sudo ./setup-docker-worker.sh</code></pre>
                 btnStop.style.display = 'none';
                 btnRestart.style.display = 'none';
                 btnRemove.style.display = 'inline-flex';
-                envSection.style.display = 'none';
             }
         }
         
