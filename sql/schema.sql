@@ -106,9 +106,11 @@ CREATE TABLE IF NOT EXISTS `operation_logs` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='Operation logs for tracking configuration changes';
 
 -- Migrations table for tracking applied database migrations
+-- Note: VARCHAR(191) is used instead of VARCHAR(255) to stay within MySQL 5.6's
+-- 767-byte index limit when using utf8mb4 charset (191 * 4 = 764 bytes)
 CREATE TABLE IF NOT EXISTS `migrations` (
     `id` INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
-    `migration` VARCHAR(255) NOT NULL UNIQUE COMMENT 'Migration filename',
+    `migration` VARCHAR(191) NOT NULL UNIQUE COMMENT 'Migration filename',
     `batch` INT NOT NULL COMMENT 'Batch number for grouping migrations',
     `executed_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='Database migrations tracking';
