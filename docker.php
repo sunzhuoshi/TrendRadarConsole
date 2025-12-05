@@ -572,14 +572,6 @@ sudo ./setup-docker-worker.sh</code></pre>
             try {
                 const result = await apiRequest('api/docker.php', 'POST', {
                     action: 'run',
-                    feishu_webhook_url: document.getElementById('env-feishu').value,
-                    dingtalk_webhook_url: document.getElementById('env-dingtalk').value,
-                    wework_webhook_url: document.getElementById('env-wework').value,
-                    telegram_bot_token: document.getElementById('env-telegram-token').value,
-                    telegram_chat_id: document.getElementById('env-telegram-chat').value,
-                    email_from: document.getElementById('env-email-from').value,
-                    email_password: document.getElementById('env-email-password').value,
-                    email_to: document.getElementById('env-email-to').value,
                     cron_schedule: document.getElementById('env-cron').value,
                     run_mode: document.getElementById('env-run-mode').value,
                     immediate_run: document.getElementById('env-immediate-run').value
