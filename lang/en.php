@@ -431,4 +431,11 @@ return [
     'log_target_webhook' => 'Webhook',
     'log_target_setting' => 'Setting',
     'log_target_github' => 'GitHub',
+    
+    // Development Mode
+    'development_mode' => 'Development Mode',
+    'dev_mode_desc' => 'Enable development mode to access additional features and debugging tools. This is intended for developers and advanced users.',
+    'enable_dev_mode' => 'Enable Development Mode',
+    'dev_mode_warning' => 'Development mode may expose additional features that are not fully tested. Use with caution.',
+    'dev_mode_saved' => 'Development mode settings saved',
 ];

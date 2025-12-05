@@ -7,12 +7,18 @@ require_once __DIR__ . '/../includes/helpers.php';
 $currentUsername = Auth::getUsername();
 $currentLang = getCurrentLanguage();
 $lastUpdated = getLastUpdatedTime();
+$isDevMode = Auth::checkDevMode();
 ?>
 <button class="mobile-menu-toggle" onclick="toggleSidebar()">☰</button>
 <aside class="sidebar">
     <div class="sidebar-header">
         <h1>TrendRadarConsole</h1>
         <small>👤 <?php echo htmlspecialchars($currentUsername ?? __('guest')); ?></small>
+        <?php if ($isDevMode): ?>
+        <div style="margin-top: 5px;">
+            <span style="background: #ff9800; color: #000; font-size: 0.65rem; padding: 2px 6px; border-radius: 3px; font-weight: bold;">🛠️ DEV</span>
+        </div>
+        <?php endif; ?>
     </div>
     <nav class="sidebar-nav">
         <a href="index.php" class="nav-item <?php echo ($currentPage ?? '') === 'dashboard' ? 'active' : ''; ?>">

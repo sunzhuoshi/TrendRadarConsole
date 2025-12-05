@@ -252,6 +252,47 @@ class Auth
         
         return $user ?: ['github_owner' => '', 'github_repo' => '', 'github_token' => ''];
     }
+    
+    /**
+     * Check if development mode is enabled for user
+     */
+    public function isDevModeEnabled($userId)
+    {
+        $user = $this->db->fetchOne(
+            'SELECT dev_mode FROM users WHERE id = ?',
+            [$userId]
+        );
+        
+        return $user && (int)$user['dev_mode'] === 1;
+    }
+    
+    /**
+     * Set development mode for user
+     */
+    public function setDevMode($userId, $enabled)
+    {
+        return $this->db->update(
+            'users',
+            ['dev_mode' => $enabled ? 1 : 0],
+            'id = ?',
+            [$userId]
+        );
+    }
+    
+    /**
+     * Get development mode status for user
+     * Static method for convenience
+     */
+    public static function checkDevMode()
+    {
+        $userId = self::getUserId();
+        if (!$userId) {
+            return false;
+        }
+        
+        $auth = new self();
+        return $auth->isDevModeEnabled($userId);
+    }
 }
 
 /**
