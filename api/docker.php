@@ -16,6 +16,12 @@ if (!Auth::isLoggedIn()) {
 }
 $userId = Auth::getUserId();
 
+// Docker settings are calculated based on user ID (not user-configurable)
+$containerName = 'trend-radar-' . $userId;
+$configPath = './workspace/' . $userId . '/config';
+$outputPath = './workspace/' . $userId . '/output';
+$dockerImage = 'wantcat/trendradar:latest';
+
 try {
     $method = getMethod();
     $input = getInput();
@@ -34,45 +40,19 @@ try {
     
     $action = $input['action'] ?? '';
     
-    // Get Docker settings from user
-    $auth = new Auth();
-    $dockerSettings = $auth->getDockerSettings($userId);
-    
     switch ($action) {
-        case 'save_settings':
-            // Save Docker settings
-            $containerName = isset($input['container_name']) ? trim($input['container_name']) : '';
-            $configPath = isset($input['config_path']) ? trim($input['config_path']) : '';
-            $outputPath = isset($input['output_path']) ? trim($input['output_path']) : '';
-            $dockerImage = isset($input['docker_image']) ? trim($input['docker_image']) : 'wantcat/trendradar:latest';
-            
-            // Validate container name (alphanumeric, underscore, hyphen)
-            if ($containerName && !preg_match('/^[a-zA-Z0-9_-]+$/', $containerName)) {
-                jsonError('Invalid container name. Use only letters, numbers, underscore and hyphen.');
-            }
-            
-            $auth->updateDockerSettings($userId, $containerName, $configPath, $outputPath, $dockerImage);
-            jsonSuccess(null, 'Docker settings saved');
-            break;
-            
         case 'get_settings':
-            jsonSuccess($dockerSettings, 'Docker settings retrieved');
+            jsonSuccess([
+                'container_name' => $containerName,
+                'config_path' => $configPath,
+                'output_path' => $outputPath,
+                'docker_image' => $dockerImage
+            ], 'Docker settings retrieved');
             break;
             
         case 'inspect':
-            // Get container name from settings or input
-            $containerName = $input['container_name'] ?? $dockerSettings['docker_container_name'] ?? '';
-            if (!$containerName) {
-                jsonError('Container name is required');
-            }
-            
-            // Validate container name
-            if (!preg_match('/^[a-zA-Z0-9_-]+$/', $containerName)) {
-                jsonError('Invalid container name');
-            }
-            
             // Execute docker inspect command
-            // Security: Container name is validated with strict regex and escaped with escapeshellarg()
+            // Security: Container name is calculated from user ID (no user input)
             $escapedName = escapeshellarg($containerName);
             $output = [];
             $returnVar = 0;
@@ -126,25 +106,14 @@ try {
             
         case 'logs':
             // Get container logs
-            $containerName = $input['container_name'] ?? $dockerSettings['docker_container_name'] ?? '';
             $tail = isset($input['tail']) ? (int)$input['tail'] : 100;
-            
-            if (!$containerName) {
-                jsonError('Container name is required');
-            }
-            
-            // Validate container name
-            if (!preg_match('/^[a-zA-Z0-9_-]+$/', $containerName)) {
-                jsonError('Invalid container name');
-            }
             
             // Limit tail lines
             if ($tail < 1) $tail = 100;
             if ($tail > 1000) $tail = 1000;
             
             // Execute docker logs command
-            // Note: Container name is validated with regex and escaped
-            // Tail is cast to int and bounded, but we escape it for extra safety
+            // Security: Container name is calculated from user ID (no user input)
             $escapedName = escapeshellarg($containerName);
             $escapedTail = escapeshellarg((string)$tail);
             $output = [];
@@ -162,12 +131,6 @@ try {
             break;
             
         case 'generate_command':
-            // Generate docker run command based on settings
-            $containerName = $input['container_name'] ?? $dockerSettings['docker_container_name'] ?? 'trend-radar';
-            $configPath = $input['config_path'] ?? $dockerSettings['docker_config_path'] ?? './config';
-            $outputPath = $input['output_path'] ?? $dockerSettings['docker_output_path'] ?? './output';
-            $dockerImage = $input['docker_image'] ?? $dockerSettings['docker_image'] ?? 'wantcat/trendradar:latest';
-            
             // Environment variables from input
             $envVars = [];
             $envKeys = [
@@ -199,7 +162,7 @@ try {
             }
             
             // Build docker run command
-            // Note: All values are properly escaped with escapeshellarg() for security
+            // Note: Container name, paths, and image are calculated (not from user input)
             $cmd = "docker run -d --name " . escapeshellarg($containerName) . " \\\n";
             $cmd .= "  -v " . escapeshellarg($configPath) . ":/app/config:ro \\\n";
             $cmd .= "  -v " . escapeshellarg($outputPath) . ":/app/output \\\n";

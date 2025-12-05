@@ -252,39 +252,6 @@ class Auth
         
         return $user ?: ['github_owner' => '', 'github_repo' => '', 'github_token' => ''];
     }
-    
-    /**
-     * Update user's Docker settings
-     */
-    public function updateDockerSettings($userId, $containerName, $configPath, $outputPath, $dockerImage = 'wantcat/trendradar:latest')
-    {
-        $data = [
-            'docker_container_name' => $containerName,
-            'docker_config_path' => $configPath,
-            'docker_output_path' => $outputPath,
-            'docker_image' => $dockerImage
-        ];
-        
-        return $this->db->update('users', $data, 'id = ?', [$userId]);
-    }
-    
-    /**
-     * Get user's Docker settings
-     */
-    public function getDockerSettings($userId)
-    {
-        $user = $this->db->fetchOne(
-            'SELECT docker_container_name, docker_config_path, docker_output_path, docker_image FROM users WHERE id = ?',
-            [$userId]
-        );
-        
-        return $user ?: [
-            'docker_container_name' => '',
-            'docker_config_path' => '',
-            'docker_output_path' => '',
-            'docker_image' => 'wantcat/trendradar:latest'
-        ];
-    }
 }
 
 /**

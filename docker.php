@@ -22,10 +22,6 @@ try {
     $config = new Configuration($userId);
     $activeConfig = $config->getActive();
     
-    // Get Docker settings
-    $auth = new Auth();
-    $dockerSettings = $auth->getDockerSettings($userId);
-    
 } catch (Exception $e) {
     $error = $e->getMessage();
 }
@@ -33,11 +29,11 @@ try {
 $flash = getFlash();
 $currentPage = 'docker';
 
-// Default values
-$containerName = $dockerSettings['docker_container_name'] ?? 'trend-radar';
-$configPath = $dockerSettings['docker_config_path'] ?? './config';
-$outputPath = $dockerSettings['docker_output_path'] ?? './output';
-$dockerImage = $dockerSettings['docker_image'] ?? 'wantcat/trendradar:latest';
+// Docker settings are calculated based on user ID (not user-configurable)
+$containerName = 'trend-radar-' . $userId;
+$configPath = './workspace/' . $userId . '/config';
+$outputPath = './workspace/' . $userId . '/output';
+$dockerImage = 'wantcat/trendradar:latest';
 
 $csrfToken = generateCsrfToken();
 $currentLang = getCurrentLanguage();
@@ -71,57 +67,42 @@ $currentLang = getCurrentLanguage();
             <div class="alert alert-danger"><?php echo sanitize($error); ?></div>
             <?php else: ?>
             
-            <!-- Docker Settings -->
+            <!-- Docker Settings (Auto-calculated) -->
             <div class="card">
                 <div class="card-header">
                     <h3>⚙️ <?php _e('docker_settings'); ?></h3>
                 </div>
                 <div class="card-body">
-                    <form id="docker-settings-form">
-                        <div class="row">
-                            <div class="col-6">
-                                <div class="form-group">
-                                    <label class="form-label"><?php _e('container_name'); ?></label>
-                                    <input type="text" name="container_name" class="form-control" 
-                                           value="<?php echo sanitize($containerName); ?>"
-                                           placeholder="trend-radar">
-                                    <div class="form-text"><?php _e('container_name_desc'); ?></div>
-                                </div>
-                            </div>
-                            <div class="col-6">
-                                <div class="form-group">
-                                    <label class="form-label"><?php _e('docker_image'); ?></label>
-                                    <input type="text" name="docker_image" class="form-control" 
-                                           value="<?php echo sanitize($dockerImage); ?>"
-                                           placeholder="wantcat/trendradar:latest">
-                                    <div class="form-text"><?php _e('docker_image_desc'); ?></div>
-                                </div>
+                    <p class="text-muted mb-3"><?php _e('docker_settings_auto_desc'); ?></p>
+                    <div class="row">
+                        <div class="col-6">
+                            <div class="form-group">
+                                <label class="form-label"><?php _e('container_name'); ?></label>
+                                <input type="text" class="form-control" value="<?php echo sanitize($containerName); ?>" readonly>
                             </div>
                         </div>
-                        
-                        <div class="row">
-                            <div class="col-6">
-                                <div class="form-group">
-                                    <label class="form-label"><?php _e('config_path'); ?></label>
-                                    <input type="text" name="config_path" class="form-control" 
-                                           value="<?php echo sanitize($configPath); ?>"
-                                           placeholder="./config">
-                                    <div class="form-text"><?php _e('config_path_desc'); ?></div>
-                                </div>
-                            </div>
-                            <div class="col-6">
-                                <div class="form-group">
-                                    <label class="form-label"><?php _e('output_path'); ?></label>
-                                    <input type="text" name="output_path" class="form-control" 
-                                           value="<?php echo sanitize($outputPath); ?>"
-                                           placeholder="./output">
-                                    <div class="form-text"><?php _e('output_path_desc'); ?></div>
-                                </div>
+                        <div class="col-6">
+                            <div class="form-group">
+                                <label class="form-label"><?php _e('docker_image'); ?></label>
+                                <input type="text" class="form-control" value="<?php echo sanitize($dockerImage); ?>" readonly>
                             </div>
                         </div>
-                        
-                        <button type="submit" class="btn btn-primary"><?php _e('save_settings'); ?></button>
-                    </form>
+                    </div>
+                    
+                    <div class="row">
+                        <div class="col-6">
+                            <div class="form-group">
+                                <label class="form-label"><?php _e('config_path'); ?></label>
+                                <input type="text" class="form-control" value="<?php echo sanitize($configPath); ?>" readonly>
+                            </div>
+                        </div>
+                        <div class="col-6">
+                            <div class="form-group">
+                                <label class="form-label"><?php _e('output_path'); ?></label>
+                                <input type="text" class="form-control" value="<?php echo sanitize($outputPath); ?>" readonly>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
             
@@ -324,41 +305,23 @@ $currentLang = getCurrentLanguage();
     <script>var i18n = <?php echo getJsTranslations(); ?>;</script>
     <script src="assets/js/app.js"></script>
     <script>
-        // Save Docker settings
-        document.getElementById('docker-settings-form').addEventListener('submit', async function(e) {
-            e.preventDefault();
-            
-            const submitBtn = this.querySelector('button[type="submit"]');
-            const formData = new FormData(this);
-            
-            setButtonLoading(submitBtn, true);
-            try {
-                await apiRequest('api/docker.php', 'POST', {
-                    action: 'save_settings',
-                    container_name: formData.get('container_name'),
-                    config_path: formData.get('config_path'),
-                    output_path: formData.get('output_path'),
-                    docker_image: formData.get('docker_image')
-                });
-                showToast(__('docker_settings_saved') || 'Docker settings saved', 'success');
-            } catch (error) {
-                showToast(__('failed_to_save') + ': ' + error.message, 'error');
-            } finally {
-                setButtonLoading(submitBtn, false);
-            }
-        });
+        // Fixed Docker settings (calculated by server based on user ID)
+        const dockerSettings = {
+            containerName: '<?php echo $containerName; ?>',
+            configPath: '<?php echo $configPath; ?>',
+            outputPath: '<?php echo $outputPath; ?>',
+            dockerImage: '<?php echo $dockerImage; ?>'
+        };
         
         // Inspect container
         async function inspectContainer() {
-            const containerName = document.querySelector('input[name="container_name"]').value || 'trend-radar';
             const statusDiv = document.getElementById('container-status');
             
             statusDiv.innerHTML = '<div class="loading"><div class="spinner"></div></div>';
             
             try {
                 const result = await apiRequest('api/docker.php', 'POST', {
-                    action: 'inspect',
-                    container_name: containerName
+                    action: 'inspect'
                 });
                 
                 const data = result.data;
@@ -445,7 +408,6 @@ $currentLang = getCurrentLanguage();
         
         // Fetch container logs
         async function fetchLogs() {
-            const containerName = document.querySelector('input[name="container_name"]').value || 'trend-radar';
             const tailLines = document.getElementById('log-tail-lines').value;
             const logsDiv = document.getElementById('container-logs');
             
@@ -454,7 +416,6 @@ $currentLang = getCurrentLanguage();
             try {
                 const result = await apiRequest('api/docker.php', 'POST', {
                     action: 'logs',
-                    container_name: containerName,
                     tail: parseInt(tailLines)
                 });
                 
@@ -480,18 +441,9 @@ $currentLang = getCurrentLanguage();
         
         // Generate docker run command
         async function generateCommand() {
-            const containerName = document.querySelector('input[name="container_name"]').value || 'trend-radar';
-            const configPath = document.querySelector('input[name="config_path"]').value || './config';
-            const outputPath = document.querySelector('input[name="output_path"]').value || './output';
-            const dockerImage = document.querySelector('input[name="docker_image"]').value || 'wantcat/trendradar:latest';
-            
             try {
                 const result = await apiRequest('api/docker.php', 'POST', {
                     action: 'generate_command',
-                    container_name: containerName,
-                    config_path: configPath,
-                    output_path: outputPath,
-                    docker_image: dockerImage,
                     feishu_webhook_url: document.getElementById('env-feishu').value,
                     dingtalk_webhook_url: document.getElementById('env-dingtalk').value,
                     wework_webhook_url: document.getElementById('env-wework').value,

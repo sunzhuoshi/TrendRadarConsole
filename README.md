@@ -137,29 +137,28 @@ These variables will automatically override the config files during GitHub Actio
 
 TrendRadarConsole now supports local Docker deployment as an alternative to GitHub Actions. Navigate to **Docker Deployment** in the sidebar to:
 
-1. **Configure Docker Settings**: Set your container name, Docker image, and volume paths
+1. **View Docker Settings**: Container name and volume paths are automatically calculated based on your user ID
 2. **Monitor Container Status**: View real-time status of your Docker container
 3. **View Container Logs**: Access container logs directly from the web interface
 4. **Generate Docker Commands**: Automatically generate `docker run` commands with your settings
 
+Each user has their own isolated workspace:
+- Container name: `trend-radar-{userId}`
+- Config path: `./workspace/{userId}/config`
+- Output path: `./workspace/{userId}/output`
+- Docker image: `wantcat/trendradar:latest` (fixed)
+
 #### Quick Start with Docker
 
 ```bash
-# Create directories for config and output
-mkdir -p ./config ./output
+# Create directories for config and output (replace {userId} with your actual user ID)
+mkdir -p ./workspace/{userId}/config ./workspace/{userId}/output
 
-# Run the container
-docker run -d --name trend-radar \
-  -v ./config:/app/config:ro \
-  -v ./output:/app/output \
+# Run the container (use the generated command from the Docker Deployment page)
+docker run -d --name trend-radar-{userId} \
+  -v ./workspace/{userId}/config:/app/config:ro \
+  -v ./workspace/{userId}/output:/app/output \
   -e FEISHU_WEBHOOK_URL="your_feishu_webhook" \
-  -e DINGTALK_WEBHOOK_URL="your_dingtalk_webhook" \
-  -e WEWORK_WEBHOOK_URL="your_wework_webhook" \
-  -e TELEGRAM_BOT_TOKEN="your_telegram_bot_token" \
-  -e TELEGRAM_CHAT_ID="your_telegram_chat_id" \
-  -e EMAIL_FROM="your_email" \
-  -e EMAIL_PASSWORD="your_email_password" \
-  -e EMAIL_TO="recipient_email" \
   -e CRON_SCHEDULE="*/30 * * * *" \
   -e RUN_MODE="cron" \
   -e IMMEDIATE_RUN="true" \
@@ -169,20 +168,20 @@ docker run -d --name trend-radar \
 #### Useful Docker Commands
 
 ```bash
-# Check container status
-docker inspect trend-radar
+# Check container status (replace {userId} with your actual user ID)
+docker inspect trend-radar-{userId}
 
 # View container logs
-docker logs --tail 100 trend-radar
+docker logs --tail 100 trend-radar-{userId}
 
 # Stop container
-docker stop trend-radar
+docker stop trend-radar-{userId}
 
 # Start container
-docker start trend-radar
+docker start trend-radar-{userId}
 
 # Remove container
-docker rm trend-radar
+docker rm trend-radar-{userId}
 ```
 
 ## Directory Structure
