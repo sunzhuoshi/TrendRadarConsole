@@ -306,48 +306,93 @@ class Auth
     }
     
     /**
-     * Get Docker SSH settings for user
+     * Get Docker worker for user (first active worker)
      */
-    public function getDockerSSHSettings($userId)
+    public function getDockerWorker($userId)
     {
-        $user = $this->db->fetchOne(
-            'SELECT docker_ssh_host, docker_ssh_port, docker_ssh_username, docker_ssh_password, docker_workspace_path FROM users WHERE id = ?',
+        $worker = $this->db->fetchOne(
+            'SELECT * FROM docker_workers WHERE user_id = ? AND is_active = 1 ORDER BY id ASC LIMIT 1',
             [$userId]
         );
         
-        if (!$user) {
+        if (!$worker) {
             return [
-                'docker_ssh_host' => '',
-                'docker_ssh_port' => 22,
-                'docker_ssh_username' => '',
-                'docker_ssh_password' => '',
-                'docker_workspace_path' => '/srv/trendradar'
+                'id' => null,
+                'name' => '',
+                'ssh_host' => '',
+                'ssh_port' => 22,
+                'ssh_username' => '',
+                'ssh_password' => '',
+                'workspace_path' => '/srv/trendradar'
             ];
         }
         
-        return $user;
+        return $worker;
     }
     
     /**
-     * Update Docker SSH settings for user
+     * Get Docker SSH settings for user (backwards compatibility alias)
      */
-    public function updateDockerSSHSettings($userId, $host, $port, $username, $password = null, $workspacePath = null)
+    public function getDockerSSHSettings($userId)
     {
+        $worker = $this->getDockerWorker($userId);
+        return [
+            'docker_ssh_host' => $worker['ssh_host'] ?? '',
+            'docker_ssh_port' => $worker['ssh_port'] ?? 22,
+            'docker_ssh_username' => $worker['ssh_username'] ?? '',
+            'docker_ssh_password' => $worker['ssh_password'] ?? '',
+            'docker_workspace_path' => $worker['workspace_path'] ?? '/srv/trendradar',
+            'worker_id' => $worker['id'] ?? null,
+            'worker_name' => $worker['name'] ?? ''
+        ];
+    }
+    
+    /**
+     * Save or update Docker worker for user
+     */
+    public function saveDockerWorker($userId, $host, $port, $username, $password = null, $workspacePath = null, $name = null)
+    {
+        // Check if user has an existing worker
+        $existing = $this->db->fetchOne(
+            'SELECT id FROM docker_workers WHERE user_id = ? LIMIT 1',
+            [$userId]
+        );
+        
         $data = [
-            'docker_ssh_host' => $host,
-            'docker_ssh_port' => (int)$port ?: 22,
-            'docker_ssh_username' => $username
+            'ssh_host' => $host,
+            'ssh_port' => (int)$port ?: 22,
+            'ssh_username' => $username
         ];
         
         if ($password !== null) {
-            $data['docker_ssh_password'] = $password;
+            $data['ssh_password'] = $password;
         }
         
         if ($workspacePath !== null) {
-            $data['docker_workspace_path'] = $workspacePath;
+            $data['workspace_path'] = $workspacePath;
         }
         
-        return $this->db->update('users', $data, 'id = ?', [$userId]);
+        if ($name !== null) {
+            $data['name'] = $name;
+        }
+        
+        if ($existing) {
+            // Update existing worker
+            return $this->db->update('docker_workers', $data, 'id = ?', [$existing['id']]);
+        } else {
+            // Create new worker
+            $data['user_id'] = $userId;
+            $data['name'] = $name ?: 'Default Worker';
+            return $this->db->insert('docker_workers', $data);
+        }
+    }
+    
+    /**
+     * Update Docker SSH settings for user (backwards compatibility alias)
+     */
+    public function updateDockerSSHSettings($userId, $host, $port, $username, $password = null, $workspacePath = null)
+    {
+        return $this->saveDockerWorker($userId, $host, $port, $username, $password, $workspacePath);
     }
     
     /**
@@ -355,8 +400,8 @@ class Auth
      */
     public function isDockerSSHConfigured($userId)
     {
-        $settings = $this->getDockerSSHSettings($userId);
-        return !empty($settings['docker_ssh_host']) && !empty($settings['docker_ssh_username']);
+        $worker = $this->getDockerWorker($userId);
+        return !empty($worker['ssh_host']) && !empty($worker['ssh_username']);
     }
 }
 
