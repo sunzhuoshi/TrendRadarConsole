@@ -144,12 +144,12 @@ try {
             
         case 'run':
             // Create and start a new container
-            // First, ensure workspace directories exist
+            // First, ensure workspace directories exist with proper permissions for www user
             if (!is_dir($configPath)) {
-                mkdir($configPath, 0755, true);
+                mkdir($configPath, 0775, true);
             }
             if (!is_dir($outputPath)) {
-                mkdir($outputPath, 0755, true);
+                mkdir($outputPath, 0775, true);
             }
             
             // Build environment variables
