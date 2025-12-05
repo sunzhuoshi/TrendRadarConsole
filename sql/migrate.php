@@ -228,11 +228,18 @@ try {
             }
             
             try {
-                // Execute the migration
-                // Note: Multi-statement execution requires handling
+                // Remove SQL comments (lines starting with --)
+                $sqlLines = explode("\n", $sql);
+                $cleanLines = array_filter($sqlLines, function($line) {
+                    $trimmed = trim($line);
+                    return !empty($trimmed) && strpos($trimmed, '--') !== 0;
+                });
+                $cleanSql = implode("\n", $cleanLines);
+                
+                // Split by semicolon and filter empty statements
                 $statements = array_filter(
-                    array_map('trim', explode(';', $sql)),
-                    function($s) { return !empty($s) && !preg_match('/^--/', $s); }
+                    array_map('trim', explode(';', $cleanSql)),
+                    function($s) { return !empty($s); }
                 );
                 
                 foreach ($statements as $statement) {
