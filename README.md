@@ -155,6 +155,28 @@ Each user has their own isolated workspace on the Docker worker:
 - A dedicated user account (e.g., `trendradarsrv`) for running Docker commands
 - PHP SSH2 extension (`php-ssh2`) installed on the web server
 
+**Setting up Docker Worker**:
+
+Use the provided setup script to configure your Docker worker server:
+
+```bash
+# Download the setup script
+curl -O https://raw.githubusercontent.com/sunzhuoshi/TrendRadarConsole/main/scripts/setup-docker-worker.sh
+
+# Make it executable
+chmod +x setup-docker-worker.sh
+
+# Run as root
+sudo ./setup-docker-worker.sh
+```
+
+The script will:
+1. Create the `trendradarsrv` user account
+2. Add the user to the `docker` group for Docker command access
+3. Create the workspace directory at `/srv/trendradar`
+4. Set proper permissions on the workspace
+5. Prompt you to set a password for SSH access
+
 ## Directory Structure
 
 ```
@@ -181,7 +203,10 @@ TrendRadarConsole/
 │   ├── configuration.php   # Configuration model
 │   ├── database.php        # Database connection
 │   ├── github.php          # GitHub API integration
-│   └── helpers.php         # Helper functions
+│   ├── helpers.php         # Helper functions
+│   └── ssh.php             # SSH connection helper for Docker deployment
+├── scripts/
+│   └── setup-docker-worker.sh  # Docker worker setup script (run on Docker server)
 ├── sql/
 │   ├── migrations/         # Database migrations
 │   └── schema.sql          # Database schema (users, configurations, etc.)
