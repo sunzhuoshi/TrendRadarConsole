@@ -24,6 +24,3 @@ cache/
 # Backup files
 *.bak
 *.backup
-
-# Docker workspace directories (user data)
-workspace/

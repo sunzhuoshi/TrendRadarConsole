@@ -18,7 +18,6 @@ return [
     'app' => [
         'debug' => false,
         'timezone' => 'Asia/Shanghai',
-        'base_url' => '',
-        'environment' => 'production'  // 'development' or 'production'
+        'base_url' => ''
     ]
 ];

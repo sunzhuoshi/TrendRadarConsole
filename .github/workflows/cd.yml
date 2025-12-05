@@ -57,10 +57,9 @@ jobs:
                        --exclude='vendor/' \
                        ./ ./dist/
           
-          # Generate version file with deployment timestamp and environment
+          # Generate version file with deployment timestamp
           DATE_FORMAT='%Y-%m-%dT%H:%M:%S+00:00'
           DEPLOY_TIME=$(date -u +"$DATE_FORMAT")
-          DEPLOY_ENV="${{ needs.choose-environment.outputs.environment }}"
           printf '%s\n' \
             '<?php' \
             '/**' \
@@ -72,7 +71,6 @@ jobs:
             '' \
             'return [' \
             "    'updated_at' => '$DEPLOY_TIME'," \
-            "    'environment' => '$DEPLOY_ENV'," \
             '];' \
             > ./dist/version.php
 
