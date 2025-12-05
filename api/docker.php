@@ -452,26 +452,3 @@ function convertToYaml($data, $indent = 0) {
     
     return $yaml;
 }
-
-/**
- * Format a single value for YAML output
- * 
- * @param mixed $value Value to format
- * @return string Formatted value
- */
-function formatYamlValue($value) {
-    if (is_bool($value)) {
-        return $value ? 'true' : 'false';
-    } elseif (is_numeric($value)) {
-        return (string)$value;
-    } elseif (is_string($value)) {
-        // Quote strings that contain special characters
-        if (preg_match('/[:\{\}\[\],&\*#\?\|\-<>=!%@\\\\]/', $value) || $value === '' || $value === 'true' || $value === 'false') {
-            return '"' . addslashes($value) . '"';
-        }
-        return $value;
-    } elseif (is_null($value)) {
-        return '""';
-    }
-    return (string)$value;
-}
