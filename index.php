@@ -75,7 +75,7 @@ $csrfToken = generateCsrfToken();
                     <div style="font-size: 48px; margin-bottom: 20px;">🐙</div>
                     <h3><?php _e('github_setup_required'); ?></h3>
                     <p style="color: #666; margin: 15px 0 25px;"><?php _e('github_setup_required_desc'); ?></p>
-                    <a href="setup-github.php" class="btn btn-primary btn-lg"><?php _e('setup_github_now'); ?></a>
+                    <a href="github-deployment.php" class="btn btn-primary btn-lg"><?php _e('setup_github_now'); ?></a>
                 </div>
             </div>
             
@@ -141,7 +141,7 @@ $csrfToken = generateCsrfToken();
                     <?php if (empty($configurations)): ?>
                     <div class="empty-state">
                         <p><?php _e('no_configurations'); ?></p>
-                        <button type="button" class="btn btn-primary" onclick="loadFromGitHub()"><?php _e('load_from_github'); ?></button>
+                        <a href="github-deployment.php" class="btn btn-primary"><?php _e('setup_github_now'); ?></a>
                     </div>
                     <?php else: ?>
                     <table class="table">
@@ -181,9 +181,6 @@ $csrfToken = generateCsrfToken();
                                         <button type="submit" class="btn btn-success btn-sm"><?php _e('activate'); ?></button>
                                     </form>
                                     <?php endif; ?>
-                                    <button type="button" class="btn btn-outline btn-sm" data-action="load-github-<?php echo $cfg['id']; ?>" onclick="loadFromGitHub(<?php echo $cfg['id']; ?>, this)" title="<?php _e('load_from_github'); ?>">⬇️ GitHub</button>
-                                    <button type="button" class="btn btn-outline btn-sm" data-action="save-github-<?php echo $cfg['id']; ?>" onclick="saveToGitHub(<?php echo $cfg['id']; ?>, this)" title="<?php _e('save_to_github'); ?>">⬆️ GitHub</button>
-                                    <button type="button" class="btn btn-outline btn-sm" data-action="test-crawling-<?php echo $cfg['id']; ?>" onclick="testCrawling(this)" title="<?php _e('test_crawling'); ?>">🕷️ <?php _e('test_crawling'); ?></button>
                                 </td>
                             </tr>
                             <?php endforeach; ?>
@@ -217,116 +214,5 @@ $csrfToken = generateCsrfToken();
     <script>var i18n = <?php echo getJsTranslations(); ?>;</script>
     <script src="assets/js/app.js"></script>
     <script src="assets/js/shared.js"></script>
-    <script>
-        // Load from GitHub
-        async function loadFromGitHub(configId, btn) {
-            if (!confirm(__('confirm_load_from_github'))) {
-                return;
-            }
-            
-            setButtonLoading(btn, true);
-            try {
-                const result = await apiRequest('api/github.php', 'POST', {
-                    action: 'load_or_create_default',
-                    owner: '',  // Will use saved settings
-                    repo: '',
-                    token: ''
-                });
-                
-                showToast(__('config_loaded_from_github'), 'success');
-                // Reload page to show updated configuration
-                setTimeout(() => window.location.reload(), 1000);
-            } catch (error) {
-                if (error.message && error.message.includes('Owner, repo, and token are required')) {
-                    showToast(__('configure_github_first'), 'error');
-                    setTimeout(() => window.location.href = 'settings.php', 1500);
-                } else {
-                    showToast(__('failed_to_load') + ': ' + error.message, 'error');
-                }
-            } finally {
-                setButtonLoading(btn, false);
-            }
-        }
-        
-        // Save to GitHub
-        async function saveToGitHub(configId, btn) {
-            if (!confirm(__('confirm_save_to_github'))) {
-                return;
-            }
-            
-            setButtonLoading(btn, true);
-            try {
-                await apiRequest('api/github.php', 'POST', {
-                    action: 'save',
-                    owner: '',  // Will use saved settings
-                    repo: '',
-                    token: '',
-                    config_id: configId
-                });
-                
-                showToast(__('config_saved_to_github'), 'success');
-            } catch (error) {
-                if (error.message && error.message.includes('Owner, repo, and token are required')) {
-                    showToast(__('configure_github_first'), 'error');
-                    setTimeout(() => window.location.href = 'settings.php', 1500);
-                } else {
-                    showToast(__('failed_to_save') + ': ' + error.message, 'error');
-                }
-            } finally {
-                setButtonLoading(btn, false);
-            }
-        }
-        
-        // Test Crawling - helper functions are loaded from assets/js/shared.js
-        async function testCrawling(btn) {
-            if (!confirm(__('confirm_test_crawling'))) {
-                return;
-            }
-            
-            setButtonLoadingWithStatus(btn, true);
-            setButtonStatusText(btn, __('crawling_triggered'));
-            
-            try {
-                // Get last successful run duration for progress estimation
-                const runsResult = await apiRequest('api/github.php', 'POST', {
-                    action: 'get_workflow_runs',
-                    workflow_id: 'crawler.yml'
-                });
-                
-                let estimatedDuration = DEFAULT_ESTIMATED_DURATION_MS;
-                const runs = runsResult.data?.runs || [];
-                for (const run of runs) {
-                    if (run.conclusion === 'success' && run.run_started_at && run.updated_at) {
-                        const startTime = new Date(run.run_started_at).getTime();
-                        const endTime = new Date(run.updated_at).getTime();
-                        estimatedDuration = endTime - startTime;
-                        break;
-                    }
-                }
-                
-                // Store dispatch time BEFORE calling dispatch
-                const dispatchTime = Date.now();
-                
-                await apiRequest('api/github.php', 'POST', {
-                    action: 'dispatch_workflow',
-                    workflow_id: 'crawler.yml'
-                });
-                
-                // Start tracking workflow status - store timing data on button
-                btn.dataset.dispatchTime = dispatchTime.toString();
-                btn.dataset.startTime = dispatchTime.toString();
-                btn.dataset.estimatedDuration = estimatedDuration.toString();
-                setTimeout(() => trackWorkflowStatus(btn, 0), 3000);
-            } catch (error) {
-                if (error.message && error.message.includes('Owner, repo, and token are required')) {
-                    showToast(__('configure_github_first'), 'error');
-                    setTimeout(() => window.location.href = 'settings.php', 1500);
-                } else {
-                    showToast(__('crawling_trigger_failed') + error.message, 'error');
-                }
-                setButtonLoadingWithStatus(btn, false);
-            }
-        }
-    </script>
 </body>
 </html>

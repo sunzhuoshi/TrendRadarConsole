@@ -331,6 +331,33 @@ try {
             jsonSuccess(['run' => $run], 'Workflow run retrieved');
             break;
             
+        case 'get_workflow':
+            $workflowId = isset($input['workflow_id']) ? $input['workflow_id'] : 'crawler.yml';
+            $workflow = $github->getWorkflow($workflowId);
+            if (!$workflow) {
+                jsonError('Workflow not found');
+            }
+            jsonSuccess(['workflow' => $workflow], 'Workflow retrieved');
+            break;
+            
+        case 'enable_workflow':
+            $workflowId = isset($input['workflow_id']) ? $input['workflow_id'] : 'crawler.yml';
+            $success = $github->enableWorkflow($workflowId);
+            if (!$success) {
+                jsonError('Failed to enable workflow');
+            }
+            jsonSuccess(null, 'Workflow enabled successfully');
+            break;
+            
+        case 'disable_workflow':
+            $workflowId = isset($input['workflow_id']) ? $input['workflow_id'] : 'crawler.yml';
+            $success = $github->disableWorkflow($workflowId);
+            if (!$success) {
+                jsonError('Failed to disable workflow');
+            }
+            jsonSuccess(null, 'Workflow disabled successfully');
+            break;
+            
         default:
             jsonError('Invalid action');
     }

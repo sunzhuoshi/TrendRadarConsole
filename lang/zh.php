@@ -333,6 +333,18 @@ return [
     'workflow_status_cancelled' => '工作流已取消',
     'workflow_status_unknown' => '正在检查工作流状态...',
     'workflow_checking_status' => '正在检查工作流状态...',
+    'workflow_status' => '工作流状态',
+    'workflow_enabled' => '已启用',
+    'workflow_disabled' => '已禁用',
+    'workflow_enable' => '启用',
+    'workflow_disable' => '禁用',
+    'workflow_enable_confirm' => '确定要启用爬虫工作流吗？',
+    'workflow_disable_confirm' => '确定要禁用爬虫工作流吗？这将停止定时爬取。',
+    'workflow_enabled_success' => '工作流已成功启用',
+    'workflow_disabled_success' => '工作流已成功禁用',
+    'workflow_enable_failed' => '启用工作流失败：',
+    'workflow_disable_failed' => '禁用工作流失败：',
+    'workflow_status_loading' => '加载中...',
     'loaded_config_preview' => '已加载配置预览',
     'not_found' => '# 未找到',
     'github_settings_saved' => 'GitHub 设置已保存',
@@ -371,6 +383,11 @@ return [
     'github_setup_required' => '需要设置 GitHub',
     'github_setup_required_desc' => 'TrendRadarConsole 需要 GitHub 连接来同步您的配置。请完成设置向导。',
     'using_default_config' => '使用默认配置',
+    
+    // GitHub Deployment
+    'github_deployment' => 'GitHub 部署',
+    'github_deployment_desc' => '管理您的 GitHub 仓库连接并部署配置',
+    'github_connected' => 'GitHub 已连接',
     
     // Flash Messages
     'please_create_config' => '请先创建并激活一个配置。',

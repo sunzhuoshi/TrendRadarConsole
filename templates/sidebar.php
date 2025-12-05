@@ -36,6 +36,9 @@ $isDevMode = Auth::checkDevMode();
         <a href="settings.php" class="nav-item <?php echo ($currentPage ?? '') === 'settings' ? 'active' : ''; ?>">
             ⚙️ <?php _e('settings'); ?>
         </a>
+        <a href="github-deployment.php" class="nav-item <?php echo ($currentPage ?? '') === 'github-deployment' ? 'active' : ''; ?>">
+            🐙 <?php _e('github_deployment'); ?>
+        </a>
         <a href="logs.php" class="nav-item <?php echo ($currentPage ?? '') === 'logs' ? 'active' : ''; ?>">
             📋 <?php _e('operation_logs'); ?>
         </a>

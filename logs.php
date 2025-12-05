@@ -25,7 +25,7 @@ $githubConfigured = !empty($githubSettings['github_owner']) &&
                     !empty($githubSettings['github_token']);
 
 if (!$githubConfigured) {
-    header('Location: setup-github.php');
+    header('Location: github-deployment.php');
     exit;
 }
 

@@ -191,4 +191,31 @@ class GitHub
         $result = $this->request('GET', "/repos/{$this->owner}/{$this->repo}/actions/runs/{$runId}");
         return $result['data'] ?? null;
     }
+    
+    /**
+     * Get workflow information by ID (e.g., 'crawler.yml')
+     */
+    public function getWorkflow($workflowId)
+    {
+        $result = $this->request('GET', "/repos/{$this->owner}/{$this->repo}/actions/workflows/{$workflowId}");
+        return $result['data'] ?? null;
+    }
+    
+    /**
+     * Enable a workflow
+     */
+    public function enableWorkflow($workflowId)
+    {
+        $result = $this->request('PUT', "/repos/{$this->owner}/{$this->repo}/actions/workflows/{$workflowId}/enable");
+        return $result['code'] === 204;
+    }
+    
+    /**
+     * Disable a workflow
+     */
+    public function disableWorkflow($workflowId)
+    {
+        $result = $this->request('PUT', "/repos/{$this->owner}/{$this->repo}/actions/workflows/{$workflowId}/disable");
+        return $result['code'] === 204;
+    }
 }

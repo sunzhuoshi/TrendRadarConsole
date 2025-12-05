@@ -333,6 +333,18 @@ return [
     'workflow_status_cancelled' => 'Workflow cancelled',
     'workflow_status_unknown' => 'Checking workflow status...',
     'workflow_checking_status' => 'Checking workflow status...',
+    'workflow_status' => 'Workflow Status',
+    'workflow_enabled' => 'Enabled',
+    'workflow_disabled' => 'Disabled',
+    'workflow_enable' => 'Enable',
+    'workflow_disable' => 'Disable',
+    'workflow_enable_confirm' => 'Are you sure you want to enable the crawler workflow?',
+    'workflow_disable_confirm' => 'Are you sure you want to disable the crawler workflow? This will stop scheduled crawling.',
+    'workflow_enabled_success' => 'Workflow enabled successfully',
+    'workflow_disabled_success' => 'Workflow disabled successfully',
+    'workflow_enable_failed' => 'Failed to enable workflow: ',
+    'workflow_disable_failed' => 'Failed to disable workflow: ',
+    'workflow_status_loading' => 'Loading...',
     'loaded_config_preview' => 'Loaded Configuration Preview',
     'not_found' => '# Not found',
     'github_settings_saved' => 'GitHub settings saved',
@@ -371,6 +383,11 @@ return [
     'github_setup_required' => 'GitHub Setup Required',
     'github_setup_required_desc' => 'TrendRadarConsole requires a GitHub connection to sync your configurations. Please complete the setup wizard.',
     'using_default_config' => 'Using default configuration',
+    
+    // GitHub Deployment
+    'github_deployment' => 'GitHub Deployment',
+    'github_deployment_desc' => 'Manage your GitHub repository connection and deploy configurations',
+    'github_connected' => 'GitHub Connected',
     
     // Flash Messages
     'please_create_config' => 'Please create and activate a configuration first.',
