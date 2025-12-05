@@ -963,3 +963,16 @@ pre {
     border-radius: 4px;
     font-size: 12px;
 }
+
+
+/* Development Mode Badge */
+.dev-mode-badge {
+    background: #ff9800;
+    color: #000;
+    font-size: 0.65rem;
+    padding: 2px 6px;
+    border-radius: 3px;
+    font-weight: bold;
+    display: inline-block;
+    margin-top: 5px;
+}
