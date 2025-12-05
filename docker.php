@@ -2,6 +2,7 @@
 /**
  * TrendRadarConsole - Docker Deployment Page
  * Local Docker deployment as alternative to GitHub Actions
+ * Docker commands are executed directly on the web server
  */
 
 session_start();
@@ -38,8 +39,9 @@ $currentPage = 'docker';
 // Docker settings are calculated based on user ID (not user-configurable)
 // User ID is validated to be numeric, so it's safe for display
 $containerName = 'trend-radar-' . $userId;
-$configPath = './workspace/' . $userId . '/config';
-$outputPath = './workspace/' . $userId . '/output';
+$basePath = dirname(__FILE__);
+$configPath = $basePath . '/workspace/' . $userId . '/config';
+$outputPath = $basePath . '/workspace/' . $userId . '/output';
 $dockerImage = 'wantcat/trendradar:latest';
 
 $csrfToken = generateCsrfToken();
@@ -113,6 +115,129 @@ $currentLang = getCurrentLanguage();
                 </div>
             </div>
             
+            <!-- Container Control -->
+            <div class="card">
+                <div class="card-header">
+                    <h3>🎮 <?php _e('container_control'); ?></h3>
+                </div>
+                <div class="card-body">
+                    <div id="container-status-summary" class="mb-3">
+                        <span class="badge badge-secondary"><?php _e('status_unknown'); ?></span>
+                    </div>
+                    
+                    <div class="btn-group">
+                        <button type="button" class="btn btn-success" onclick="runContainer()" id="btn-run">
+                            ▶️ <?php _e('run_container'); ?>
+                        </button>
+                        <button type="button" class="btn btn-primary" onclick="startContainer()" id="btn-start">
+                            ▶️ <?php _e('start_container'); ?>
+                        </button>
+                        <button type="button" class="btn btn-warning" onclick="stopContainer()" id="btn-stop">
+                            ⏹️ <?php _e('stop_container'); ?>
+                        </button>
+                        <button type="button" class="btn btn-secondary" onclick="restartContainer()" id="btn-restart">
+                            🔄 <?php _e('restart_container'); ?>
+                        </button>
+                        <button type="button" class="btn btn-danger" onclick="removeContainer()" id="btn-remove">
+                            🗑️ <?php _e('remove_container'); ?>
+                        </button>
+                    </div>
+                    
+                    <!-- Environment Variables for new container -->
+                    <div id="env-vars-section" class="mt-4" style="display: none;">
+                        <h4><?php _e('environment_variables'); ?> <small class="text-muted">(<?php _e('optional'); ?>)</small></h4>
+                        
+                        <div class="row">
+                            <div class="col-6">
+                                <div class="form-group">
+                                    <label class="form-label"><small>FEISHU_WEBHOOK_URL</small></label>
+                                    <input type="text" id="env-feishu" class="form-control env-var" placeholder="<?php _e('feishu_webhook_placeholder'); ?>">
+                                </div>
+                            </div>
+                            <div class="col-6">
+                                <div class="form-group">
+                                    <label class="form-label"><small>DINGTALK_WEBHOOK_URL</small></label>
+                                    <input type="text" id="env-dingtalk" class="form-control env-var" placeholder="<?php _e('dingtalk_webhook_placeholder'); ?>">
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="row">
+                            <div class="col-6">
+                                <div class="form-group">
+                                    <label class="form-label"><small>WEWORK_WEBHOOK_URL</small></label>
+                                    <input type="text" id="env-wework" class="form-control env-var" placeholder="<?php _e('wework_webhook_placeholder'); ?>">
+                                </div>
+                            </div>
+                            <div class="col-6">
+                                <div class="form-group">
+                                    <label class="form-label"><small>TELEGRAM_BOT_TOKEN</small></label>
+                                    <input type="text" id="env-telegram-token" class="form-control env-var" placeholder="<?php _e('telegram_token_placeholder'); ?>">
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="row">
+                            <div class="col-6">
+                                <div class="form-group">
+                                    <label class="form-label"><small>TELEGRAM_CHAT_ID</small></label>
+                                    <input type="text" id="env-telegram-chat" class="form-control env-var" placeholder="<?php _e('telegram_chat_id_placeholder'); ?>">
+                                </div>
+                            </div>
+                            <div class="col-6">
+                                <div class="form-group">
+                                    <label class="form-label"><small>EMAIL_FROM</small></label>
+                                    <input type="text" id="env-email-from" class="form-control env-var" placeholder="<?php _e('email_from_placeholder'); ?>">
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="row">
+                            <div class="col-6">
+                                <div class="form-group">
+                                    <label class="form-label"><small>EMAIL_PASSWORD</small></label>
+                                    <input type="password" id="env-email-password" class="form-control env-var" placeholder="<?php _e('email_password_placeholder'); ?>">
+                                </div>
+                            </div>
+                            <div class="col-6">
+                                <div class="form-group">
+                                    <label class="form-label"><small>EMAIL_TO</small></label>
+                                    <input type="text" id="env-email-to" class="form-control env-var" placeholder="<?php _e('email_to_placeholder'); ?>">
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="row">
+                            <div class="col-4">
+                                <div class="form-group">
+                                    <label class="form-label"><small>CRON_SCHEDULE</small></label>
+                                    <input type="text" id="env-cron" class="form-control env-var" value="*/30 * * * *" placeholder="*/30 * * * *">
+                                    <div class="form-text"><?php _e('cron_schedule_desc'); ?></div>
+                                </div>
+                            </div>
+                            <div class="col-4">
+                                <div class="form-group">
+                                    <label class="form-label"><small>RUN_MODE</small></label>
+                                    <select id="env-run-mode" class="form-control env-var">
+                                        <option value="cron"><?php _e('cron_mode'); ?></option>
+                                        <option value="once"><?php _e('once_mode'); ?></option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="col-4">
+                                <div class="form-group">
+                                    <label class="form-label"><small>IMMEDIATE_RUN</small></label>
+                                    <select id="env-immediate-run" class="form-control env-var">
+                                        <option value="true"><?php _e('yes'); ?></option>
+                                        <option value="false"><?php _e('no'); ?></option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
             <!-- Container Status -->
             <div class="card">
                 <div class="card-header">
@@ -155,156 +280,6 @@ $currentLang = getCurrentLanguage();
                 </div>
             </div>
             
-            <!-- Docker Command Generator -->
-            <div class="card">
-                <div class="card-header">
-                    <h3>🛠️ <?php _e('docker_command_generator'); ?></h3>
-                </div>
-                <div class="card-body">
-                    <p class="text-muted mb-3"><?php _e('docker_command_generator_desc'); ?></p>
-                    
-                    <div class="form-group">
-                        <label class="form-label"><?php _e('environment_variables'); ?> <small>(<?php _e('optional'); ?>)</small></label>
-                    </div>
-                    
-                    <div class="row">
-                        <div class="col-6">
-                            <div class="form-group">
-                                <label class="form-label"><small>FEISHU_WEBHOOK_URL</small></label>
-                                <input type="text" id="env-feishu" class="form-control env-var" placeholder="<?php _e('feishu_webhook_placeholder'); ?>">
-                            </div>
-                        </div>
-                        <div class="col-6">
-                            <div class="form-group">
-                                <label class="form-label"><small>DINGTALK_WEBHOOK_URL</small></label>
-                                <input type="text" id="env-dingtalk" class="form-control env-var" placeholder="<?php _e('dingtalk_webhook_placeholder'); ?>">
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <div class="row">
-                        <div class="col-6">
-                            <div class="form-group">
-                                <label class="form-label"><small>WEWORK_WEBHOOK_URL</small></label>
-                                <input type="text" id="env-wework" class="form-control env-var" placeholder="<?php _e('wework_webhook_placeholder'); ?>">
-                            </div>
-                        </div>
-                        <div class="col-6">
-                            <div class="form-group">
-                                <label class="form-label"><small>TELEGRAM_BOT_TOKEN</small></label>
-                                <input type="text" id="env-telegram-token" class="form-control env-var" placeholder="<?php _e('telegram_token_placeholder'); ?>">
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <div class="row">
-                        <div class="col-6">
-                            <div class="form-group">
-                                <label class="form-label"><small>TELEGRAM_CHAT_ID</small></label>
-                                <input type="text" id="env-telegram-chat" class="form-control env-var" placeholder="<?php _e('telegram_chat_id_placeholder'); ?>">
-                            </div>
-                        </div>
-                        <div class="col-6">
-                            <div class="form-group">
-                                <label class="form-label"><small>EMAIL_FROM</small></label>
-                                <input type="text" id="env-email-from" class="form-control env-var" placeholder="<?php _e('email_from_placeholder'); ?>">
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <div class="row">
-                        <div class="col-6">
-                            <div class="form-group">
-                                <label class="form-label"><small>EMAIL_PASSWORD</small></label>
-                                <input type="password" id="env-email-password" class="form-control env-var" placeholder="<?php _e('email_password_placeholder'); ?>">
-                            </div>
-                        </div>
-                        <div class="col-6">
-                            <div class="form-group">
-                                <label class="form-label"><small>EMAIL_TO</small></label>
-                                <input type="text" id="env-email-to" class="form-control env-var" placeholder="<?php _e('email_to_placeholder'); ?>">
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <div class="row">
-                        <div class="col-4">
-                            <div class="form-group">
-                                <label class="form-label"><small>CRON_SCHEDULE</small></label>
-                                <input type="text" id="env-cron" class="form-control env-var" value="*/30 * * * *" placeholder="*/30 * * * *">
-                                <div class="form-text"><?php _e('cron_schedule_desc'); ?></div>
-                            </div>
-                        </div>
-                        <div class="col-4">
-                            <div class="form-group">
-                                <label class="form-label"><small>RUN_MODE</small></label>
-                                <select id="env-run-mode" class="form-control env-var">
-                                    <option value="cron"><?php _e('cron_mode'); ?></option>
-                                    <option value="once"><?php _e('once_mode'); ?></option>
-                                </select>
-                            </div>
-                        </div>
-                        <div class="col-4">
-                            <div class="form-group">
-                                <label class="form-label"><small>IMMEDIATE_RUN</small></label>
-                                <select id="env-immediate-run" class="form-control env-var">
-                                    <option value="true"><?php _e('yes'); ?></option>
-                                    <option value="false"><?php _e('no'); ?></option>
-                                </select>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <div class="btn-group mt-3">
-                        <button type="button" class="btn btn-primary" onclick="generateCommand()">
-                            🔧 <?php _e('generate_command'); ?>
-                        </button>
-                    </div>
-                    
-                    <div id="generated-command" style="display: none; margin-top: 20px;">
-                        <label class="form-label"><?php _e('generated_docker_command'); ?></label>
-                        <pre id="command-output" style="position: relative;"></pre>
-                        <button type="button" class="btn btn-outline btn-sm" onclick="copyCommand()">
-                            📋 <?php _e('copy_command'); ?>
-                        </button>
-                    </div>
-                </div>
-            </div>
-            
-            <!-- Quick Reference -->
-            <div class="card">
-                <div class="card-header">
-                    <h3>📖 <?php _e('quick_reference'); ?></h3>
-                </div>
-                <div class="card-body">
-                    <h4><?php _e('useful_docker_commands'); ?></h4>
-                    <div class="example-config-block mt-2 mb-3">
-                        <code># <?php _e('inspect_container'); ?></code><br>
-                        <code>docker inspect <?php echo sanitize($containerName ?: 'trend-radar'); ?></code><br><br>
-                        <code># <?php _e('view_container_logs'); ?></code><br>
-                        <code>docker logs --tail 100 <?php echo sanitize($containerName ?: 'trend-radar'); ?></code><br><br>
-                        <code># <?php _e('stop_container'); ?></code><br>
-                        <code>docker stop <?php echo sanitize($containerName ?: 'trend-radar'); ?></code><br><br>
-                        <code># <?php _e('start_container'); ?></code><br>
-                        <code>docker start <?php echo sanitize($containerName ?: 'trend-radar'); ?></code><br><br>
-                        <code># <?php _e('remove_container'); ?></code><br>
-                        <code>docker rm <?php echo sanitize($containerName ?: 'trend-radar'); ?></code><br><br>
-                        <code># <?php _e('view_running_containers'); ?></code><br>
-                        <code>docker ps</code>
-                    </div>
-                    
-                    <h4><?php _e('directory_structure'); ?></h4>
-                    <p class="text-muted"><?php _e('directory_structure_desc'); ?></p>
-                    <div class="example-config-block mt-2">
-                        <code>./config/</code><br>
-                        <code>├── config.yaml          # <?php _e('main_config_file'); ?></code><br>
-                        <code>└── frequency_words.txt  # <?php _e('keywords_file'); ?></code><br><br>
-                        <code>./output/</code><br>
-                        <code>└── ...                  # <?php _e('output_files'); ?></code>
-                    </div>
-                </div>
-            </div>
-            
             <?php endif; ?>
         </main>
     </div>
@@ -320,6 +295,154 @@ $currentLang = getCurrentLanguage();
             dockerImage: <?php echo json_encode($dockerImage); ?>
         };
         
+        let containerExists = false;
+        let containerRunning = false;
+        
+        // Check container status on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            inspectContainer();
+        });
+        
+        // Update button states based on container status
+        function updateButtonStates() {
+            const btnRun = document.getElementById('btn-run');
+            const btnStart = document.getElementById('btn-start');
+            const btnStop = document.getElementById('btn-stop');
+            const btnRestart = document.getElementById('btn-restart');
+            const btnRemove = document.getElementById('btn-remove');
+            const envSection = document.getElementById('env-vars-section');
+            const statusSummary = document.getElementById('container-status-summary');
+            
+            if (!containerExists) {
+                // Container doesn't exist - only show Run button
+                btnRun.style.display = 'inline-flex';
+                btnStart.style.display = 'none';
+                btnStop.style.display = 'none';
+                btnRestart.style.display = 'none';
+                btnRemove.style.display = 'none';
+                envSection.style.display = 'block';
+                statusSummary.innerHTML = '<span class="badge badge-secondary"><?php _e('not_created'); ?></span>';
+            } else if (containerRunning) {
+                // Container is running
+                btnRun.style.display = 'none';
+                btnStart.style.display = 'none';
+                btnStop.style.display = 'inline-flex';
+                btnRestart.style.display = 'inline-flex';
+                btnRemove.style.display = 'none';
+                envSection.style.display = 'none';
+                statusSummary.innerHTML = '<span class="badge badge-success"><?php _e('running'); ?></span>';
+            } else {
+                // Container exists but stopped
+                btnRun.style.display = 'none';
+                btnStart.style.display = 'inline-flex';
+                btnStop.style.display = 'none';
+                btnRestart.style.display = 'none';
+                btnRemove.style.display = 'inline-flex';
+                envSection.style.display = 'none';
+                statusSummary.innerHTML = '<span class="badge badge-warning"><?php _e('stopped'); ?></span>';
+            }
+        }
+        
+        // Run (create and start) container
+        async function runContainer() {
+            if (!confirm('<?php _e('confirm_run_container'); ?>')) return;
+            
+            const btn = document.getElementById('btn-run');
+            setButtonLoading(btn, true);
+            
+            try {
+                const result = await apiRequest('api/docker.php', 'POST', {
+                    action: 'run',
+                    feishu_webhook_url: document.getElementById('env-feishu').value,
+                    dingtalk_webhook_url: document.getElementById('env-dingtalk').value,
+                    wework_webhook_url: document.getElementById('env-wework').value,
+                    telegram_bot_token: document.getElementById('env-telegram-token').value,
+                    telegram_chat_id: document.getElementById('env-telegram-chat').value,
+                    email_from: document.getElementById('env-email-from').value,
+                    email_password: document.getElementById('env-email-password').value,
+                    email_to: document.getElementById('env-email-to').value,
+                    cron_schedule: document.getElementById('env-cron').value,
+                    run_mode: document.getElementById('env-run-mode').value,
+                    immediate_run: document.getElementById('env-immediate-run').value
+                });
+                
+                showToast('<?php _e('container_started_success'); ?>', 'success');
+                inspectContainer();
+            } catch (error) {
+                showToast('<?php _e('container_start_failed'); ?>: ' + error.message, 'error');
+            } finally {
+                setButtonLoading(btn, false);
+            }
+        }
+        
+        // Start existing container
+        async function startContainer() {
+            const btn = document.getElementById('btn-start');
+            setButtonLoading(btn, true);
+            
+            try {
+                await apiRequest('api/docker.php', 'POST', { action: 'start' });
+                showToast('<?php _e('container_started_success'); ?>', 'success');
+                inspectContainer();
+            } catch (error) {
+                showToast('<?php _e('container_start_failed'); ?>: ' + error.message, 'error');
+            } finally {
+                setButtonLoading(btn, false);
+            }
+        }
+        
+        // Stop container
+        async function stopContainer() {
+            if (!confirm('<?php _e('confirm_stop_container'); ?>')) return;
+            
+            const btn = document.getElementById('btn-stop');
+            setButtonLoading(btn, true);
+            
+            try {
+                await apiRequest('api/docker.php', 'POST', { action: 'stop' });
+                showToast('<?php _e('container_stopped_success'); ?>', 'success');
+                inspectContainer();
+            } catch (error) {
+                showToast('<?php _e('container_stop_failed'); ?>: ' + error.message, 'error');
+            } finally {
+                setButtonLoading(btn, false);
+            }
+        }
+        
+        // Restart container
+        async function restartContainer() {
+            const btn = document.getElementById('btn-restart');
+            setButtonLoading(btn, true);
+            
+            try {
+                await apiRequest('api/docker.php', 'POST', { action: 'restart' });
+                showToast('<?php _e('container_restarted_success'); ?>', 'success');
+                inspectContainer();
+            } catch (error) {
+                showToast('<?php _e('container_restart_failed'); ?>: ' + error.message, 'error');
+            } finally {
+                setButtonLoading(btn, false);
+            }
+        }
+        
+        // Remove container
+        async function removeContainer() {
+            if (!confirm('<?php _e('confirm_remove_container'); ?>')) return;
+            
+            const btn = document.getElementById('btn-remove');
+            setButtonLoading(btn, true);
+            
+            try {
+                await apiRequest('api/docker.php', 'POST', { action: 'remove' });
+                showToast('<?php _e('container_removed_success'); ?>', 'success');
+                inspectContainer();
+            } catch (error) {
+                showToast('<?php _e('container_remove_failed'); ?>: ' + error.message, 'error');
+            } finally {
+                setButtonLoading(btn, false);
+            }
+        }
+        
         // Inspect container
         async function inspectContainer() {
             const statusDiv = document.getElementById('container-status');
@@ -334,13 +457,20 @@ $currentLang = getCurrentLanguage();
                 const data = result.data;
                 
                 if (data.status === 'not_found') {
+                    containerExists = false;
+                    containerRunning = false;
+                    updateButtonStates();
+                    
                     statusDiv.innerHTML = `
-                        <div class="alert alert-warning">
-                            <strong><?php _e('container_not_found'); ?></strong><br>
-                            ${escapeHtml(data.message)}
+                        <div class="alert alert-info">
+                            <?php _e('container_not_created'); ?>
                         </div>
                     `;
                 } else if (data.status === 'found') {
+                    containerExists = true;
+                    containerRunning = data.state.running;
+                    updateButtonStates();
+                    
                     const state = data.state;
                     const statusBadge = state.running 
                         ? '<span class="badge badge-success"><?php _e('running'); ?></span>'
@@ -381,7 +511,6 @@ $currentLang = getCurrentLanguage();
                                     <tr>
                                         <th><?php _e('source'); ?></th>
                                         <th><?php _e('destination'); ?></th>
-                                        <th><?php _e('type'); ?></th>
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -389,7 +518,6 @@ $currentLang = getCurrentLanguage();
                                         <tr>
                                             <td><code>${escapeHtml(m.source)}</code></td>
                                             <td><code>${escapeHtml(m.destination)}</code></td>
-                                            <td>${escapeHtml(m.type)}</td>
                                         </tr>
                                     `).join('')}
                                 </tbody>
@@ -398,6 +526,10 @@ $currentLang = getCurrentLanguage();
                         ` : ''}
                     `;
                 } else {
+                    containerExists = false;
+                    containerRunning = false;
+                    updateButtonStates();
+                    
                     statusDiv.innerHTML = `
                         <div class="alert alert-danger">
                             ${escapeHtml(data.message || 'Unknown error')}
@@ -405,6 +537,10 @@ $currentLang = getCurrentLanguage();
                     `;
                 }
             } catch (error) {
+                containerExists = false;
+                containerRunning = false;
+                updateButtonStates();
+                
                 statusDiv.innerHTML = `
                     <div class="alert alert-danger">
                         <?php _e('failed_to_inspect'); ?>: ${escapeHtml(error.message)}
@@ -444,37 +580,6 @@ $currentLang = getCurrentLanguage();
                     </div>
                 `;
             }
-        }
-        
-        // Generate docker run command
-        async function generateCommand() {
-            try {
-                const result = await apiRequest('api/docker.php', 'POST', {
-                    action: 'generate_command',
-                    feishu_webhook_url: document.getElementById('env-feishu').value,
-                    dingtalk_webhook_url: document.getElementById('env-dingtalk').value,
-                    wework_webhook_url: document.getElementById('env-wework').value,
-                    telegram_bot_token: document.getElementById('env-telegram-token').value,
-                    telegram_chat_id: document.getElementById('env-telegram-chat').value,
-                    email_from: document.getElementById('env-email-from').value,
-                    email_password: document.getElementById('env-email-password').value,
-                    email_to: document.getElementById('env-email-to').value,
-                    cron_schedule: document.getElementById('env-cron').value,
-                    run_mode: document.getElementById('env-run-mode').value,
-                    immediate_run: document.getElementById('env-immediate-run').value
-                });
-                
-                document.getElementById('command-output').textContent = result.data.command;
-                document.getElementById('generated-command').style.display = 'block';
-            } catch (error) {
-                showToast(__('failed_to_generate') + ': ' + error.message, 'error');
-            }
-        }
-        
-        // Copy command to clipboard
-        function copyCommand() {
-            const command = document.getElementById('command-output').textContent;
-            copyToClipboard(command);
         }
         
         // Helper functions

@@ -2,6 +2,7 @@
 /**
  * TrendRadarConsole - Docker API Endpoint
  * Provides Docker container management functionality for local deployment
+ * Docker commands are executed directly on the web server
  */
 
 session_start();
@@ -25,8 +26,10 @@ $userId = (int)$userId;
 // Docker settings are calculated based on user ID (not user-configurable)
 // User ID is validated to be numeric, so it's safe for shell commands
 $containerName = 'trend-radar-' . $userId;
-$configPath = './workspace/' . $userId . '/config';
-$outputPath = './workspace/' . $userId . '/output';
+// Use absolute paths for Docker volume mounts
+$basePath = dirname(dirname(__FILE__));
+$configPath = $basePath . '/workspace/' . $userId . '/config';
+$outputPath = $basePath . '/workspace/' . $userId . '/output';
 $dockerImage = 'wantcat/trendradar:latest';
 
 try {
@@ -137,9 +140,18 @@ try {
             ], $returnVar === 0 ? 'Logs retrieved' : 'Failed to retrieve logs');
             break;
             
-        case 'generate_command':
-            // Environment variables from input
-            $envVars = [];
+        case 'run':
+            // Create and start a new container
+            // First, ensure workspace directories exist
+            if (!is_dir($configPath)) {
+                mkdir($configPath, 0755, true);
+            }
+            if (!is_dir($outputPath)) {
+                mkdir($outputPath, 0755, true);
+            }
+            
+            // Build environment variables
+            $envArgs = [];
             $envKeys = [
                 'FEISHU_WEBHOOK_URL', 'DINGTALK_WEBHOOK_URL', 'WEWORK_WEBHOOK_URL',
                 'TELEGRAM_BOT_TOKEN', 'TELEGRAM_CHAT_ID',
@@ -164,29 +176,119 @@ try {
                         continue; // Skip invalid cron schedules
                     }
                     
-                    $envVars[$key] = $value;
+                    $envArgs[] = '-e ' . escapeshellarg($key . '=' . $value);
                 }
             }
             
-            // Build docker run command
-            // Note: Container name, paths, and image are calculated (not from user input)
-            $cmd = "docker run -d --name " . escapeshellarg($containerName) . " \\\n";
-            $cmd .= "  -v " . escapeshellarg($configPath) . ":/app/config:ro \\\n";
-            $cmd .= "  -v " . escapeshellarg($outputPath) . ":/app/output \\\n";
+            $envStr = implode(' ', $envArgs);
             
-            foreach ($envVars as $key => $value) {
-                $cmd .= "  -e " . escapeshellarg($key . '=' . $value) . " \\\n";
+            // Build and execute docker run command
+            $escapedName = escapeshellarg($containerName);
+            $escapedConfigPath = escapeshellarg($configPath);
+            $escapedOutputPath = escapeshellarg($outputPath);
+            $escapedImage = escapeshellarg($dockerImage);
+            
+            $cmd = "docker run -d --name {$escapedName} " .
+                   "-v {$escapedConfigPath}:/app/config:ro " .
+                   "-v {$escapedOutputPath}:/app/output " .
+                   "{$envStr} {$escapedImage} 2>&1";
+            
+            $output = [];
+            $returnVar = 0;
+            exec($cmd, $output, $returnVar);
+            
+            $outputStr = implode("\n", $output);
+            
+            if ($returnVar === 0) {
+                jsonSuccess([
+                    'container_name' => $containerName,
+                    'container_id' => trim($outputStr),
+                    'message' => 'Container started successfully'
+                ], 'Container started');
+            } else {
+                jsonError('Failed to start container: ' . $outputStr, 500);
             }
+            break;
             
-            $cmd .= "  " . escapeshellarg($dockerImage);
+        case 'start':
+            // Start an existing stopped container
+            $escapedName = escapeshellarg($containerName);
+            $output = [];
+            $returnVar = 0;
+            exec("docker start {$escapedName} 2>&1", $output, $returnVar);
             
-            jsonSuccess([
-                'command' => $cmd,
-                'container_name' => $containerName,
-                'config_path' => $configPath,
-                'output_path' => $outputPath,
-                'docker_image' => $dockerImage
-            ], 'Command generated');
+            $outputStr = implode("\n", $output);
+            
+            if ($returnVar === 0) {
+                jsonSuccess([
+                    'container_name' => $containerName,
+                    'message' => 'Container started successfully'
+                ], 'Container started');
+            } else {
+                jsonError('Failed to start container: ' . $outputStr, 500);
+            }
+            break;
+            
+        case 'stop':
+            // Stop a running container
+            $escapedName = escapeshellarg($containerName);
+            $output = [];
+            $returnVar = 0;
+            exec("docker stop {$escapedName} 2>&1", $output, $returnVar);
+            
+            $outputStr = implode("\n", $output);
+            
+            if ($returnVar === 0) {
+                jsonSuccess([
+                    'container_name' => $containerName,
+                    'message' => 'Container stopped successfully'
+                ], 'Container stopped');
+            } else {
+                jsonError('Failed to stop container: ' . $outputStr, 500);
+            }
+            break;
+            
+        case 'remove':
+            // Remove a container (must be stopped first)
+            $escapedName = escapeshellarg($containerName);
+            
+            // First stop the container if it's running
+            exec("docker stop {$escapedName} 2>&1");
+            
+            // Then remove it
+            $output = [];
+            $returnVar = 0;
+            exec("docker rm {$escapedName} 2>&1", $output, $returnVar);
+            
+            $outputStr = implode("\n", $output);
+            
+            if ($returnVar === 0) {
+                jsonSuccess([
+                    'container_name' => $containerName,
+                    'message' => 'Container removed successfully'
+                ], 'Container removed');
+            } else {
+                jsonError('Failed to remove container: ' . $outputStr, 500);
+            }
+            break;
+            
+        case 'restart':
+            // Restart a container
+            $escapedName = escapeshellarg($containerName);
+            $output = [];
+            $returnVar = 0;
+            exec("docker restart {$escapedName} 2>&1", $output, $returnVar);
+            
+            $outputStr = implode("\n", $output);
+            
+            if ($returnVar === 0) {
+                jsonSuccess([
+                    'container_name' => $containerName,
+                    'message' => 'Container restarted successfully'
+                ], 'Container restarted');
+            } else {
+                jsonError('Failed to restart container: ' . $outputStr, 500);
+            }
             break;
             
         default:

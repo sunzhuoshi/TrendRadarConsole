@@ -135,54 +135,20 @@ These variables will automatically override the config files during GitHub Actio
 
 ### Docker Deployment
 
-TrendRadarConsole now supports local Docker deployment as an alternative to GitHub Actions. Navigate to **Docker Deployment** in the sidebar to:
+TrendRadarConsole now supports local Docker deployment as an alternative to GitHub Actions. Docker commands are executed directly on the web server. Navigate to **Docker Deployment** in the sidebar to:
 
 1. **View Docker Settings**: Container name and volume paths are automatically calculated based on your user ID
-2. **Monitor Container Status**: View real-time status of your Docker container
-3. **View Container Logs**: Access container logs directly from the web interface
-4. **Generate Docker Commands**: Automatically generate `docker run` commands with your settings
+2. **Control Container**: Run, start, stop, restart, or remove your Docker container directly from the web interface
+3. **Monitor Container Status**: View real-time status of your Docker container
+4. **View Container Logs**: Access container logs directly from the web interface
 
 Each user has their own isolated workspace:
 - Container name: `trend-radar-{userId}`
-- Config path: `./workspace/{userId}/config`
-- Output path: `./workspace/{userId}/output`
+- Config path: `{app_path}/workspace/{userId}/config`
+- Output path: `{app_path}/workspace/{userId}/output`
 - Docker image: `wantcat/trendradar:latest` (fixed)
 
-#### Quick Start with Docker
-
-```bash
-# Create directories for config and output (replace {userId} with your actual user ID)
-mkdir -p ./workspace/{userId}/config ./workspace/{userId}/output
-
-# Run the container (use the generated command from the Docker Deployment page)
-docker run -d --name trend-radar-{userId} \
-  -v ./workspace/{userId}/config:/app/config:ro \
-  -v ./workspace/{userId}/output:/app/output \
-  -e FEISHU_WEBHOOK_URL="your_feishu_webhook" \
-  -e CRON_SCHEDULE="*/30 * * * *" \
-  -e RUN_MODE="cron" \
-  -e IMMEDIATE_RUN="true" \
-  wantcat/trendradar:latest
-```
-
-#### Useful Docker Commands
-
-```bash
-# Check container status (replace {userId} with your actual user ID)
-docker inspect trend-radar-{userId}
-
-# View container logs
-docker logs --tail 100 trend-radar-{userId}
-
-# Stop container
-docker stop trend-radar-{userId}
-
-# Start container
-docker start trend-radar-{userId}
-
-# Remove container
-docker rm trend-radar-{userId}
-```
+**Note**: Docker must be installed on the web server and the web server user must have permission to run Docker commands.
 
 ## Directory Structure
 
