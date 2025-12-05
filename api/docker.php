@@ -72,6 +72,7 @@ try {
             }
             
             // Execute docker inspect command
+            // Security: Container name is validated with strict regex and escaped with escapeshellarg()
             $escapedName = escapeshellarg($containerName);
             $output = [];
             $returnVar = 0;
@@ -142,10 +143,13 @@ try {
             if ($tail > 1000) $tail = 1000;
             
             // Execute docker logs command
+            // Note: Container name is validated with regex and escaped
+            // Tail is cast to int and bounded, but we escape it for extra safety
             $escapedName = escapeshellarg($containerName);
+            $escapedTail = escapeshellarg((string)$tail);
             $output = [];
             $returnVar = 0;
-            exec("docker logs --tail {$tail} {$escapedName} 2>&1", $output, $returnVar);
+            exec("docker logs --tail {$escapedTail} {$escapedName} 2>&1", $output, $returnVar);
             
             $outputStr = implode("\n", $output);
             
@@ -176,11 +180,26 @@ try {
             foreach ($envKeys as $key) {
                 $inputKey = strtolower($key);
                 if (isset($input[$inputKey]) && $input[$inputKey] !== '') {
-                    $envVars[$key] = $input[$inputKey];
+                    $value = $input[$inputKey];
+                    
+                    // Validate specific environment variables
+                    if ($key === 'RUN_MODE' && !in_array($value, ['cron', 'once'])) {
+                        $value = 'cron';
+                    }
+                    if ($key === 'IMMEDIATE_RUN' && !in_array($value, ['true', 'false'])) {
+                        $value = 'true';
+                    }
+                    // Validate cron schedule format (basic validation)
+                    if ($key === 'CRON_SCHEDULE' && !preg_match('/^[\d\*\/\-,\s]+$/', $value)) {
+                        continue; // Skip invalid cron schedules
+                    }
+                    
+                    $envVars[$key] = $value;
                 }
             }
             
             // Build docker run command
+            // Note: All values are properly escaped with escapeshellarg() for security
             $cmd = "docker run -d --name " . escapeshellarg($containerName) . " \\\n";
             $cmd .= "  -v " . escapeshellarg($configPath) . ":/app/config:ro \\\n";
             $cmd .= "  -v " . escapeshellarg($outputPath) . ":/app/output \\\n";
