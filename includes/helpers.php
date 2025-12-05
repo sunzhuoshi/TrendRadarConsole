@@ -392,6 +392,10 @@ function getJsTranslations() {
         'workflow_status_success', 'workflow_status_failure', 'workflow_status_cancelled',
         'workflow_status_unknown', 'workflow_checking_status', 'dev_mode_saved',
         'failed_to_inspect', 'failed_to_fetch_logs', 'failed_to_generate'
+        'workflow_status', 'workflow_enabled', 'workflow_disabled', 'workflow_enable',
+        'workflow_disable', 'workflow_enable_confirm', 'workflow_disable_confirm',
+        'workflow_enabled_success', 'workflow_disabled_success', 'workflow_enable_failed',
+        'workflow_disable_failed', 'workflow_status_loading'
     ];
     
     foreach ($commonKeys as $key) {
@@ -401,4 +405,32 @@ function getJsTranslations() {
     }
     
     return json_encode($jsTranslations, JSON_UNESCAPED_UNICODE);
+}
+
+/**
+ * Determine CSS class for wizard step based on current step
+ * Used in setup wizards to show completed/active/pending states
+ *
+ * @param int $currentStep The current step the user is on
+ * @param int $targetStep The step to determine the class for
+ * @return string CSS class: 'completed', 'active', or ''
+ */
+function getStepClass($currentStep, $targetStep) {
+    if ($currentStep > $targetStep) {
+        return 'completed';
+    } elseif ($currentStep === $targetStep) {
+        return 'active';
+    }
+    return '';
+}
+
+/**
+ * Encode data as JSON with XSS-safe flags for embedding in JavaScript context
+ * This prevents script injection when data might contain malicious content
+ *
+ * @param mixed $data The data to encode
+ * @return string JSON-encoded string safe for inline JavaScript
+ */
+function jsonEncodeForJs($data) {
+    return json_encode($data, JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT);
 }

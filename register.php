@@ -41,8 +41,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $user = $auth->login($username, $password);
             if ($user) {
                 $auth->startSession($user);
-                // Redirect to GitHub setup wizard after registration
-                header('Location: setup-github.php');
+                // Redirect to dashboard after registration
+                header('Location: index.php');
                 exit;
             }
             
