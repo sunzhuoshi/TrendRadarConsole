@@ -372,6 +372,11 @@ return [
     'github_setup_required_desc' => 'TrendRadarConsole 需要 GitHub 连接来同步您的配置。请完成设置向导。',
     'using_default_config' => '使用默认配置',
     
+    // GitHub Deployment
+    'github_deployment' => 'GitHub 部署',
+    'github_deployment_desc' => '管理您的 GitHub 仓库连接并部署配置',
+    'github_connected' => 'GitHub 已连接',
+    
     // Flash Messages
     'please_create_config' => '请先创建并激活一个配置。',
     'config_activated' => '配置已激活',

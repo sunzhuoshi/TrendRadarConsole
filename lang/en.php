@@ -372,6 +372,11 @@ return [
     'github_setup_required_desc' => 'TrendRadarConsole requires a GitHub connection to sync your configurations. Please complete the setup wizard.',
     'using_default_config' => 'Using default configuration',
     
+    // GitHub Deployment
+    'github_deployment' => 'GitHub Deployment',
+    'github_deployment_desc' => 'Manage your GitHub repository connection and deploy configurations',
+    'github_connected' => 'GitHub Connected',
+    
     // Flash Messages
     'please_create_config' => 'Please create and activate a configuration first.',
     'config_activated' => 'Configuration activated',
