@@ -4,11 +4,12 @@
  * TrendRadarConsole - Database Migration Script
  * 
  * This script runs database migrations automatically.
- * Usage: php migrate.php [--dry-run] [--status]
+ * Usage: php migrate.php [--dry-run] [--status] [--verify]
  * 
  * Options:
  *   --dry-run  Show what migrations would be run without executing them
  *   --status   Show the current migration status
+ *   --verify   Verify that all migrations have been applied correctly
  */
 
 // Determine the base path
@@ -29,6 +30,68 @@ $db = $config['db'];
 // Parse command line arguments
 $dryRun = in_array('--dry-run', $argv);
 $statusOnly = in_array('--status', $argv);
+$verifyOnly = in_array('--verify', $argv);
+
+/**
+ * Verify that a migration was applied successfully
+ * Returns true if verification passes, false otherwise
+ */
+function verifyMigration($pdo, $migrationName) {
+    $verifications = [
+        '001_create_operation_logs_table.sql' => function($pdo) {
+            // Check if operation_logs table exists
+            $stmt = $pdo->query("SHOW TABLES LIKE 'operation_logs'");
+            if ($stmt->rowCount() === 0) {
+                return ['success' => false, 'message' => 'Table operation_logs does not exist'];
+            }
+            
+            // Verify table structure
+            $stmt = $pdo->query("DESCRIBE operation_logs");
+            $columns = $stmt->fetchAll(PDO::FETCH_COLUMN);
+            $requiredColumns = ['id', 'user_id', 'action', 'target_type', 'target_id', 'details', 'created_at'];
+            
+            foreach ($requiredColumns as $col) {
+                if (!in_array($col, $columns)) {
+                    return ['success' => false, 'message' => "Missing column: {$col}"];
+                }
+            }
+            
+            // Verify indexes exist
+            $stmt = $pdo->query("SHOW INDEX FROM operation_logs");
+            $indexes = $stmt->fetchAll(PDO::FETCH_ASSOC);
+            $indexNames = array_unique(array_column($indexes, 'Key_name'));
+            
+            $requiredIndexes = ['PRIMARY', 'idx_user_id', 'idx_action', 'idx_created_at'];
+            foreach ($requiredIndexes as $idx) {
+                if (!in_array($idx, $indexNames)) {
+                    return ['success' => false, 'message' => "Missing index: {$idx}"];
+                }
+            }
+            
+            // Verify foreign key exists
+            $stmt = $pdo->query("
+                SELECT CONSTRAINT_NAME 
+                FROM information_schema.TABLE_CONSTRAINTS 
+                WHERE TABLE_SCHEMA = DATABASE() 
+                AND TABLE_NAME = 'operation_logs' 
+                AND CONSTRAINT_TYPE = 'FOREIGN KEY'
+            ");
+            $fkNames = $stmt->fetchAll(PDO::FETCH_COLUMN);
+            if (!in_array('fk_operation_logs_user', $fkNames)) {
+                return ['success' => false, 'message' => 'Missing foreign key: fk_operation_logs_user'];
+            }
+            
+            return ['success' => true, 'message' => 'All verifications passed'];
+        }
+    ];
+    
+    if (isset($verifications[$migrationName])) {
+        return $verifications[$migrationName]($pdo);
+    }
+    
+    // No specific verification defined, just check if recorded in migrations table
+    return ['success' => true, 'message' => 'No specific verification defined'];
+}
 
 try {
     // Connect to database
@@ -101,6 +164,37 @@ try {
         exit(0);
     }
     
+    // Verify mode - check all applied migrations
+    if ($verifyOnly) {
+        echo "\n🔍 Verifying applied migrations...\n";
+        $allPassed = true;
+        
+        if (empty($appliedMigrations)) {
+            echo "   ⚠️  No migrations have been applied yet.\n";
+            exit(0);
+        }
+        
+        foreach ($appliedMigrations as $migration) {
+            echo "\n   📋 Verifying: {$migration}\n";
+            $result = verifyMigration($pdo, $migration);
+            if ($result['success']) {
+                echo "      ✅ {$result['message']}\n";
+            } else {
+                echo "      ❌ {$result['message']}\n";
+                $allPassed = false;
+            }
+        }
+        
+        echo "\n";
+        if ($allPassed) {
+            echo "🎉 All migrations verified successfully!\n";
+            exit(0);
+        } else {
+            echo "❌ Some migrations failed verification.\n";
+            exit(1);
+        }
+    }
+    
     // Run pending migrations
     if (empty($pendingMigrations)) {
         echo "\n✨ Nothing to migrate. Database is up to date.\n";
@@ -156,6 +250,16 @@ try {
                 
                 $pdo->commit();
                 echo "      ✅ Migrated successfully\n";
+                
+                // Verify the migration
+                echo "      🔍 Verifying migration...\n";
+                $verifyResult = verifyMigration($pdo, $migration);
+                if ($verifyResult['success']) {
+                    echo "      ✅ Verification passed: {$verifyResult['message']}\n";
+                } else {
+                    echo "      ⚠️  Verification warning: {$verifyResult['message']}\n";
+                }
+                
                 $migratedCount++;
                 
             } catch (Exception $e) {

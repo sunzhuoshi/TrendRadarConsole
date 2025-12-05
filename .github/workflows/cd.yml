@@ -144,6 +144,9 @@ jobs:
             if [ -f 'sql/migrate.php' ] && [ -f 'config/config.php' ]; then
               echo '📦 Running migrations...'
               $PHP_PATH sql/migrate.php
+              echo ''
+              echo '🔍 Verifying migrations...'
+              $PHP_PATH sql/migrate.php --verify
             else
               echo '⚠️ Skipping migrations: migrate.php or config.php not found'
             fi
