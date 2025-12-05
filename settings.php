@@ -314,6 +314,7 @@ $currentLang = getCurrentLanguage();
                             <li><?php _e('pat_step3'); ?></li>
                             <li><?php _e('pat_step4'); ?></li>
                             <li><?php _e('pat_step5'); ?></li>
+                            <li><?php _e('pat_step6'); ?></li>
                         </ol>
                     </div>
                     
@@ -351,6 +352,7 @@ $currentLang = getCurrentLanguage();
                             <button type="submit" class="btn btn-primary"><?php _e('save_settings'); ?></button>
                             <button type="button" class="btn btn-secondary" data-action="test-connection" onclick="testConnection()"><?php _e('test_connection'); ?></button>
                             <button type="button" class="btn btn-success" data-action="save-to-github" onclick="saveToGitHub()"><?php _e('save_to_github'); ?></button>
+                            <button type="button" class="btn btn-warning" data-action="test-crawling" onclick="testCrawling()"><?php _e('test_crawling'); ?></button>
                         </div>
                     </form>
                 </div>
@@ -362,6 +364,7 @@ $currentLang = getCurrentLanguage();
     
     <script>var i18n = <?php echo getJsTranslations(); ?>;</script>
     <script src="assets/js/app.js"></script>
+    <script src="assets/js/shared.js"></script>
     <script>
         // Push window toggle
         document.getElementById('push-window-toggle').addEventListener('change', function() {
@@ -492,6 +495,57 @@ $currentLang = getCurrentLanguage();
                 }
             } finally {
                 setButtonLoading(saveBtn, false);
+            }
+        }
+        
+        // Test Crawling - helper functions are loaded from assets/js/shared.js
+        async function testCrawling() {
+            const btn = document.querySelector('button[data-action="test-crawling"]');
+            if (!confirm(__('confirm_test_crawling'))) {
+                return;
+            }
+            
+            setButtonLoadingWithStatus(btn, true);
+            setButtonStatusText(btn, __('crawling_triggered'));
+            
+            try {
+                // Get last successful run duration for progress estimation
+                const runsResult = await apiRequest('api/github.php', 'POST', {
+                    action: 'get_workflow_runs',
+                    workflow_id: 'crawler.yml'
+                });
+                
+                let estimatedDuration = DEFAULT_ESTIMATED_DURATION_MS;
+                const runs = runsResult.data?.runs || [];
+                for (const run of runs) {
+                    if (run.conclusion === 'success' && run.run_started_at && run.updated_at) {
+                        const startTime = new Date(run.run_started_at).getTime();
+                        const endTime = new Date(run.updated_at).getTime();
+                        estimatedDuration = endTime - startTime;
+                        break;
+                    }
+                }
+                
+                // Store dispatch time BEFORE calling dispatch
+                const dispatchTime = Date.now();
+                
+                await apiRequest('api/github.php', 'POST', {
+                    action: 'dispatch_workflow',
+                    workflow_id: 'crawler.yml'
+                });
+                
+                // Start tracking workflow status - store timing data on button
+                btn.dataset.dispatchTime = dispatchTime.toString();
+                btn.dataset.startTime = dispatchTime.toString();
+                btn.dataset.estimatedDuration = estimatedDuration.toString();
+                setTimeout(() => trackWorkflowStatus(btn, 0), 3000);
+            } catch (error) {
+                if (error.message && error.message.includes('Owner, repo, and token are required')) {
+                    showToast(__('configure_github_first'), 'error');
+                } else {
+                    showToast(__('crawling_trigger_failed') + error.message, 'error');
+                }
+                setButtonLoadingWithStatus(btn, false);
             }
         }
     </script>

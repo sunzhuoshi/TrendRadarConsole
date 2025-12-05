@@ -301,6 +301,7 @@ $githubConfigured = !empty($githubSettings['github_owner']) &&
                     <li><?php _e('pat_step3'); ?></li>
                     <li><?php _e('pat_step4'); ?></li>
                     <li><?php _e('pat_step5'); ?></li>
+                    <li><?php _e('pat_step6'); ?></li>
                 </ol>
             </div>
             
