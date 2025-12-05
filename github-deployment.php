@@ -384,17 +384,6 @@ $csrfToken = generateCsrfToken();
                 </div>
             </div>
             
-            <!-- Test Crawling -->
-            <div class="card">
-                <div class="card-header">
-                    <h3>🕷️ <?php _e('test_crawling'); ?></h3>
-                </div>
-                <div class="card-body">
-                    <p class="text-muted mb-3"><?php _e('test_crawling_desc'); ?></p>
-                    <button type="button" class="btn btn-warning" data-action="test-crawling" onclick="testCrawling()"><?php _e('test_crawling'); ?></button>
-                </div>
-            </div>
-            
             <!-- PAT Instructions -->
             <div class="card">
                 <div class="card-header">
@@ -616,52 +605,6 @@ $csrfToken = generateCsrfToken();
             }
         }
         
-        // Test Crawling
-        async function testCrawling() {
-            const btn = document.querySelector('button[data-action="test-crawling"]');
-            if (!confirm(__('confirm_test_crawling'))) {
-                return;
-            }
-            
-            setButtonLoadingWithStatus(btn, true);
-            setButtonStatusText(btn, __('crawling_triggered'));
-            
-            try {
-                // Get last successful run duration for progress estimation
-                const runsResult = await apiRequest('api/github.php', 'POST', {
-                    action: 'get_workflow_runs',
-                    workflow_id: 'crawler.yml'
-                });
-                
-                let estimatedDuration = DEFAULT_ESTIMATED_DURATION_MS;
-                const runs = runsResult.data?.runs || [];
-                for (const run of runs) {
-                    if (run.conclusion === 'success' && run.run_started_at && run.updated_at) {
-                        const startTime = new Date(run.run_started_at).getTime();
-                        const endTime = new Date(run.updated_at).getTime();
-                        estimatedDuration = endTime - startTime;
-                        break;
-                    }
-                }
-                
-                // Store dispatch time BEFORE calling dispatch
-                const dispatchTime = Date.now();
-                
-                await apiRequest('api/github.php', 'POST', {
-                    action: 'dispatch_workflow',
-                    workflow_id: 'crawler.yml'
-                });
-                
-                // Start tracking workflow status - store timing data on button
-                btn.dataset.dispatchTime = dispatchTime.toString();
-                btn.dataset.startTime = dispatchTime.toString();
-                btn.dataset.estimatedDuration = estimatedDuration.toString();
-                setTimeout(() => trackWorkflowStatus(btn, 0), 3000);
-            } catch (error) {
-                showToast(__('crawling_trigger_failed') + error.message, 'error');
-                setButtonLoadingWithStatus(btn, false);
-            }
-        }
         <?php endif; ?>
     </script>
 </body>
