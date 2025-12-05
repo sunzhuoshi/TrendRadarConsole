@@ -4,12 +4,13 @@
  * TrendRadarConsole - Database Migration Script
  * 
  * This script runs database migrations automatically.
- * Usage: php migrate.php [--dry-run] [--status] [--verify]
+ * Usage: php migrate.php [--dry-run] [--status] [--verify] [--fix]
  * 
  * Options:
  *   --dry-run  Show what migrations would be run without executing them
  *   --status   Show the current migration status
  *   --verify   Verify that all migrations have been applied correctly
+ *   --fix      Re-run migrations that failed verification (removes and re-applies)
  */
 
 // Determine the base path
@@ -31,6 +32,7 @@ $db = $config['db'];
 $dryRun = in_array('--dry-run', $argv);
 $statusOnly = in_array('--status', $argv);
 $verifyOnly = in_array('--verify', $argv);
+$fixMode = in_array('--fix', $argv);
 
 /**
  * Verify that a migration was applied successfully
@@ -191,8 +193,80 @@ try {
             exit(0);
         } else {
             echo "❌ Some migrations failed verification.\n";
+            echo "   Run with --fix to re-apply failed migrations.\n";
             exit(1);
         }
+    }
+    
+    // Fix mode - find and re-run migrations that failed verification
+    if ($fixMode) {
+        echo "\n🔧 Fix mode: checking for failed migrations...\n";
+        $failedMigrations = [];
+        
+        foreach ($appliedMigrations as $migration) {
+            $result = verifyMigration($pdo, $migration);
+            if (!$result['success']) {
+                $failedMigrations[] = $migration;
+                echo "   ❌ {$migration}: {$result['message']}\n";
+            }
+        }
+        
+        if (empty($failedMigrations)) {
+            echo "   ✅ All applied migrations are valid. Nothing to fix.\n";
+            exit(0);
+        }
+        
+        echo "\n🔄 Re-applying " . count($failedMigrations) . " failed migration(s)...\n";
+        
+        foreach ($failedMigrations as $migration) {
+            $migrationFile = $migrationsPath . '/' . $migration;
+            
+            if (!file_exists($migrationFile)) {
+                echo "   ❌ Migration file not found: {$migrationFile}\n";
+                continue;
+            }
+            
+            echo "\n   📦 Re-applying: {$migration}\n";
+            
+            // Remove the migration record first
+            $stmt = $pdo->prepare("DELETE FROM migrations WHERE migration = ?");
+            $stmt->execute([$migration]);
+            echo "      🗑️  Removed old migration record\n";
+            
+            // Read and execute migration SQL
+            $sql = file_get_contents($migrationFile);
+            $cleanSql = preg_replace('/--[^\n]*\n/', "\n", $sql);
+            $cleanSql = trim($cleanSql);
+            
+            try {
+                if (!empty($cleanSql)) {
+                    $pdo->exec($cleanSql);
+                    echo "      ✅ SQL executed successfully\n";
+                }
+                
+                // Verify the migration worked
+                $verifyResult = verifyMigration($pdo, $migration);
+                if (!$verifyResult['success']) {
+                    echo "      ❌ Verification still failed: {$verifyResult['message']}\n";
+                    exit(1);
+                }
+                echo "      ✅ Verification passed\n";
+                
+                // Re-record the migration
+                $stmt = $pdo->query("SELECT COALESCE(MAX(batch), 0) + 1 AS next_batch FROM migrations");
+                $nextBatch = (int) $stmt->fetch()['next_batch'];
+                $stmt = $pdo->prepare("INSERT INTO migrations (migration, batch) VALUES (?, ?)");
+                $stmt->execute([$migration, $nextBatch]);
+                echo "      ✅ Migration re-recorded\n";
+                
+            } catch (PDOException $e) {
+                echo "      ❌ SQL Error: " . $e->getMessage() . "\n";
+                exit(1);
+            }
+        }
+        
+        echo "\n🎉 Fix complete!\n";
+        exit(0);
     }
     
     // Run pending migrations
@@ -227,43 +301,43 @@ try {
                 continue;
             }
             
-            // Begin transaction
-            $pdo->beginTransaction();
-            
             try {
-                // Execute the migration
-                // Note: Multi-statement execution requires handling
-                $statements = array_filter(
-                    array_map('trim', explode(';', $sql)),
-                    function($s) { return !empty($s) && !preg_match('/^--/', $s); }
-                );
+                // Execute the migration SQL directly
+                // Note: DDL statements (CREATE TABLE, ALTER TABLE, etc.) cause implicit commits
+                // in MySQL, so we can't wrap them in a transaction. We execute the full SQL
+                // and then record it in migrations table separately.
                 
-                foreach ($statements as $statement) {
-                    if (!empty(trim($statement))) {
-                        $pdo->exec($statement);
-                    }
+                // Remove SQL comments for cleaner execution
+                $cleanSql = preg_replace('/--[^\n]*\n/', "\n", $sql);
+                $cleanSql = trim($cleanSql);
+                
+                if (!empty($cleanSql)) {
+                    // Execute the migration SQL
+                    $result = $pdo->exec($cleanSql);
+                    echo "      ✅ SQL executed successfully\n";
                 }
                 
-                // Record the migration
-                $stmt = $pdo->prepare("INSERT INTO migrations (migration, batch) VALUES (?, ?)");
-                $stmt->execute([$migration, $nextBatch]);
-                
-                $pdo->commit();
-                echo "      ✅ Migrated successfully\n";
-                
-                // Verify the migration
+                // Verify the migration worked before recording it
                 echo "      🔍 Verifying migration...\n";
                 $verifyResult = verifyMigration($pdo, $migration);
-                if ($verifyResult['success']) {
-                    echo "      ✅ Verification passed: {$verifyResult['message']}\n";
-                } else {
-                    echo "      ⚠️  Verification warning: {$verifyResult['message']}\n";
+                if (!$verifyResult['success']) {
+                    echo "      ❌ Verification failed: {$verifyResult['message']}\n";
+                    echo "      ⚠️  Migration will NOT be recorded as applied.\n";
+                    exit(1);
                 }
+                echo "      ✅ Verification passed: {$verifyResult['message']}\n";
+                
+                // Record the migration only after successful verification
+                $stmt = $pdo->prepare("INSERT INTO migrations (migration, batch) VALUES (?, ?)");
+                $stmt->execute([$migration, $nextBatch]);
+                echo "      ✅ Migration recorded\n";
                 
                 $migratedCount++;
                 
+            } catch (PDOException $e) {
+                echo "      ❌ SQL Error: " . $e->getMessage() . "\n";
+                exit(1);
             } catch (Exception $e) {
-                $pdo->rollBack();
                 echo "      ❌ Failed: " . $e->getMessage() . "\n";
                 exit(1);
             }
