@@ -145,8 +145,8 @@ jobs:
               echo '📦 Running migrations...'
               $PHP_PATH sql/migrate.php
               echo ''
-              echo '🔍 Verifying and fixing migrations if needed...'
-              $PHP_PATH sql/migrate.php --fix
+              echo '🔍 Verifying migrations...'
+              $PHP_PATH sql/migrate.php --verify
             else
               echo '⚠️ Skipping migrations: migrate.php or config.php not found'
             fi
