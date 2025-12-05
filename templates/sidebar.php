@@ -15,8 +15,8 @@ $isDevMode = Auth::checkDevMode();
         <h1>TrendRadarConsole</h1>
         <small>👤 <?php echo htmlspecialchars($currentUsername ?? __('guest')); ?></small>
         <?php if ($isDevMode): ?>
-        <div style="margin-top: 5px;">
-            <span style="background: #ff9800; color: #000; font-size: 0.65rem; padding: 2px 6px; border-radius: 3px; font-weight: bold;">🛠️ DEV</span>
+        <div>
+            <span class="dev-mode-badge">🛠️ DEV</span>
         </div>
         <?php endif; ?>
     </div>

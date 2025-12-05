@@ -281,17 +281,28 @@ class Auth
     
     /**
      * Get development mode status for user
-     * Static method for convenience
+     * Static method for convenience with caching
      */
     public static function checkDevMode()
     {
+        static $devModeCache = null;
+        static $cachedUserId = null;
+        
         $userId = self::getUserId();
         if (!$userId) {
             return false;
         }
         
+        // Return cached result if available for the same user
+        if ($devModeCache !== null && $cachedUserId === $userId) {
+            return $devModeCache;
+        }
+        
         $auth = new self();
-        return $auth->isDevModeEnabled($userId);
+        $devModeCache = $auth->isDevModeEnabled($userId);
+        $cachedUserId = $userId;
+        
+        return $devModeCache;
     }
 }
 
