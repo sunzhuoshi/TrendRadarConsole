@@ -51,6 +51,9 @@ $dockerImage = 'wantcat/trendradar:latest';
 
 $csrfToken = generateCsrfToken();
 $currentLang = getCurrentLanguage();
+
+// Check if development mode is enabled
+$isDevMode = $auth->isDevModeEnabled($userId);
 ?>
 <!DOCTYPE html>
 <html lang="<?php echo $currentLang; ?>">
@@ -88,6 +91,16 @@ $currentLang = getCurrentLanguage();
                 </div>
                 <div class="card-body">
                     <p class="text-muted mb-3"><?php _e('ssh_connection_desc'); ?></p>
+                    
+                    <!-- Setup script prompt -->
+                    <div class="alert alert-info mb-3">
+                        <strong>💡 <?php _e('setup_ssh_account_title'); ?></strong><br>
+                        <?php _e('setup_ssh_account_desc'); ?>
+                        <pre style="margin-top: 10px; background: #f5f5f5; padding: 10px; border-radius: 4px;"><code>curl -O https://trendingnews.cn/scripts/setup-docker-worker.sh
+chmod +x setup-docker-worker.sh
+sudo ./setup-docker-worker.sh</code></pre>
+                    </div>
+                    
                     <form id="ssh-settings-form">
                         <div class="row">
                             <div class="col-4">
@@ -122,13 +135,14 @@ $currentLang = getCurrentLanguage();
                                 </div>
                             </div>
                         </div>
+                        <?php if ($isDevMode): ?>
                         <div class="row">
                             <div class="col-6">
                                 <div class="form-group">
                                     <label class="form-label"><?php _e('workspace_path'); ?></label>
                                     <input type="text" id="workspace-path" class="form-control" 
                                            value="<?php echo sanitize($sshSettings['docker_workspace_path'] ?? '/srv/trendradar'); ?>" 
-                                           placeholder="/srv/trendradar">
+                                           readonly>
                                     <div class="form-text"><?php _e('workspace_path_desc'); ?></div>
                                 </div>
                             </div>
@@ -143,12 +157,28 @@ $currentLang = getCurrentLanguage();
                                 </div>
                             </div>
                         </div>
+                        <?php else: ?>
+                        <input type="hidden" id="workspace-path" value="<?php echo sanitize($sshSettings['docker_workspace_path'] ?? '/srv/trendradar'); ?>">
+                        <div class="row">
+                            <div class="col-12">
+                                <div class="btn-group">
+                                    <button type="button" class="btn btn-primary" onclick="saveSSHSettings()">
+                                        💾 <?php _e('save_settings'); ?>
+                                    </button>
+                                    <button type="button" class="btn btn-outline" onclick="testConnection()">
+                                        🔗 <?php _e('test_connection'); ?>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                        <?php endif; ?>
                     </form>
                     <div id="connection-status" class="mt-3" style="display: none;"></div>
                 </div>
             </div>
             
-            <!-- Docker Settings (Auto-calculated) -->
+            <!-- Docker Settings (Auto-calculated) - Only visible in development mode -->
+            <?php if ($isDevMode): ?>
             <div class="card">
                 <div class="card-header">
                     <h3>⚙️ <?php _e('docker_settings'); ?></h3>
@@ -186,6 +216,7 @@ $currentLang = getCurrentLanguage();
                     </div>
                 </div>
             </div>
+            <?php endif; ?>
             
             <!-- Container Control (only show if SSH is configured) -->
             <div class="card" id="container-control-card" style="<?php echo $sshConfigured ? '' : 'display: none;'; ?>">
@@ -379,6 +410,7 @@ $currentLang = getCurrentLanguage();
         let containerExists = false;
         let containerRunning = false;
         let sshConfigured = <?php echo $sshConfigured ? 'true' : 'false'; ?>;
+        const isDevMode = <?php echo $isDevMode ? 'true' : 'false'; ?>;
         
         // Check container status on page load if SSH is configured
         document.addEventListener('DOMContentLoaded', function() {
@@ -503,11 +535,14 @@ $currentLang = getCurrentLanguage();
             }
         }
         
-        // Update display paths
+        // Update display paths (only in dev mode when elements exist)
         function updateDisplayPaths(workspacePath) {
+            if (!isDevMode) return; // Skip if not in dev mode
             const userId = <?php echo json_encode($userId); ?>;
-            document.getElementById('config-path-display').value = workspacePath + '/' + userId + '/config';
-            document.getElementById('output-path-display').value = workspacePath + '/' + userId + '/output';
+            const configPathEl = document.getElementById('config-path-display');
+            const outputPathEl = document.getElementById('output-path-display');
+            if (configPathEl) configPathEl.value = workspacePath + '/' + userId + '/config';
+            if (outputPathEl) outputPathEl.value = workspacePath + '/' + userId + '/output';
         }
         
         // Update button states based on container status

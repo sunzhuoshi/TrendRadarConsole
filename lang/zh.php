@@ -515,6 +515,8 @@ return [
     // SSH Connection Settings
     'ssh_connection_settings' => 'SSH 连接设置',
     'ssh_connection_desc' => '配置到 Docker 工作服务器的 SSH 连接。为安全起见，建议使用单独的账户（如 trendradarsrv）。',
+    'setup_ssh_account_title' => '在 Docker 工作服务器上创建 SSH 账户',
+    'setup_ssh_account_desc' => '连接前，请在 Docker 工作服务器上以 root 身份运行以下脚本创建 trendradarsrv 账户：',
     'ssh_host' => 'SSH 主机',
     'ssh_port' => 'SSH 端口',
     'ssh_username' => 'SSH 用户名',

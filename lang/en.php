@@ -515,6 +515,8 @@ return [
     // SSH Connection Settings
     'ssh_connection_settings' => 'SSH Connection Settings',
     'ssh_connection_desc' => 'Configure SSH connection to your Docker worker server. A separate account (e.g., trendradarsrv) is recommended for security.',
+    'setup_ssh_account_title' => 'Create SSH Account on Docker Worker',
+    'setup_ssh_account_desc' => 'Before connecting, run the following script on your Docker worker server (as root) to create the trendradarsrv account:',
     'ssh_host' => 'SSH Host',
     'ssh_port' => 'SSH Port',
     'ssh_username' => 'SSH Username',
