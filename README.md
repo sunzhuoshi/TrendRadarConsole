@@ -135,20 +135,25 @@ These variables will automatically override the config files during GitHub Actio
 
 ### Docker Deployment
 
-TrendRadarConsole now supports local Docker deployment as an alternative to GitHub Actions. Docker commands are executed directly on the web server. Navigate to **Docker Deployment** in the sidebar to:
+TrendRadarConsole now supports local Docker deployment as an alternative to GitHub Actions. Docker commands are executed via SSH to a remote Docker worker server. Navigate to **Docker Deployment** in the sidebar to:
 
-1. **View Docker Settings**: Container name and volume paths are automatically calculated based on your user ID
-2. **Control Container**: Run, start, stop, restart, or remove your Docker container directly from the web interface
-3. **Monitor Container Status**: View real-time status of your Docker container
-4. **View Container Logs**: Access container logs directly from the web interface
+1. **Configure SSH Connection**: Set up SSH connection to your Docker worker server
+2. **View Docker Settings**: Container name and volume paths are automatically calculated based on your user ID
+3. **Control Container**: Run, start, stop, restart, or remove your Docker container via SSH
+4. **Monitor Container Status**: View real-time status of your Docker container
+5. **View Container Logs**: Access container logs from the remote server
 
-Each user has their own isolated workspace:
+Each user has their own isolated workspace on the Docker worker:
 - Container name: `trend-radar-{userId}`
-- Config path: `{app_path}/workspace/{userId}/config`
-- Output path: `{app_path}/workspace/{userId}/output`
+- Config path: `{workspace_path}/{userId}/config` (default: `/srv/trendradar/{userId}/config`)
+- Output path: `{workspace_path}/{userId}/output` (default: `/srv/trendradar/{userId}/output`)
 - Docker image: `wantcat/trendradar:latest` (fixed)
 
-**Note**: Docker must be installed on the web server and the web server user must have permission to run Docker commands.
+**Requirements**:
+- A separate Docker worker server with Docker installed
+- SSH access to the Docker worker server
+- A dedicated user account (e.g., `trendradarsrv`) for running Docker commands
+- PHP SSH2 extension (`php-ssh2`) installed on the web server
 
 ## Directory Structure
 

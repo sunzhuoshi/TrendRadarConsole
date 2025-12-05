@@ -304,6 +304,60 @@ class Auth
         
         return $devModeCache;
     }
+    
+    /**
+     * Get Docker SSH settings for user
+     */
+    public function getDockerSSHSettings($userId)
+    {
+        $user = $this->db->fetchOne(
+            'SELECT docker_ssh_host, docker_ssh_port, docker_ssh_username, docker_ssh_password, docker_workspace_path FROM users WHERE id = ?',
+            [$userId]
+        );
+        
+        if (!$user) {
+            return [
+                'docker_ssh_host' => '',
+                'docker_ssh_port' => 22,
+                'docker_ssh_username' => '',
+                'docker_ssh_password' => '',
+                'docker_workspace_path' => '/srv/trendradar'
+            ];
+        }
+        
+        return $user;
+    }
+    
+    /**
+     * Update Docker SSH settings for user
+     */
+    public function updateDockerSSHSettings($userId, $host, $port, $username, $password = null, $workspacePath = null)
+    {
+        $data = [
+            'docker_ssh_host' => $host,
+            'docker_ssh_port' => (int)$port ?: 22,
+            'docker_ssh_username' => $username
+        ];
+        
+        if ($password !== null) {
+            $data['docker_ssh_password'] = $password;
+        }
+        
+        if ($workspacePath !== null) {
+            $data['docker_workspace_path'] = $workspacePath;
+        }
+        
+        return $this->db->update('users', $data, 'id = ?', [$userId]);
+    }
+    
+    /**
+     * Check if Docker SSH is configured for user
+     */
+    public function isDockerSSHConfigured($userId)
+    {
+        $settings = $this->getDockerSSHSettings($userId);
+        return !empty($settings['docker_ssh_host']) && !empty($settings['docker_ssh_username']);
+    }
 }
 
 /**

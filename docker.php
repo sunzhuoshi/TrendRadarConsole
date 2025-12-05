@@ -2,7 +2,7 @@
 /**
  * TrendRadarConsole - Docker Deployment Page
  * Local Docker deployment as alternative to GitHub Actions
- * Docker commands are executed directly on the web server
+ * Docker commands are executed via SSH to remote Docker worker
  */
 
 session_start();
@@ -36,16 +36,18 @@ try {
 $flash = getFlash();
 $currentPage = 'docker';
 
+// Get Docker SSH settings
+$auth = new Auth();
+$sshSettings = $auth->getDockerSSHSettings($userId);
+$sshConfigured = $auth->isDockerSSHConfigured($userId);
+
 // Docker settings are calculated based on user ID (not user-configurable)
-// User ID is validated to be numeric, so it's safe for display
-// Environment suffix: '-dev' for development, '' for production
-$envSuffix = getEnvironmentSuffix();
-$containerName = 'trend-radar-' . $userId . $envSuffix;
-$basePath = dirname(__FILE__);
-$configPath = $basePath . '/workspace/' . $userId . '/config';
-$outputPath = $basePath . '/workspace/' . $userId . '/output';
+// No environment suffix - container name is just trend-radar-{userId}
+$containerName = 'trend-radar-' . $userId;
+$workspacePath = $sshSettings['docker_workspace_path'] ?: '/srv/trendradar';
+$configPath = $workspacePath . '/' . $userId . '/config';
+$outputPath = $workspacePath . '/' . $userId . '/output';
 $dockerImage = 'wantcat/trendradar:latest';
-$appEnvironment = getAppEnvironment();
 
 $csrfToken = generateCsrfToken();
 $currentLang = getCurrentLanguage();
@@ -79,6 +81,73 @@ $currentLang = getCurrentLanguage();
             <div class="alert alert-danger"><?php echo sanitize($error); ?></div>
             <?php else: ?>
             
+            <!-- SSH Connection Settings -->
+            <div class="card">
+                <div class="card-header">
+                    <h3>🔐 <?php _e('ssh_connection_settings'); ?></h3>
+                </div>
+                <div class="card-body">
+                    <p class="text-muted mb-3"><?php _e('ssh_connection_desc'); ?></p>
+                    <form id="ssh-settings-form">
+                        <div class="row">
+                            <div class="col-4">
+                                <div class="form-group">
+                                    <label class="form-label"><?php _e('ssh_host'); ?> <span class="text-danger">*</span></label>
+                                    <input type="text" id="ssh-host" class="form-control" 
+                                           value="<?php echo sanitize($sshSettings['docker_ssh_host'] ?? ''); ?>" 
+                                           placeholder="192.168.1.100">
+                                </div>
+                            </div>
+                            <div class="col-2">
+                                <div class="form-group">
+                                    <label class="form-label"><?php _e('ssh_port'); ?></label>
+                                    <input type="number" id="ssh-port" class="form-control" 
+                                           value="<?php echo (int)($sshSettings['docker_ssh_port'] ?? 22); ?>" 
+                                           placeholder="22">
+                                </div>
+                            </div>
+                            <div class="col-3">
+                                <div class="form-group">
+                                    <label class="form-label"><?php _e('ssh_username'); ?> <span class="text-danger">*</span></label>
+                                    <input type="text" id="ssh-username" class="form-control" 
+                                           value="<?php echo sanitize($sshSettings['docker_ssh_username'] ?? ''); ?>" 
+                                           placeholder="trendradarsrv">
+                                </div>
+                            </div>
+                            <div class="col-3">
+                                <div class="form-group">
+                                    <label class="form-label"><?php _e('ssh_password'); ?></label>
+                                    <input type="password" id="ssh-password" class="form-control" 
+                                           placeholder="<?php _e('leave_empty_to_keep'); ?>">
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-6">
+                                <div class="form-group">
+                                    <label class="form-label"><?php _e('workspace_path'); ?></label>
+                                    <input type="text" id="workspace-path" class="form-control" 
+                                           value="<?php echo sanitize($sshSettings['docker_workspace_path'] ?? '/srv/trendradar'); ?>" 
+                                           placeholder="/srv/trendradar">
+                                    <div class="form-text"><?php _e('workspace_path_desc'); ?></div>
+                                </div>
+                            </div>
+                            <div class="col-6 d-flex align-items-end">
+                                <div class="btn-group">
+                                    <button type="button" class="btn btn-primary" onclick="saveSSHSettings()">
+                                        💾 <?php _e('save_settings'); ?>
+                                    </button>
+                                    <button type="button" class="btn btn-outline" onclick="testConnection()">
+                                        🔗 <?php _e('test_connection'); ?>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </form>
+                    <div id="connection-status" class="mt-3" style="display: none;"></div>
+                </div>
+            </div>
+            
             <!-- Docker Settings (Auto-calculated) -->
             <div class="card">
                 <div class="card-header">
@@ -87,22 +156,16 @@ $currentLang = getCurrentLanguage();
                 <div class="card-body">
                     <p class="text-muted mb-3"><?php _e('docker_settings_auto_desc'); ?></p>
                     <div class="row">
-                        <div class="col-4">
+                        <div class="col-6">
                             <div class="form-group">
                                 <label class="form-label"><?php _e('container_name'); ?></label>
                                 <input type="text" class="form-control" value="<?php echo sanitize($containerName); ?>" readonly>
                             </div>
                         </div>
-                        <div class="col-4">
+                        <div class="col-6">
                             <div class="form-group">
                                 <label class="form-label"><?php _e('docker_image'); ?></label>
                                 <input type="text" class="form-control" value="<?php echo sanitize($dockerImage); ?>" readonly>
-                            </div>
-                        </div>
-                        <div class="col-4">
-                            <div class="form-group">
-                                <label class="form-label"><?php _e('environment'); ?></label>
-                                <input type="text" class="form-control" value="<?php echo sanitize($appEnvironment); ?>" readonly>
                             </div>
                         </div>
                     </div>
@@ -111,21 +174,21 @@ $currentLang = getCurrentLanguage();
                         <div class="col-6">
                             <div class="form-group">
                                 <label class="form-label"><?php _e('config_path'); ?></label>
-                                <input type="text" class="form-control" value="<?php echo sanitize($configPath); ?>" readonly>
+                                <input type="text" class="form-control" id="config-path-display" value="<?php echo sanitize($configPath); ?>" readonly>
                             </div>
                         </div>
                         <div class="col-6">
                             <div class="form-group">
                                 <label class="form-label"><?php _e('output_path'); ?></label>
-                                <input type="text" class="form-control" value="<?php echo sanitize($outputPath); ?>" readonly>
+                                <input type="text" class="form-control" id="output-path-display" value="<?php echo sanitize($outputPath); ?>" readonly>
                             </div>
                         </div>
                     </div>
                 </div>
             </div>
             
-            <!-- Container Control -->
-            <div class="card">
+            <!-- Container Control (only show if SSH is configured) -->
+            <div class="card" id="container-control-card" style="<?php echo $sshConfigured ? '' : 'display: none;'; ?>">
                 <div class="card-header">
                     <h3>🎮 <?php _e('container_control'); ?></h3>
                 </div>
@@ -247,8 +310,8 @@ $currentLang = getCurrentLanguage();
                 </div>
             </div>
             
-            <!-- Container Status -->
-            <div class="card">
+            <!-- Container Status (only show if SSH is configured) -->
+            <div class="card" id="container-status-card" style="<?php echo $sshConfigured ? '' : 'display: none;'; ?>">
                 <div class="card-header">
                     <h3>📊 <?php _e('container_status'); ?></h3>
                     <button type="button" class="btn btn-outline btn-sm" onclick="inspectContainer()">
@@ -264,8 +327,8 @@ $currentLang = getCurrentLanguage();
                 </div>
             </div>
             
-            <!-- Container Logs -->
-            <div class="card">
+            <!-- Container Logs (only show if SSH is configured) -->
+            <div class="card" id="container-logs-card" style="<?php echo $sshConfigured ? '' : 'display: none;'; ?>">
                 <div class="card-header">
                     <h3>📋 <?php _e('container_logs'); ?></h3>
                     <div class="btn-group">
@@ -289,6 +352,15 @@ $currentLang = getCurrentLanguage();
                 </div>
             </div>
             
+            <!-- Not configured message -->
+            <div id="not-configured-message" class="card" style="<?php echo $sshConfigured ? 'display: none;' : ''; ?>">
+                <div class="card-body">
+                    <div class="alert alert-info">
+                        <?php _e('ssh_not_configured_message'); ?>
+                    </div>
+                </div>
+            </div>
+            
             <?php endif; ?>
         </main>
     </div>
@@ -306,11 +378,137 @@ $currentLang = getCurrentLanguage();
         
         let containerExists = false;
         let containerRunning = false;
+        let sshConfigured = <?php echo $sshConfigured ? 'true' : 'false'; ?>;
         
-        // Check container status on page load
+        // Check container status on page load if SSH is configured
         document.addEventListener('DOMContentLoaded', function() {
-            inspectContainer();
+            if (sshConfigured) {
+                inspectContainer();
+            }
         });
+        
+        // Save SSH settings
+        async function saveSSHSettings() {
+            const host = document.getElementById('ssh-host').value.trim();
+            const port = document.getElementById('ssh-port').value || 22;
+            const username = document.getElementById('ssh-username').value.trim();
+            const password = document.getElementById('ssh-password').value;
+            const workspacePath = document.getElementById('workspace-path').value.trim();
+            
+            if (!host) {
+                showToast('<?php _e('ssh_host_required'); ?>', 'error');
+                return;
+            }
+            if (!username) {
+                showToast('<?php _e('ssh_username_required'); ?>', 'error');
+                return;
+            }
+            
+            try {
+                const result = await apiRequest('api/docker.php', 'POST', {
+                    action: 'save_ssh_settings',
+                    ssh_host: host,
+                    ssh_port: port,
+                    ssh_username: username,
+                    ssh_password: password || null,
+                    workspace_path: workspacePath
+                });
+                
+                showToast('<?php _e('ssh_settings_saved'); ?>', 'success');
+                
+                // Update paths based on new workspace
+                updateDisplayPaths(workspacePath);
+                
+                // Show container control cards
+                sshConfigured = true;
+                document.getElementById('container-control-card').style.display = '';
+                document.getElementById('container-status-card').style.display = '';
+                document.getElementById('container-logs-card').style.display = '';
+                document.getElementById('not-configured-message').style.display = 'none';
+                
+                // Check container status
+                inspectContainer();
+                
+            } catch (error) {
+                showToast('<?php _e('ssh_settings_save_failed'); ?>: ' + error.message, 'error');
+            }
+        }
+        
+        // Test SSH connection
+        async function testConnection() {
+            const statusDiv = document.getElementById('connection-status');
+            statusDiv.style.display = 'block';
+            statusDiv.innerHTML = '<div class="alert alert-info"><?php _e('testing_connection'); ?>...</div>';
+            
+            try {
+                // First save settings if changed
+                const host = document.getElementById('ssh-host').value.trim();
+                const port = document.getElementById('ssh-port').value || 22;
+                const username = document.getElementById('ssh-username').value.trim();
+                const password = document.getElementById('ssh-password').value;
+                const workspacePath = document.getElementById('workspace-path').value.trim();
+                
+                if (!host || !username) {
+                    statusDiv.innerHTML = '<div class="alert alert-danger"><?php _e('ssh_host_username_required'); ?></div>';
+                    return;
+                }
+                
+                // Save first
+                await apiRequest('api/docker.php', 'POST', {
+                    action: 'save_ssh_settings',
+                    ssh_host: host,
+                    ssh_port: port,
+                    ssh_username: username,
+                    ssh_password: password || null,
+                    workspace_path: workspacePath
+                });
+                
+                // Then test
+                const result = await apiRequest('api/docker.php', 'POST', {
+                    action: 'test_connection'
+                });
+                
+                const data = result.data;
+                
+                if (data.ssh_connected && data.docker_available) {
+                    statusDiv.innerHTML = `
+                        <div class="alert alert-success">
+                            ✅ <?php _e('connection_successful'); ?><br>
+                            🐳 Docker: ${escapeHtml(data.docker_version)}
+                        </div>
+                    `;
+                    
+                    // Show container control cards
+                    sshConfigured = true;
+                    document.getElementById('container-control-card').style.display = '';
+                    document.getElementById('container-status-card').style.display = '';
+                    document.getElementById('container-logs-card').style.display = '';
+                    document.getElementById('not-configured-message').style.display = 'none';
+                    updateDisplayPaths(workspacePath);
+                    inspectContainer();
+                } else if (data.ssh_connected) {
+                    statusDiv.innerHTML = `
+                        <div class="alert alert-warning">
+                            ✅ <?php _e('ssh_connected'); ?><br>
+                            ⚠️ ${escapeHtml(data.message)}
+                        </div>
+                    `;
+                }
+            } catch (error) {
+                statusDiv.innerHTML = `
+                    <div class="alert alert-danger">
+                        ❌ ${escapeHtml(error.message)}
+                    </div>
+                `;
+            }
+        }
+        
+        // Update display paths
+        function updateDisplayPaths(workspacePath) {
+            const userId = <?php echo json_encode($userId); ?>;
+            document.getElementById('config-path-display').value = workspacePath + '/' + userId + '/config';
+            document.getElementById('output-path-display').value = workspacePath + '/' + userId + '/output';
+        }
         
         // Update button states based on container status
         function updateButtonStates() {
@@ -454,6 +652,8 @@ $currentLang = getCurrentLanguage();
         
         // Inspect container
         async function inspectContainer() {
+            if (!sshConfigured) return;
+            
             const statusDiv = document.getElementById('container-status');
             
             statusDiv.innerHTML = '<div class="loading"><div class="spinner"></div></div>';
@@ -560,6 +760,8 @@ $currentLang = getCurrentLanguage();
         
         // Fetch container logs
         async function fetchLogs() {
+            if (!sshConfigured) return;
+            
             const tailLines = document.getElementById('log-tail-lines').value;
             const logsDiv = document.getElementById('container-logs');
             

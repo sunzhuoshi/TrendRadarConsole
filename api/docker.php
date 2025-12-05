@@ -1,13 +1,13 @@
 <?php
 /**
  * TrendRadarConsole - Docker API Endpoint
- * Provides Docker container management functionality for local deployment
- * Docker commands are executed directly on the web server
+ * Provides Docker container management functionality via SSH to remote Docker worker
  */
 
 session_start();
 require_once '../includes/helpers.php';
 require_once '../includes/auth.php';
+require_once '../includes/ssh.php';
 
 header('Content-Type: application/json; charset=utf-8');
 
@@ -23,15 +23,16 @@ if (!is_numeric($userId) || $userId <= 0) {
 }
 $userId = (int)$userId;
 
+// Get Docker SSH settings
+$auth = new Auth();
+$sshSettings = $auth->getDockerSSHSettings($userId);
+
 // Docker settings are calculated based on user ID (not user-configurable)
-// User ID is validated to be numeric, so it's safe for shell commands
-// Environment suffix: '-dev' for development, '' for production
-$envSuffix = getEnvironmentSuffix();
-$containerName = 'trend-radar-' . $userId . $envSuffix;
-// Use absolute paths for Docker volume mounts
-$basePath = dirname(dirname(__FILE__));
-$configPath = $basePath . '/workspace/' . $userId . '/config';
-$outputPath = $basePath . '/workspace/' . $userId . '/output';
+// No environment suffix - container name is just trend-radar-{userId}
+$containerName = 'trend-radar-' . $userId;
+$workspacePath = $sshSettings['docker_workspace_path'] ?: '/srv/trendradar';
+$configPath = $workspacePath . '/' . $userId . '/config';
+$outputPath = $workspacePath . '/' . $userId . '/output';
 $dockerImage = 'wantcat/trendradar:latest';
 
 try {
@@ -52,35 +53,123 @@ try {
     
     $action = $input['action'] ?? '';
     
+    // Actions that don't require SSH connection
     switch ($action) {
         case 'get_settings':
             jsonSuccess([
                 'container_name' => $containerName,
                 'config_path' => $configPath,
                 'output_path' => $outputPath,
-                'docker_image' => $dockerImage
+                'docker_image' => $dockerImage,
+                'ssh_configured' => $auth->isDockerSSHConfigured($userId),
+                'ssh_host' => $sshSettings['docker_ssh_host'] ?: '',
+                'ssh_port' => $sshSettings['docker_ssh_port'] ?: 22,
+                'ssh_username' => $sshSettings['docker_ssh_username'] ?: '',
+                'workspace_path' => $workspacePath
             ], 'Docker settings retrieved');
             break;
             
+        case 'save_ssh_settings':
+            // Save SSH connection settings
+            $host = trim($input['ssh_host'] ?? '');
+            $port = (int)($input['ssh_port'] ?? 22);
+            $username = trim($input['ssh_username'] ?? '');
+            $password = $input['ssh_password'] ?? null;
+            $workspace = trim($input['workspace_path'] ?? '/srv/trendradar');
+            
+            if (empty($host)) {
+                jsonError('SSH host is required');
+            }
+            if (empty($username)) {
+                jsonError('SSH username is required');
+            }
+            if ($port < 1 || $port > 65535) {
+                $port = 22;
+            }
+            
+            // Validate workspace path
+            if (!preg_match('/^\/[a-zA-Z0-9_\-\/]+$/', $workspace)) {
+                jsonError('Invalid workspace path. Must be an absolute path.');
+            }
+            
+            $auth->updateDockerSSHSettings($userId, $host, $port, $username, $password, $workspace);
+            
+            jsonSuccess([
+                'ssh_host' => $host,
+                'ssh_port' => $port,
+                'ssh_username' => $username,
+                'workspace_path' => $workspace
+            ], 'SSH settings saved successfully');
+            break;
+            
+        case 'test_connection':
+            // Test SSH connection
+            if (!$auth->isDockerSSHConfigured($userId)) {
+                jsonError('SSH connection not configured. Please configure SSH settings first.');
+            }
+            
+            $ssh = new SSHHelper(
+                $sshSettings['docker_ssh_host'],
+                $sshSettings['docker_ssh_username'],
+                $sshSettings['docker_ssh_password'],
+                $sshSettings['docker_ssh_port']
+            );
+            
+            $testResult = $ssh->testConnection();
+            
+            if ($testResult['success']) {
+                // Also check Docker availability
+                $dockerCheck = $ssh->checkDocker();
+                if ($dockerCheck['success']) {
+                    jsonSuccess([
+                        'ssh_connected' => true,
+                        'docker_available' => true,
+                        'docker_version' => $dockerCheck['version']
+                    ], 'Connection successful. Docker is available.');
+                } else {
+                    jsonSuccess([
+                        'ssh_connected' => true,
+                        'docker_available' => false,
+                        'message' => $dockerCheck['message']
+                    ], 'SSH connected but Docker is not available.');
+                }
+            } else {
+                jsonError($testResult['message']);
+            }
+            break;
+    }
+    
+    // Actions that require SSH connection
+    if (!$auth->isDockerSSHConfigured($userId)) {
+        jsonError('SSH connection not configured. Please configure SSH settings first.');
+    }
+    
+    $ssh = new SSHHelper(
+        $sshSettings['docker_ssh_host'],
+        $sshSettings['docker_ssh_username'],
+        $sshSettings['docker_ssh_password'],
+        $sshSettings['docker_ssh_port']
+    );
+    
+    if (!$ssh->connect()) {
+        jsonError('Failed to connect to Docker worker: ' . $ssh->getLastError());
+    }
+    
+    switch ($action) {
         case 'inspect':
-            // Execute docker inspect command
-            // Security: Container name is calculated from user ID (no user input)
+            // Execute docker inspect command via SSH
             $escapedName = escapeshellarg($containerName);
-            $output = [];
-            $returnVar = 0;
-            exec("docker inspect {$escapedName} 2>&1", $output, $returnVar);
+            $result = $ssh->exec("docker inspect {$escapedName} 2>&1");
             
-            $outputStr = implode("\n", $output);
-            
-            if ($returnVar !== 0) {
-                // Container not found or Docker not available
+            if (!$result['success'] && strpos($result['output'], 'No such object') !== false) {
+                // Container not found
                 jsonSuccess([
                     'status' => 'not_found',
                     'container_name' => $containerName,
-                    'message' => $outputStr
-                ], 'Container not found or Docker not available');
-            } else {
-                $inspectData = json_decode($outputStr, true);
+                    'message' => 'Container not found'
+                ], 'Container not found');
+            } else if ($result['success'] || !empty($result['output'])) {
+                $inspectData = json_decode($result['output'], true);
                 if ($inspectData && isset($inspectData[0])) {
                     $container = $inspectData[0];
                     $state = $container['State'] ?? [];
@@ -108,49 +197,42 @@ try {
                     ], 'Container inspected');
                 } else {
                     jsonSuccess([
-                        'status' => 'error',
+                        'status' => 'not_found',
                         'container_name' => $containerName,
-                        'message' => 'Failed to parse inspect output'
-                    ], 'Failed to parse inspect output');
+                        'message' => 'Container not found or failed to parse output'
+                    ], 'Container not found');
                 }
+            } else {
+                jsonError('Failed to inspect container: ' . $result['error']);
             }
             break;
             
         case 'logs':
-            // Get container logs
+            // Get container logs via SSH
             $tail = isset($input['tail']) ? (int)$input['tail'] : 100;
             
             // Limit tail lines
             if ($tail < 1) $tail = 100;
             if ($tail > 1000) $tail = 1000;
             
-            // Execute docker logs command
-            // Security: Container name is calculated from user ID (no user input)
             $escapedName = escapeshellarg($containerName);
             $escapedTail = escapeshellarg((string)$tail);
-            $output = [];
-            $returnVar = 0;
-            exec("docker logs --tail {$escapedTail} {$escapedName} 2>&1", $output, $returnVar);
-            
-            $outputStr = implode("\n", $output);
+            $result = $ssh->exec("docker logs --tail {$escapedTail} {$escapedName} 2>&1");
             
             jsonSuccess([
                 'container_name' => $containerName,
                 'tail' => $tail,
-                'logs' => $outputStr,
-                'success' => $returnVar === 0
-            ], $returnVar === 0 ? 'Logs retrieved' : 'Failed to retrieve logs');
+                'logs' => $result['output'],
+                'success' => $result['success']
+            ], $result['success'] ? 'Logs retrieved' : 'Failed to retrieve logs');
             break;
             
         case 'run':
-            // Create and start a new container
-            // First, ensure workspace directories exist with proper permissions for www user
-            if (!is_dir($configPath)) {
-                mkdir($configPath, 0775, true);
-            }
-            if (!is_dir($outputPath)) {
-                mkdir($outputPath, 0775, true);
-            }
+            // Create and start a new container via SSH
+            // First, ensure workspace directories exist on remote server
+            $escapedConfigPath = escapeshellarg($configPath);
+            $escapedOutputPath = escapeshellarg($outputPath);
+            $ssh->exec("mkdir -p {$escapedConfigPath} {$escapedOutputPath}");
             
             // Build environment variables
             $envArgs = [];
@@ -186,8 +268,6 @@ try {
             
             // Build and execute docker run command
             $escapedName = escapeshellarg($containerName);
-            $escapedConfigPath = escapeshellarg($configPath);
-            $escapedOutputPath = escapeshellarg($outputPath);
             $escapedImage = escapeshellarg($dockerImage);
             
             $cmd = "docker run -d --name {$escapedName} " .
@@ -195,101 +275,81 @@ try {
                    "-v {$escapedOutputPath}:/app/output " .
                    "{$envStr} {$escapedImage} 2>&1";
             
-            $output = [];
-            $returnVar = 0;
-            exec($cmd, $output, $returnVar);
+            $result = $ssh->exec($cmd);
             
-            $outputStr = implode("\n", $output);
-            
-            if ($returnVar === 0) {
+            if ($result['success'] && !empty($result['output'])) {
                 jsonSuccess([
                     'container_name' => $containerName,
-                    'container_id' => trim($outputStr),
+                    'container_id' => trim($result['output']),
                     'message' => 'Container started successfully'
                 ], 'Container started');
             } else {
-                jsonError('Failed to start container: ' . $outputStr, 500);
+                jsonError('Failed to start container: ' . ($result['error'] ?: $result['output']));
             }
             break;
             
         case 'start':
-            // Start an existing stopped container
+            // Start an existing stopped container via SSH
             $escapedName = escapeshellarg($containerName);
-            $output = [];
-            $returnVar = 0;
-            exec("docker start {$escapedName} 2>&1", $output, $returnVar);
+            $result = $ssh->exec("docker start {$escapedName} 2>&1");
             
-            $outputStr = implode("\n", $output);
-            
-            if ($returnVar === 0) {
+            if ($result['success']) {
                 jsonSuccess([
                     'container_name' => $containerName,
                     'message' => 'Container started successfully'
                 ], 'Container started');
             } else {
-                jsonError('Failed to start container: ' . $outputStr, 500);
+                jsonError('Failed to start container: ' . ($result['error'] ?: $result['output']));
             }
             break;
             
         case 'stop':
-            // Stop a running container
+            // Stop a running container via SSH
             $escapedName = escapeshellarg($containerName);
-            $output = [];
-            $returnVar = 0;
-            exec("docker stop {$escapedName} 2>&1", $output, $returnVar);
+            $result = $ssh->exec("docker stop {$escapedName} 2>&1");
             
-            $outputStr = implode("\n", $output);
-            
-            if ($returnVar === 0) {
+            if ($result['success']) {
                 jsonSuccess([
                     'container_name' => $containerName,
                     'message' => 'Container stopped successfully'
                 ], 'Container stopped');
             } else {
-                jsonError('Failed to stop container: ' . $outputStr, 500);
+                jsonError('Failed to stop container: ' . ($result['error'] ?: $result['output']));
             }
             break;
             
         case 'remove':
-            // Remove a container (must be stopped first)
+            // Remove a container via SSH (must be stopped first)
             $escapedName = escapeshellarg($containerName);
             
             // First stop the container if it's running
-            exec("docker stop {$escapedName} 2>&1");
+            $ssh->exec("docker stop {$escapedName} 2>&1");
             
             // Then remove it
-            $output = [];
-            $returnVar = 0;
-            exec("docker rm {$escapedName} 2>&1", $output, $returnVar);
+            $result = $ssh->exec("docker rm {$escapedName} 2>&1");
             
-            $outputStr = implode("\n", $output);
-            
-            if ($returnVar === 0) {
+            if ($result['success']) {
                 jsonSuccess([
                     'container_name' => $containerName,
                     'message' => 'Container removed successfully'
                 ], 'Container removed');
             } else {
-                jsonError('Failed to remove container: ' . $outputStr, 500);
+                jsonError('Failed to remove container: ' . ($result['error'] ?: $result['output']));
             }
             break;
             
         case 'restart':
-            // Restart a container
+            // Restart a container via SSH
             $escapedName = escapeshellarg($containerName);
-            $output = [];
-            $returnVar = 0;
-            exec("docker restart {$escapedName} 2>&1", $output, $returnVar);
+            $result = $ssh->exec("docker restart {$escapedName} 2>&1");
             
-            $outputStr = implode("\n", $output);
-            
-            if ($returnVar === 0) {
+            if ($result['success']) {
                 jsonSuccess([
                     'container_name' => $containerName,
                     'message' => 'Container restarted successfully'
                 ], 'Container restarted');
             } else {
-                jsonError('Failed to restart container: ' . $outputStr, 500);
+                jsonError('Failed to restart container: ' . ($result['error'] ?: $result['output']));
             }
             break;
             

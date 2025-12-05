@@ -16,7 +16,6 @@ WRITABLE_DIRS=(
   "storage/framework/views"
   "uploads"
   "public/uploads"
-  "workspace"
 )
 
 # ✅ 显式排除宝塔保护文件/目录（不 touch 它们）
@@ -49,14 +48,6 @@ echo "🔧 修复权限（跳过宝塔敏感文件）: $TARGET_DIR"
 if ! groups "$DEPLOY_USER" 2>/dev/null | grep -q "\b$WEB_USER\b"; then
   echo "   ➕ 将 $DEPLOY_USER 加入 $WEB_USER 组..."
   sudo usermod -aG "$WEB_USER" "$DEPLOY_USER"
-fi
-
-# 1.5 确保 www 用户在 docker 组（用于执行 docker 命令）
-if getent group docker > /dev/null 2>&1; then
-  if ! groups "$WEB_USER" 2>/dev/null | grep -q "\bdocker\b"; then
-    echo "   🐳 将 $WEB_USER 加入 docker 组..."
-    sudo usermod -aG docker "$WEB_USER"
-  fi
 fi
 
 # 2. 修复属主：仅针对非敏感文件

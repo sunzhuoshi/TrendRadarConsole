@@ -11,6 +11,11 @@ CREATE TABLE IF NOT EXISTS `users` (
     `github_repo` VARCHAR(100) COMMENT 'GitHub repository name',
     `github_token` VARCHAR(255) COMMENT 'GitHub PAT (encrypted)',
     `dev_mode` TINYINT(1) NOT NULL DEFAULT 0 COMMENT 'Development mode: 0=disabled, 1=enabled',
+    `docker_ssh_host` VARCHAR(255) DEFAULT NULL COMMENT 'Docker worker SSH host address',
+    `docker_ssh_port` INT UNSIGNED DEFAULT 22 COMMENT 'Docker worker SSH port',
+    `docker_ssh_username` VARCHAR(100) DEFAULT NULL COMMENT 'Docker worker SSH username',
+    `docker_ssh_password` VARCHAR(255) DEFAULT NULL COMMENT 'Docker worker SSH password (encrypted)',
+    `docker_workspace_path` VARCHAR(255) DEFAULT '/srv/trendradar' COMMENT 'Docker workspace path on remote server',
     `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     `last_login` TIMESTAMP NULL,
     `updated_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
