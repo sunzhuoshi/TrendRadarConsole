@@ -135,47 +135,38 @@ These variables will automatically override the config files during GitHub Actio
 
 ### Docker Deployment
 
-TrendRadarConsole now supports local Docker deployment as an alternative to GitHub Actions. Docker commands are executed via SSH to a remote Docker worker server. Navigate to **Docker Deployment** in the sidebar to:
+TrendRadarConsole now supports local Docker deployment as an alternative to GitHub Actions. Docker commands are executed via SSH to a remote Docker worker server.
 
-1. **Configure SSH Connection**: Set up SSH connection to your Docker worker server
-2. **View Docker Settings**: Container name and volume paths are automatically calculated based on your user ID
-3. **Control Container**: Run, start, stop, restart, or remove your Docker container via SSH
-4. **Monitor Container Status**: View real-time status of your Docker container
-5. **View Container Logs**: Access container logs from the remote server
+**Quick Start**:
 
-Each user has their own isolated workspace on the Docker worker:
+1. **Set up Docker Worker**: Run the setup script on your Docker server (as root):
+   ```bash
+   curl -O https://trendingnews.cn/scripts/setup-docker-worker.sh
+   chmod +x setup-docker-worker.sh
+   sudo ./setup-docker-worker.sh
+   ```
+
+2. **Configure your settings**: In TrendRadarConsole, set up your platforms, keywords, and webhooks
+
+3. **Run Container**: Navigate to **Docker Deployment** and click **Run Container**
+   - Your `config.yaml` and `frequency_words.txt` are auto-generated from your current configuration
+   - Only basic runtime settings are needed: CRON_SCHEDULE, RUN_MODE, IMMEDIATE_RUN
+
+**Features**:
+- **Auto-generated config**: Configuration files are created from your current settings when running/restarting the container
+- **Isolated workspace**: Each user has their own container and workspace
+- **Simple controls**: Run, start, stop, restart, or remove your container with one click
+- **Real-time monitoring**: View container status and logs
+
+**Technical Details**:
 - Container name: `trend-radar-{userId}`
-- Config path: `{workspace_path}/{userId}/config` (default: `/srv/trendradar/{userId}/config`)
-- Output path: `{workspace_path}/{userId}/output` (default: `/srv/trendradar/{userId}/output`)
-- Docker image: `wantcat/trendradar:latest` (fixed)
+- Config path: `/srv/trendradar/{userId}/config`
+- Output path: `/srv/trendradar/{userId}/output`
+- Docker image: `wantcat/trendradar:latest`
 
 **Requirements**:
-- A separate Docker worker server with Docker installed
-- SSH access to the Docker worker server
-- A dedicated user account (e.g., `trendradarsrv`) for running Docker commands
-- PHP SSH2 extension (`php-ssh2`) installed on the web server
-
-**Setting up Docker Worker**:
-
-Use the provided setup script to configure your Docker worker server:
-
-```bash
-# Download the setup script
-curl -O https://raw.githubusercontent.com/sunzhuoshi/TrendRadarConsole/main/scripts/setup-docker-worker.sh
-
-# Make it executable
-chmod +x setup-docker-worker.sh
-
-# Run as root
-sudo ./setup-docker-worker.sh
-```
-
-The script will:
-1. Create the `trendradarsrv` user account
-2. Add the user to the `docker` group for Docker command access
-3. Create the workspace directory at `/srv/trendradar`
-4. Set proper permissions on the workspace
-5. Prompt you to set a password for SSH access
+- Docker worker server with Docker installed
+- PHP SSH2 extension (`php-ssh2`) on the web server
 
 ## Directory Structure
 
