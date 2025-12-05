@@ -140,6 +140,7 @@ jobs:
         run: |
           echo "Running database migrations..."
           ssh -o StrictHostKeyChecking=no "$SSH_USER@$SSH_HOST" "
+            set -e
             cd \"$TARGET_DIR\" || exit 1
             if [ -f 'sql/migrate.php' ] && [ -f 'config/config.php' ]; then
               echo '📦 Running migrations...'
