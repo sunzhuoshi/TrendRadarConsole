@@ -16,7 +16,14 @@ if (!Auth::isLoggedIn()) {
 }
 $userId = Auth::getUserId();
 
+// Validate user ID is numeric (database IDs are always integers)
+if (!is_numeric($userId) || $userId <= 0) {
+    jsonError('Invalid user ID', 400);
+}
+$userId = (int)$userId;
+
 // Docker settings are calculated based on user ID (not user-configurable)
+// User ID is validated to be numeric, so it's safe for shell commands
 $containerName = 'trend-radar-' . $userId;
 $configPath = './workspace/' . $userId . '/config';
 $outputPath = './workspace/' . $userId . '/output';

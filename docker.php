@@ -18,6 +18,12 @@ if (!file_exists('config/config.php')) {
 Auth::requireLogin();
 $userId = Auth::getUserId();
 
+// Validate user ID is numeric
+if (!is_numeric($userId) || $userId <= 0) {
+    redirect('login.php');
+}
+$userId = (int)$userId;
+
 try {
     $config = new Configuration($userId);
     $activeConfig = $config->getActive();
@@ -30,6 +36,7 @@ $flash = getFlash();
 $currentPage = 'docker';
 
 // Docker settings are calculated based on user ID (not user-configurable)
+// User ID is validated to be numeric, so it's safe for display
 $containerName = 'trend-radar-' . $userId;
 $configPath = './workspace/' . $userId . '/config';
 $outputPath = './workspace/' . $userId . '/output';
@@ -307,10 +314,10 @@ $currentLang = getCurrentLanguage();
     <script>
         // Fixed Docker settings (calculated by server based on user ID)
         const dockerSettings = {
-            containerName: '<?php echo $containerName; ?>',
-            configPath: '<?php echo $configPath; ?>',
-            outputPath: '<?php echo $outputPath; ?>',
-            dockerImage: '<?php echo $dockerImage; ?>'
+            containerName: <?php echo json_encode($containerName); ?>,
+            configPath: <?php echo json_encode($configPath); ?>,
+            outputPath: <?php echo json_encode($outputPath); ?>,
+            dockerImage: <?php echo json_encode($dockerImage); ?>
         };
         
         // Inspect container
