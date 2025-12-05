@@ -28,6 +28,9 @@ try {
                         !empty($githubSettings['github_repo']) && 
                         !empty($githubSettings['github_token']);
     
+    // Get development mode status
+    $devModeEnabled = $auth->isDevModeEnabled($userId);
+    
     if (!$githubConfigured) {
         header('Location: setup-github.php');
         exit;
@@ -358,6 +361,29 @@ $currentLang = getCurrentLanguage();
                 </div>
             </div>
             
+            <!-- Development Mode Settings -->
+            <div class="card">
+                <div class="card-header">
+                    <h3>🛠️ <?php _e('development_mode'); ?></h3>
+                </div>
+                <div class="card-body">
+                    <p class="text-muted mb-3">
+                        <?php _e('dev_mode_desc'); ?>
+                    </p>
+                    <form id="dev-mode-form">
+                        <div class="form-group">
+                            <label class="form-label"><?php _e('enable_dev_mode'); ?></label>
+                            <select name="dev_mode" class="form-control" id="dev-mode-toggle">
+                                <option value="false" <?php echo !$devModeEnabled ? 'selected' : ''; ?>><?php _e('disabled'); ?></option>
+                                <option value="true" <?php echo $devModeEnabled ? 'selected' : ''; ?>><?php _e('enabled'); ?></option>
+                            </select>
+                            <div class="form-text"><?php _e('dev_mode_warning'); ?></div>
+                        </div>
+                        <button type="submit" class="btn btn-primary"><?php _e('save_settings'); ?></button>
+                    </form>
+                </div>
+            </div>
+            
             <?php endif; ?>
         </main>
     </div>
@@ -548,6 +574,26 @@ $currentLang = getCurrentLanguage();
                 setButtonLoadingWithStatus(btn, false);
             }
         }
+        
+        // Development mode form submission
+        document.getElementById('dev-mode-form').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const submitBtn = this.querySelector('button[type="submit"]');
+            const devMode = document.getElementById('dev-mode-toggle').value === 'true';
+            
+            setButtonLoading(submitBtn, true);
+            try {
+                await apiRequest('api/dev-mode.php', 'POST', {
+                    dev_mode: devMode
+                });
+                showToast(__('dev_mode_saved'), 'success');
+            } catch (error) {
+                showToast(__('failed_to_save') + ': ' + error.message, 'error');
+            } finally {
+                setButtonLoading(submitBtn, false);
+            }
+        });
     </script>
 </body>
 </html>

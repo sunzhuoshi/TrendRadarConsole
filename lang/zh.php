@@ -494,4 +494,10 @@ return [
     'failed_to_inspect' => '检查容器失败',
     'no_logs_available' => '无可用日志',
     'failed_to_fetch_logs' => '获取日志失败',
+    // Development Mode
+    'development_mode' => '开发者模式',
+    'dev_mode_desc' => '启用开发者模式可访问额外的功能和调试工具。此功能面向开发者和高级用户。',
+    'enable_dev_mode' => '启用开发者模式',
+    'dev_mode_warning' => '开发者模式可能会显示未经完全测试的功能。请谨慎使用。',
+    'dev_mode_saved' => '开发者模式设置已保存',
 ];

@@ -494,4 +494,10 @@ return [
     'failed_to_inspect' => 'Failed to inspect container',
     'no_logs_available' => 'No logs available',
     'failed_to_fetch_logs' => 'Failed to fetch logs',
+    // Development Mode
+    'development_mode' => 'Development Mode',
+    'dev_mode_desc' => 'Enable development mode to access additional features and debugging tools. This is intended for developers and advanced users.',
+    'enable_dev_mode' => 'Enable Development Mode',
+    'dev_mode_warning' => 'Development mode may expose additional features that are not fully tested. Use with caution.',
+    'dev_mode_saved' => 'Development mode settings saved',
 ];
