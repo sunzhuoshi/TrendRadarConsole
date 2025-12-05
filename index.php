@@ -36,12 +36,14 @@ try {
 $flash = getFlash();
 $currentPage = 'dashboard';
 $currentLang = getCurrentLanguage();
+$csrfToken = generateCsrfToken();
 ?>
 <!DOCTYPE html>
 <html lang="<?php echo $currentLang; ?>">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="csrf-token" content="<?php echo $csrfToken; ?>">
     <title>TrendRadarConsole - <?php _e('dashboard'); ?></title>
     <link rel="stylesheet" href="assets/css/style.css">
 </head>
@@ -139,7 +141,7 @@ $currentLang = getCurrentLanguage();
                     <?php if (empty($configurations)): ?>
                     <div class="empty-state">
                         <p><?php _e('no_configurations'); ?></p>
-                        <a href="github.php" class="btn btn-primary"><?php _e('load_from_github'); ?></a>
+                        <button type="button" class="btn btn-primary" onclick="loadFromGitHub()"><?php _e('load_from_github'); ?></button>
                     </div>
                     <?php else: ?>
                     <table class="table">
@@ -179,7 +181,8 @@ $currentLang = getCurrentLanguage();
                                         <button type="submit" class="btn btn-success btn-sm"><?php _e('activate'); ?></button>
                                     </form>
                                     <?php endif; ?>
-                                    <a href="export.php?id=<?php echo $cfg['id']; ?>" class="btn btn-secondary btn-sm"><?php _e('export'); ?></a>
+                                    <button type="button" class="btn btn-outline btn-sm" data-action="load-github-<?php echo $cfg['id']; ?>" onclick="loadFromGitHub(<?php echo $cfg['id']; ?>, this)" title="<?php _e('load_from_github'); ?>">⬇️ GitHub</button>
+                                    <button type="button" class="btn btn-outline btn-sm" data-action="save-github-<?php echo $cfg['id']; ?>" onclick="saveToGitHub(<?php echo $cfg['id']; ?>, this)" title="<?php _e('save_to_github'); ?>">⬆️ GitHub</button>
                                 </td>
                             </tr>
                             <?php endforeach; ?>
@@ -201,7 +204,7 @@ $currentLang = getCurrentLanguage();
                         <li><?php _e('step3_keywords'); ?></li>
                         <li><?php _e('step4_webhooks'); ?></li>
                         <li><?php _e('step5_settings'); ?></li>
-                        <li><?php _e('step6_export'); ?></li>
+                        <li><?php _e('step6_sync_github'); ?></li>
                     </ol>
                 </div>
             </div>
@@ -212,5 +215,65 @@ $currentLang = getCurrentLanguage();
     
     <script>var i18n = <?php echo getJsTranslations(); ?>;</script>
     <script src="assets/js/app.js"></script>
+    <script>
+        // Load from GitHub
+        async function loadFromGitHub(configId, btn) {
+            if (!confirm(__('confirm_load_from_github'))) {
+                return;
+            }
+            
+            setButtonLoading(btn, true);
+            try {
+                const result = await apiRequest('api/github.php', 'POST', {
+                    action: 'load_or_create_default',
+                    owner: '',  // Will use saved settings
+                    repo: '',
+                    token: ''
+                });
+                
+                showToast(__('config_loaded_from_github'), 'success');
+                // Reload page to show updated configuration
+                setTimeout(() => window.location.reload(), 1000);
+            } catch (error) {
+                if (error.message && error.message.includes('Owner, repo, and token are required')) {
+                    showToast(__('configure_github_first'), 'error');
+                    setTimeout(() => window.location.href = 'settings.php', 1500);
+                } else {
+                    showToast(__('failed_to_load') + ': ' + error.message, 'error');
+                }
+            } finally {
+                setButtonLoading(btn, false);
+            }
+        }
+        
+        // Save to GitHub
+        async function saveToGitHub(configId, btn) {
+            if (!confirm(__('confirm_save_to_github'))) {
+                return;
+            }
+            
+            setButtonLoading(btn, true);
+            try {
+                await apiRequest('api/github.php', 'POST', {
+                    action: 'save',
+                    owner: '',  // Will use saved settings
+                    repo: '',
+                    token: '',
+                    config_id: configId
+                });
+                
+                showToast(__('config_saved_to_github'), 'success');
+            } catch (error) {
+                if (error.message && error.message.includes('Owner, repo, and token are required')) {
+                    showToast(__('configure_github_first'), 'error');
+                    setTimeout(() => window.location.href = 'settings.php', 1500);
+                } else {
+                    showToast(__('failed_to_save') + ': ' + error.message, 'error');
+                }
+            } finally {
+                setButtonLoading(btn, false);
+            }
+        }
+    </script>
 </body>
 </html>

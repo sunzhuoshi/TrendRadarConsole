@@ -343,19 +343,15 @@ function getJsTranslations() {
         }
     }
     
-    // Also add some common translations needed in JS
+    // Also add some common translations needed in JS (excluding those with js_ prefix)
     $commonKeys = [
-        'confirm_remove_platform', 'confirm_remove_webhook', 'platform_updated',
-        'platform_added', 'platform_removed', 'webhook_saved', 'webhook_updated',
-        'webhook_removed', 'settings_saved', 'setting_updated', 'keywords_saved',
-        'file_downloaded', 'copied_to_clipboard', 'failed_to_update', 'failed_to_add',
-        'failed_to_remove', 'failed_to_save', 'failed_to_load', 'example_loaded',
-        'keywords_cleared', 'replace_keywords_confirm', 'clear_keywords_confirm',
+        'failed_to_load', 'example_loaded', 'keywords_cleared', 
+        'replace_keywords_confirm', 'clear_keywords_confirm',
         'github_settings_saved', 'connection_successful', 'connection_failed',
-        'config_loaded_from_github', 'confirm_save_to_github', 'config_saved_to_github',
-        'fill_all_fields', 'configure_github_first', 'display_name_required',
-        'enter_both_id_name', 'group', 'no_keywords_preview', 'weight_sum_is', 'should_be',
-        'weight_sum_message', 'using_default_config'
+        'config_loaded_from_github', 'confirm_load_from_github', 'confirm_save_to_github', 
+        'config_saved_to_github', 'fill_all_fields', 'configure_github_first', 
+        'display_name_required', 'enter_both_id_name', 'group', 'no_keywords_preview', 
+        'weight_sum_is', 'should_be', 'weight_sum_message', 'using_default_config'
     ];
     
     foreach ($commonKeys as $key) {

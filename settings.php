@@ -47,6 +47,11 @@ try {
 $flash = getFlash();
 $currentPage = 'settings';
 
+// Get saved GitHub settings from user profile
+$githubOwner = $githubSettings['github_owner'] ?? '';
+$githubRepo = $githubSettings['github_repo'] ?? '';
+$githubToken = $githubSettings['github_token'] ?? '';
+
 // Default settings
 $defaults = [
     'report_mode' => 'incremental',
@@ -295,6 +300,62 @@ $currentLang = getCurrentLanguage();
                 </div>
             </form>
             
+            <!-- GitHub Connection Settings -->
+            <div class="card">
+                <div class="card-header">
+                    <h3>🐙 <?php _e('github_connection'); ?></h3>
+                </div>
+                <div class="card-body">
+                    <div class="alert alert-info">
+                        <strong>📋 <?php _e('how_to_get_pat'); ?></strong>
+                        <ol class="mt-2 mb-0">
+                            <li><?php _e('pat_step1'); ?> <a href="https://github.com/settings/tokens?type=beta" target="_blank"><?php _e('pat_step1_link'); ?></a></li>
+                            <li><?php _e('pat_step2'); ?></li>
+                            <li><?php _e('pat_step3'); ?></li>
+                            <li><?php _e('pat_step4'); ?></li>
+                            <li><?php _e('pat_step5'); ?></li>
+                        </ol>
+                    </div>
+                    
+                    <form id="github-settings-form" class="mt-4">
+                        <div class="row">
+                            <div class="col-6">
+                                <div class="form-group">
+                                    <label class="form-label"><?php _e('repo_owner'); ?> <span class="text-danger">*</span></label>
+                                    <input type="text" name="github_owner" class="form-control" 
+                                           value="<?php echo sanitize($githubOwner); ?>"
+                                           placeholder="<?php _e('repo_owner_placeholder'); ?>">
+                                    <div class="form-text"><?php _e('repo_owner_desc'); ?></div>
+                                </div>
+                            </div>
+                            <div class="col-6">
+                                <div class="form-group">
+                                    <label class="form-label"><?php _e('repo_name'); ?> <span class="text-danger">*</span></label>
+                                    <input type="text" name="github_repo" class="form-control" 
+                                           value="<?php echo sanitize($githubRepo); ?>"
+                                           placeholder="<?php _e('repo_name_placeholder'); ?>">
+                                    <div class="form-text"><?php _e('repo_name_desc'); ?></div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label class="form-label"><?php _e('personal_access_token'); ?> <span class="text-danger">*</span></label>
+                            <input type="password" name="github_token" class="form-control" 
+                                   value="<?php echo sanitize($githubToken); ?>"
+                                   placeholder="<?php _e('pat_placeholder'); ?>">
+                            <div class="form-text"><?php _e('pat_desc'); ?></div>
+                        </div>
+                        
+                        <div class="btn-group">
+                            <button type="submit" class="btn btn-primary"><?php _e('save_settings'); ?></button>
+                            <button type="button" class="btn btn-secondary" data-action="test-connection" onclick="testConnection()"><?php _e('test_connection'); ?></button>
+                            <button type="button" class="btn btn-success" data-action="save-to-github" onclick="saveToGitHub()"><?php _e('save_to_github'); ?></button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+            
             <?php endif; ?>
         </main>
     </div>
@@ -349,6 +410,90 @@ $currentLang = getCurrentLanguage();
                 showToast(__('failed_to_save') + ': ' + error.message, 'error');
             }
         });
+        
+        // GitHub settings form submission
+        document.getElementById('github-settings-form').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const submitBtn = this.querySelector('button[type="submit"]');
+            const owner = document.querySelector('input[name="github_owner"]').value;
+            const repo = document.querySelector('input[name="github_repo"]').value;
+            const token = document.querySelector('input[name="github_token"]').value;
+            
+            setButtonLoading(submitBtn, true);
+            try {
+                await apiRequest('api/github.php', 'POST', {
+                    action: 'save_settings',
+                    owner: owner,
+                    repo: repo,
+                    token: token
+                });
+                showToast(__('github_settings_saved'), 'success');
+            } catch (error) {
+                showToast(__('failed_to_save') + ': ' + error.message, 'error');
+            } finally {
+                setButtonLoading(submitBtn, false);
+            }
+        });
+        
+        // Test GitHub connection
+        async function testConnection() {
+            const testBtn = document.querySelector('button[data-action="test-connection"]');
+            const owner = document.querySelector('input[name="github_owner"]').value;
+            const repo = document.querySelector('input[name="github_repo"]').value;
+            const token = document.querySelector('input[name="github_token"]').value;
+            
+            if (!owner || !repo || !token) {
+                showToast(__('fill_all_fields'), 'error');
+                return;
+            }
+            
+            setButtonLoading(testBtn, true);
+            try {
+                const result = await apiRequest('api/github.php', 'POST', {
+                    action: 'test',
+                    owner: owner,
+                    repo: repo,
+                    token: token
+                });
+                showToast(__('connection_successful') + result.data.full_name, 'success');
+            } catch (error) {
+                showToast(__('connection_failed') + error.message, 'error');
+            } finally {
+                setButtonLoading(testBtn, false);
+            }
+        }
+        
+        // Save to GitHub
+        async function saveToGitHub() {
+            const saveBtn = document.querySelector('button[data-action="save-to-github"]');
+            const configId = document.getElementById('config-id').value;
+            
+            if (!confirm(__('confirm_save_to_github'))) {
+                return;
+            }
+            
+            setButtonLoading(saveBtn, true);
+            try {
+                await apiRequest('api/github.php', 'POST', {
+                    action: 'save',
+                    owner: '',  // Will use saved settings
+                    repo: '',
+                    token: '',
+                    config_id: configId
+                });
+                
+                showToast(__('config_saved_to_github'), 'success');
+            } catch (error) {
+                if (error.message && error.message.includes('Owner, repo, and token are required')) {
+                    showToast(__('configure_github_first'), 'error');
+                } else {
+                    showToast(__('failed_to_save') + ': ' + error.message, 'error');
+                }
+            } finally {
+                setButtonLoading(saveBtn, false);
+            }
+        }
     </script>
 </body>
 </html>
