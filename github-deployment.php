@@ -44,16 +44,6 @@ try {
     $error = $e->getMessage();
 }
 
-// Helper function to determine step class
-function getStepClass($currentStep, $targetStep) {
-    if ($currentStep > $targetStep) {
-        return 'completed';
-    } elseif ($currentStep === $targetStep) {
-        return 'active';
-    }
-    return '';
-}
-
 $flash = getFlash();
 $currentPage = 'github-deployment';
 $currentLang = getCurrentLanguage();
@@ -479,16 +469,16 @@ $csrfToken = generateCsrfToken();
                 // Save token
                 await apiRequest('api/github.php', 'POST', {
                     action: 'save_settings',
-                    owner: <?php echo json_encode($githubSettings['github_owner'] ?? ''); ?>,
-                    repo: <?php echo json_encode($githubSettings['github_repo'] ?? 'TrendRadar'); ?>,
+                    owner: <?php echo jsonEncodeForJs($githubSettings['github_owner'] ?? ''); ?>,
+                    repo: <?php echo jsonEncodeForJs($githubSettings['github_repo'] ?? 'TrendRadar'); ?>,
                     token: token
                 });
                 
                 // Test connection
                 const testResult = await apiRequest('api/github.php', 'POST', {
                     action: 'test',
-                    owner: <?php echo json_encode($githubSettings['github_owner'] ?? ''); ?>,
-                    repo: <?php echo json_encode($githubSettings['github_repo'] ?? 'TrendRadar'); ?>,
+                    owner: <?php echo jsonEncodeForJs($githubSettings['github_owner'] ?? ''); ?>,
+                    repo: <?php echo jsonEncodeForJs($githubSettings['github_repo'] ?? 'TrendRadar'); ?>,
                     token: token
                 });
                 
@@ -498,8 +488,8 @@ $csrfToken = generateCsrfToken();
                 try {
                     const loadResult = await apiRequest('api/github.php', 'POST', {
                         action: 'load_or_create_default',
-                        owner: <?php echo json_encode($githubSettings['github_owner'] ?? ''); ?>,
-                        repo: <?php echo json_encode($githubSettings['github_repo'] ?? 'TrendRadar'); ?>,
+                        owner: <?php echo jsonEncodeForJs($githubSettings['github_owner'] ?? ''); ?>,
+                        repo: <?php echo jsonEncodeForJs($githubSettings['github_repo'] ?? 'TrendRadar'); ?>,
                         token: token
                     });
                     
@@ -618,7 +608,7 @@ $csrfToken = generateCsrfToken();
                     owner: '',  // Will use saved settings
                     repo: '',
                     token: '',
-                    config_id: <?php echo json_encode(isset($activeConfig['id']) ? $activeConfig['id'] : null); ?>
+                    config_id: <?php echo jsonEncodeForJs(isset($activeConfig['id']) ? $activeConfig['id'] : null); ?>
                 });
                 
                 showToast(__('config_saved_to_github'), 'success');
