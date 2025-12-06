@@ -63,6 +63,7 @@ class Auth
             ['id' => 'zhihu', 'name' => '知乎'],
         ];
         
+        $platformCount = 0;
         foreach ($defaultPlatforms as $index => $p) {
             $this->db->insert('platforms', [
                 'config_id' => $configId,
@@ -71,6 +72,7 @@ class Auth
                 'is_enabled' => 1,
                 'sort_order' => $index + 1
             ]);
+            $platformCount++;
         }
         
         // Insert default settings
@@ -90,13 +92,31 @@ class Auth
             'push_window_once_per_day' => 'true',
         ];
         
+        $settingCount = 0;
         foreach ($defaultSettings as $key => $value) {
             $this->db->insert('settings', [
                 'config_id' => $configId,
                 'setting_key' => $key,
                 'setting_value' => $value
             ]);
+            $settingCount++;
         }
+        
+        // Log the user registration and default configuration creation
+        require_once __DIR__ . '/operation_log.php';
+        $opLog = new OperationLog($userId);
+        $opLog->log(
+            OperationLog::ACTION_USER_REGISTER,
+            OperationLog::TARGET_USER,
+            $userId,
+            [
+                'username' => $username,
+                'default_config_id' => $configId,
+                'default_config_name' => 'Default',
+                'platforms_count' => $platformCount,
+                'settings_count' => $settingCount
+            ]
+        );
         
         return $userId;
     }

@@ -10,6 +10,7 @@ A web-based configuration management system for [TrendRadar](https://github.com/
 - **Per-User GitHub Settings**: Each user can configure their own GitHub repository (owner/repo/PAT)
 
 ### Configuration Management
+- **Default Configuration**: Automatically created on user registration with 11 pre-configured platforms and sensible defaults
 - **Platform Management**: Configure which platforms to monitor (Weibo, Zhihu, Toutiao, etc.)
 - **Keyword Configuration**: Set up keywords with filters, required words, and limits
 - **Notification Webhooks**: Configure multiple notification channels (WeChat Work, Feishu, DingTalk, Telegram, Email, ntfy, Bark, Slack)
@@ -88,7 +89,11 @@ The installer will automatically:
 
 1. Visit `http://your-domain.com/register.php` to create your account
 2. After registration, you'll be automatically logged in
-3. Each user has their own isolated configurations
+3. **A default configuration will be automatically created** with:
+   - 11 pre-configured platforms (Toutiao, Baidu, Weibo, Zhihu, etc.)
+   - Default report settings (incremental mode, rank threshold, weights)
+   - Default notification settings
+4. Each user has their own isolated configurations
 
 ### 6. Start Using
 
