@@ -625,27 +625,6 @@ $currentLang = getCurrentLanguage();
                                 </div>
                             </div>
                         </div>
-                        ${isAdvancedMode && data.mounts.length > 0 ? `
-                        <div class="mt-3">
-                            <h4><?php _e('volume_mounts'); ?></h4>
-                            <table class="table">
-                                <thead>
-                                    <tr>
-                                        <th><?php _e('source'); ?></th>
-                                        <th><?php _e('destination'); ?></th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    ${data.mounts.map(m => `
-                                        <tr>
-                                            <td><code>${escapeHtml(m.source)}</code></td>
-                                            <td><code>${escapeHtml(m.destination)}</code></td>
-                                        </tr>
-                                    `).join('')}
-                                </tbody>
-                            </table>
-                        </div>
-                        ` : ''}
                     `;
                 } else {
                     containerExists = false;
