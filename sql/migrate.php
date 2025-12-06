@@ -84,12 +84,13 @@ function verifyMigration($pdo, $migrationName) {
             return ['success' => true, 'message' => 'All verifications passed'];
         },
         '002_add_dev_mode_to_users.sql' => function($pdo) {
-            // Verify dev_mode column exists in users table
+            // Verify dev_mode or advanced_mode column exists in users table
+            // (advanced_mode exists if migration 005 has been applied)
             $stmt = $pdo->query("DESCRIBE users");
             $columns = $stmt->fetchAll(PDO::FETCH_COLUMN);
             
-            if (!in_array('dev_mode', $columns)) {
-                return ['success' => false, 'message' => 'Column dev_mode does not exist in users table'];
+            if (!in_array('dev_mode', $columns) && !in_array('advanced_mode', $columns)) {
+                return ['success' => false, 'message' => 'Neither dev_mode nor advanced_mode column exists in users table'];
             }
             
             return ['success' => true, 'message' => 'All verifications passed'];
