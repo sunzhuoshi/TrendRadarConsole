@@ -516,7 +516,9 @@ $csrfToken = generateCsrfToken();
         
         <?php if ($githubConfigured): ?>
         // GitHub settings form submission
-        document.getElementById('github-settings-form').addEventListener('submit', async function(e) {
+        const githubSettingsForm = document.getElementById('github-settings-form');
+        if (githubSettingsForm) {
+        githubSettingsForm.addEventListener('submit', async function(e) {
             e.preventDefault();
             
             const submitBtn = this.querySelector('button[type="submit"]');
@@ -539,6 +541,7 @@ $csrfToken = generateCsrfToken();
                 setButtonLoading(submitBtn, false);
             }
         });
+        }
         
         // Test GitHub connection
         async function testConnection() {
