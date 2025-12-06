@@ -39,12 +39,12 @@ $sshSettings = [
 $sshConfigured = !empty($sshSettings['docker_ssh_host']) && !empty($sshSettings['docker_ssh_username']);
 
 // Docker settings are calculated based on user ID (not user-configurable)
-// No environment suffix - container name is just trend-radar-{userId}
-$containerName = 'trend-radar-' . $userId;
+// Environment suffix applied to container name and paths
 $workspacePath = $sshSettings['docker_workspace_path'] ?: '/srv/trendradar';
 // Add 'user-' prefix and '-dev' suffix based on advanced mode
 $isAdvancedMode = $auth->isAdvancedModeEnabled($userId);
 $envSuffix = $isAdvancedMode ? '-dev' : '';
+$containerName = 'trend-radar-' . $userId . $envSuffix;
 $userFolder = 'user-' . $userId . $envSuffix;
 $configPath = $workspacePath . '/' . $userFolder . '/config';
 $outputPath = $workspacePath . '/' . $userFolder . '/output';
