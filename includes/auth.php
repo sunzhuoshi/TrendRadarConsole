@@ -44,7 +44,7 @@ class Auth
         $configId = $this->db->insert('configurations', [
             'user_id' => $userId,
             'name' => 'Default',
-            'description' => 'Default TrendRadar configuration',
+            'description' => 'Default TrendRadar configuration with Tech & AI Monitoring keywords',
             'config_data' => '{}',
             'is_active' => 1
         ]);
@@ -103,6 +103,37 @@ class Auth
             $settingCount++;
         }
         
+        // Insert default keywords (Tech & AI Monitoring example)
+        $defaultKeywords = [
+            // Group 0: AI & Tech
+            ['keyword' => 'AI', 'type' => 'normal', 'group' => 0, 'order' => 0],
+            ['keyword' => '人工智能', 'type' => 'normal', 'group' => 0, 'order' => 1],
+            ['keyword' => 'ChatGPT', 'type' => 'normal', 'group' => 0, 'order' => 2],
+            ['keyword' => '技术', 'type' => 'required', 'group' => 0, 'order' => 3],
+            ['keyword' => '培训', 'type' => 'filter', 'group' => 0, 'order' => 4],
+            ['keyword' => '广告', 'type' => 'filter', 'group' => 0, 'order' => 5],
+            ['keyword' => '', 'type' => 'limit', 'group' => 0, 'order' => 6, 'limit' => 15],
+            // Group 1: Tech Companies & Products
+            ['keyword' => '苹果', 'type' => 'normal', 'group' => 1, 'order' => 0],
+            ['keyword' => '华为', 'type' => 'normal', 'group' => 1, 'order' => 1],
+            ['keyword' => '小米', 'type' => 'normal', 'group' => 1, 'order' => 2],
+            ['keyword' => '发布', 'type' => 'required', 'group' => 1, 'order' => 3],
+            ['keyword' => '新品', 'type' => 'required', 'group' => 1, 'order' => 4],
+        ];
+        
+        $keywordCount = 0;
+        foreach ($defaultKeywords as $kw) {
+            $this->db->insert('keywords', [
+                'config_id' => $configId,
+                'keyword' => $kw['keyword'],
+                'keyword_type' => $kw['type'],
+                'keyword_group' => $kw['group'],
+                'sort_order' => $kw['order'],
+                'limit_value' => $kw['limit'] ?? null
+            ]);
+            $keywordCount++;
+        }
+        
         // Log the user registration and default configuration creation
         $opLog = new OperationLog($userId);
         $opLog->log(
@@ -114,7 +145,8 @@ class Auth
                 'default_config_id' => $configId,
                 'default_config_name' => 'Default',
                 'platforms_count' => $platformCount,
-                'settings_count' => $settingCount
+                'settings_count' => $settingCount,
+                'keywords_count' => $keywordCount
             ]
         );
         
