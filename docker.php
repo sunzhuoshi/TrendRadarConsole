@@ -188,19 +188,19 @@ $currentLang = getCurrentLanguage();
                 </div>
                 <div class="card-body">
                     <div class="btn-group">
-                        <button type="button" class="btn btn-success" onclick="runContainer()" id="btn-run">
+                        <button type="button" class="btn btn-success" onclick="runContainer()" id="btn-run" style="display: none;">
                             ▶️ <?php _e('run_container'); ?>
                         </button>
-                        <button type="button" class="btn btn-primary" onclick="startContainer()" id="btn-start">
+                        <button type="button" class="btn btn-primary" onclick="startContainer()" id="btn-start" style="display: none;">
                             ▶️ <?php _e('start_container'); ?>
                         </button>
-                        <button type="button" class="btn btn-warning" onclick="stopContainer()" id="btn-stop">
+                        <button type="button" class="btn btn-warning" onclick="stopContainer()" id="btn-stop" style="display: none;">
                             ⏹️ <?php _e('stop_container'); ?>
                         </button>
-                        <button type="button" class="btn btn-secondary" onclick="restartContainer()" id="btn-restart">
+                        <button type="button" class="btn btn-secondary" onclick="restartContainer()" id="btn-restart" style="display: none;">
                             🔄 <?php _e('restart_container'); ?>
                         </button>
-                        <button type="button" class="btn btn-danger" onclick="removeContainer()" id="btn-remove">
+                        <button type="button" class="btn btn-danger" onclick="removeContainer()" id="btn-remove" style="display: none;">
                             🗑️ <?php _e('remove_container'); ?>
                         </button>
                     </div>
