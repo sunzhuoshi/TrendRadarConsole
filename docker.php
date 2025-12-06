@@ -57,11 +57,15 @@ $sshSettings = [
 $sshConfigured = !empty($sshSettings['docker_ssh_host']) && !empty($sshSettings['docker_ssh_username']);
 
 // Docker settings are calculated based on user ID (not user-configurable)
-// No environment suffix - container name is just trend-radar-{userId}
-$containerName = 'trend-radar-' . $userId;
+// Environment suffix applied to container name and paths
 $workspacePath = $sshSettings['docker_workspace_path'] ?: '/srv/trendradar';
-$configPath = $workspacePath . '/' . $userId . '/config';
-$outputPath = $workspacePath . '/' . $userId . '/output';
+// Add 'user-' prefix and '-dev' suffix based on deployment environment
+$deploymentEnv = getDeploymentEnvironment();
+$envSuffix = $deploymentEnv === 'development' ? '-dev' : '';
+$containerName = 'trend-radar-' . $userId . $envSuffix;
+$userFolder = 'user-' . $userId . $envSuffix;
+$configPath = $workspacePath . '/' . $userFolder . '/config';
+$outputPath = $workspacePath . '/' . $userFolder . '/output';
 $dockerImage = 'wantcat/trendradar:latest';
 
 $csrfToken = generateCsrfToken();
@@ -310,6 +314,7 @@ $currentLang = getCurrentLanguage();
         let containerRunning = false;
         let sshConfigured = <?php echo $sshConfigured ? 'true' : 'false'; ?>;
         const isAdvancedMode = <?php echo $isAdvancedMode ? 'true' : 'false'; ?>;
+        const deploymentEnv = <?php echo json_encode($deploymentEnv); ?>;
         let selectedWorkerId = <?php echo json_encode($selectedWorker['id'] ?? null); ?>;
         
         // Check container status on page load if SSH is configured
@@ -399,10 +404,12 @@ $currentLang = getCurrentLanguage();
         function updateDisplayPaths(workspacePath) {
             if (!isAdvancedMode) return; // Skip if not in advanced mode
             const userId = <?php echo json_encode($userId); ?>;
+            const envSuffix = deploymentEnv === 'development' ? '-dev' : '';
+            const userFolder = 'user-' + userId + envSuffix;
             const configPathEl = document.getElementById('config-path-display');
             const outputPathEl = document.getElementById('output-path-display');
-            if (configPathEl) configPathEl.value = workspacePath + '/' + userId + '/config';
-            if (outputPathEl) outputPathEl.value = workspacePath + '/' + userId + '/output';
+            if (configPathEl) configPathEl.value = workspacePath + '/' + userFolder + '/config';
+            if (outputPathEl) outputPathEl.value = workspacePath + '/' + userFolder + '/output';
         }
         
         // Update button states based on container status
