@@ -129,7 +129,7 @@ class Auth
                 'keyword_type' => $kw['type'],
                 'keyword_group' => $kw['group'],
                 'sort_order' => $kw['order'],
-                'limit_value' => isset($kw['limit']) ? $kw['limit'] : null
+                'limit_value' => $kw['limit'] ?? null
             ]);
             $keywordCount++;
         }
