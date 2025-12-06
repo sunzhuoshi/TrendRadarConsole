@@ -20,6 +20,7 @@ $userId = Auth::getUserId();
 try {
     $config = new Configuration($userId);
     $activeConfig = $config->getActive();
+    $configurations = $config->getAll();
     
     // Check if GitHub is configured
     $auth = new Auth();
@@ -31,7 +32,7 @@ try {
     // Get advanced mode status
     $advancedModeEnabled = $auth->isAdvancedModeEnabled($userId);
     
-    if (!$githubConfigured) {
+    if (!$githubConfigured && empty($configurations)) {
         header('Location: github-deployment.php');
         exit;
     }
