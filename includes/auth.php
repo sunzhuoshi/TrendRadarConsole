@@ -400,7 +400,7 @@ class Auth
      */
     public function isDockerSSHConfigured($userId)
     {
-        $worker = $this->getDockerWorker($userId);
+        $worker = $this->getSelectedDockerWorker($userId);
         return !empty($worker['ssh_host']) && !empty($worker['ssh_username']);
     }
     
@@ -409,12 +409,12 @@ class Auth
      */
     public function getAvailableDockerWorkers($userId)
     {
-        // Get own workers and public workers from other users
+        // Get own workers and public workers from other users (only active workers)
         $workers = $this->db->fetchAll(
             'SELECT dw.*, u.username as owner_username 
              FROM docker_workers dw 
              LEFT JOIN users u ON dw.user_id = u.id 
-             WHERE dw.user_id = ? OR dw.is_public = 1 
+             WHERE (dw.user_id = ? OR dw.is_public = 1) AND dw.is_active = 1
              ORDER BY CASE WHEN dw.user_id = ? THEN 0 ELSE 1 END, dw.name ASC',
             [$userId, $userId]
         );
@@ -526,8 +526,23 @@ class Auth
             }
         }
         
-        // Otherwise return first available worker
-        return $this->getDockerWorker($userId);
+        // Otherwise return first available worker (including public workers)
+        $availableWorkers = $this->getAvailableDockerWorkers($userId);
+        if (!empty($availableWorkers)) {
+            // Return first worker (already filtered to active workers)
+            return $availableWorkers[0];
+        }
+        
+        // No workers available, return empty structure
+        return [
+            'id' => null,
+            'name' => '',
+            'ssh_host' => '',
+            'ssh_port' => 22,
+            'ssh_username' => '',
+            'ssh_password' => '',
+            'workspace_path' => '/srv/trendradar'
+        ];
     }
     
     /**
