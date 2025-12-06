@@ -36,6 +36,14 @@ $isDevMode = Auth::checkDevMode();
         <a href="settings.php" class="nav-item <?php echo ($currentPage ?? '') === 'settings' ? 'active' : ''; ?>">
             ⚙️ <?php _e('settings'); ?>
         </a>
+        <a href="docker.php" class="nav-item <?php echo ($currentPage ?? '') === 'docker' ? 'active' : ''; ?>">
+            🐳 <?php _e('docker_deployment'); ?>
+        </a>
+        <?php if ($isDevMode): ?>
+        <a href="docker-workers.php" class="nav-item <?php echo ($currentPage ?? '') === 'docker-workers' ? 'active' : ''; ?>">
+            🖥️ <?php _e('docker_workers'); ?>
+        </a>
+        <?php endif; ?>
         <a href="github-deployment.php" class="nav-item <?php echo ($currentPage ?? '') === 'github-deployment' ? 'active' : ''; ?>">
             🐙 <?php _e('github_deployment'); ?>
         </a>

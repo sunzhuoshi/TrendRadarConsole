@@ -135,7 +135,38 @@ These variables will automatically override the config files during GitHub Actio
 
 ### Docker Deployment
 
-Place the exported files in your TrendRadar project's `config/` directory.
+TrendRadarConsole now supports local Docker deployment as an alternative to GitHub Actions. Docker commands are executed via SSH to a remote Docker worker server.
+
+**Quick Start**:
+
+1. **Set up Docker Worker**: Run the setup script on your Docker server (as root):
+   ```bash
+   curl -O https://trendingnews.cn/scripts/setup-docker-worker.sh
+   chmod +x setup-docker-worker.sh
+   sudo ./setup-docker-worker.sh
+   ```
+
+2. **Configure your settings**: In TrendRadarConsole, set up your platforms, keywords, and webhooks
+
+3. **Run Container**: Navigate to **Docker Deployment** and click **Run Container**
+   - Your `config.yaml` and `frequency_words.txt` are auto-generated from your current configuration
+   - Only basic runtime settings are needed: CRON_SCHEDULE, RUN_MODE, IMMEDIATE_RUN
+
+**Features**:
+- **Auto-generated config**: Configuration files are created from your current settings when running/restarting the container
+- **Isolated workspace**: Each user has their own container and workspace
+- **Simple controls**: Run, start, stop, restart, or remove your container with one click
+- **Real-time monitoring**: View container status and logs
+
+**Technical Details**:
+- Container name: `trend-radar-{userId}`
+- Config path: `/srv/trendradar/{userId}/config`
+- Output path: `/srv/trendradar/{userId}/output`
+- Docker image: `wantcat/trendradar:latest`
+
+**Requirements**:
+- Docker worker server with Docker installed
+- PHP SSH2 extension (`php-ssh2`) on the web server
 
 ## Directory Structure
 
@@ -143,6 +174,7 @@ Place the exported files in your TrendRadar project's `config/` directory.
 TrendRadarConsole/
 ├── api/                    # API endpoints
 │   ├── config-action.php
+│   ├── docker.php          # Docker management API
 │   ├── export.php
 │   ├── github.php
 │   ├── keywords.php
@@ -162,14 +194,17 @@ TrendRadarConsole/
 │   ├── configuration.php   # Configuration model
 │   ├── database.php        # Database connection
 │   ├── github.php          # GitHub API integration
-│   └── helpers.php         # Helper functions
+│   ├── helpers.php         # Helper functions
+│   └── ssh.php             # SSH connection helper for Docker deployment
+├── scripts/
+│   └── setup-docker-worker.sh  # Docker worker setup script (run on Docker server)
 ├── sql/
+│   ├── migrations/         # Database migrations
 │   └── schema.sql          # Database schema (users, configurations, etc.)
 ├── templates/
 │   └── sidebar.php         # Sidebar template with mobile hamburger menu
 ├── config-edit.php         # Configuration edit page
-├── export.php              # Export page
-├── github.php              # GitHub sync page
+├── docker.php              # Docker deployment management page
 ├── index.php               # Dashboard
 ├── install.php             # Installation wizard
 ├── keywords.php            # Keywords management

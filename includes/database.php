@@ -17,7 +17,8 @@ class Database
         'webhooks',
         'settings',
         'operation_logs',
-        'migrations'
+        'migrations',
+        'docker_workers'
     ];
     
     private function __construct()

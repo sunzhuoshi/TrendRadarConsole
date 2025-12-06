@@ -304,6 +304,243 @@ class Auth
         
         return $devModeCache;
     }
+    
+    /**
+     * Get Docker worker for user (first active worker)
+     */
+    public function getDockerWorker($userId)
+    {
+        $worker = $this->db->fetchOne(
+            'SELECT * FROM docker_workers WHERE user_id = ? AND is_active = 1 ORDER BY id ASC LIMIT 1',
+            [$userId]
+        );
+        
+        if (!$worker) {
+            return [
+                'id' => null,
+                'name' => '',
+                'ssh_host' => '',
+                'ssh_port' => 22,
+                'ssh_username' => '',
+                'ssh_password' => '',
+                'workspace_path' => '/srv/trendradar'
+            ];
+        }
+        
+        return $worker;
+    }
+    
+    /**
+     * Get Docker SSH settings for user (backwards compatibility alias)
+     */
+    public function getDockerSSHSettings($userId)
+    {
+        $worker = $this->getDockerWorker($userId);
+        return [
+            'docker_ssh_host' => $worker['ssh_host'] ?? '',
+            'docker_ssh_port' => $worker['ssh_port'] ?? 22,
+            'docker_ssh_username' => $worker['ssh_username'] ?? '',
+            'docker_ssh_password' => $worker['ssh_password'] ?? '',
+            'docker_workspace_path' => $worker['workspace_path'] ?? '/srv/trendradar',
+            'worker_id' => $worker['id'] ?? null,
+            'worker_name' => $worker['name'] ?? ''
+        ];
+    }
+    
+    /**
+     * Save or update Docker worker for user
+     */
+    public function saveDockerWorker($userId, $host, $port, $username, $password = null, $workspacePath = null, $name = null)
+    {
+        // Check if user has an existing worker
+        $existing = $this->db->fetchOne(
+            'SELECT id FROM docker_workers WHERE user_id = ? LIMIT 1',
+            [$userId]
+        );
+        
+        $data = [
+            'ssh_host' => $host,
+            'ssh_port' => (int)$port ?: 22,
+            'ssh_username' => $username
+        ];
+        
+        if ($password !== null) {
+            $data['ssh_password'] = $password;
+        }
+        
+        if ($workspacePath !== null) {
+            $data['workspace_path'] = $workspacePath;
+        }
+        
+        if ($name !== null) {
+            $data['name'] = $name;
+        }
+        
+        if ($existing) {
+            // Update existing worker
+            return $this->db->update('docker_workers', $data, 'id = ?', [$existing['id']]);
+        } else {
+            // Create new worker
+            $data['user_id'] = $userId;
+            $data['name'] = $name ?: 'Default Worker';
+            return $this->db->insert('docker_workers', $data);
+        }
+    }
+    
+    /**
+     * Update Docker SSH settings for user (backwards compatibility alias)
+     */
+    public function updateDockerSSHSettings($userId, $host, $port, $username, $password = null, $workspacePath = null)
+    {
+        return $this->saveDockerWorker($userId, $host, $port, $username, $password, $workspacePath);
+    }
+    
+    /**
+     * Check if Docker SSH is configured for user
+     */
+    public function isDockerSSHConfigured($userId)
+    {
+        $worker = $this->getDockerWorker($userId);
+        return !empty($worker['ssh_host']) && !empty($worker['ssh_username']);
+    }
+    
+    /**
+     * Get all Docker workers available to user (own workers + public workers)
+     */
+    public function getAvailableDockerWorkers($userId)
+    {
+        // Get own workers and public workers from other users
+        $workers = $this->db->fetchAll(
+            'SELECT dw.*, u.username as owner_username 
+             FROM docker_workers dw 
+             LEFT JOIN users u ON dw.user_id = u.id 
+             WHERE dw.user_id = ? OR dw.is_public = 1 
+             ORDER BY CASE WHEN dw.user_id = ? THEN 0 ELSE 1 END, dw.name ASC',
+            [$userId, $userId]
+        );
+        
+        return $workers ?: [];
+    }
+    
+    /**
+     * Get all Docker workers owned by user
+     */
+    public function getUserDockerWorkers($userId)
+    {
+        $workers = $this->db->fetchAll(
+            'SELECT * FROM docker_workers WHERE user_id = ? ORDER BY name ASC',
+            [$userId]
+        );
+        
+        return $workers ?: [];
+    }
+    
+    /**
+     * Get a specific Docker worker by ID
+     */
+    public function getDockerWorkerById($workerId)
+    {
+        return $this->db->fetchOne(
+            'SELECT * FROM docker_workers WHERE id = ?',
+            [$workerId]
+        );
+    }
+    
+    /**
+     * Check if user can access a Docker worker (own or public)
+     */
+    public function canAccessDockerWorker($userId, $workerId)
+    {
+        $worker = $this->getDockerWorkerById($workerId);
+        if (!$worker) {
+            return false;
+        }
+        return $worker['user_id'] == $userId || $worker['is_public'] == 1;
+    }
+    
+    /**
+     * Create a new Docker worker
+     */
+    public function createDockerWorker($userId, $name, $host, $port, $username, $password, $workspacePath, $isPublic = false)
+    {
+        return $this->db->insert('docker_workers', [
+            'user_id' => $userId,
+            'name' => $name,
+            'ssh_host' => $host,
+            'ssh_port' => (int)$port ?: 22,
+            'ssh_username' => $username,
+            'ssh_password' => $password,
+            'workspace_path' => $workspacePath ?: '/srv/trendradar',
+            'is_public' => $isPublic ? 1 : 0,
+            'is_active' => 1
+        ]);
+    }
+    
+    /**
+     * Update an existing Docker worker
+     */
+    public function updateDockerWorkerById($workerId, $name, $host, $port, $username, $password = null, $workspacePath = null, $isPublic = null)
+    {
+        $data = [
+            'name' => $name,
+            'ssh_host' => $host,
+            'ssh_port' => (int)$port ?: 22,
+            'ssh_username' => $username
+        ];
+        
+        if ($password !== null) {
+            $data['ssh_password'] = $password;
+        }
+        
+        if ($workspacePath !== null) {
+            $data['workspace_path'] = $workspacePath;
+        }
+        
+        if ($isPublic !== null) {
+            $data['is_public'] = $isPublic ? 1 : 0;
+        }
+        
+        return $this->db->update('docker_workers', $data, 'id = ?', [$workerId]);
+    }
+    
+    /**
+     * Delete a Docker worker
+     */
+    public function deleteDockerWorker($workerId, $userId)
+    {
+        // Only allow deleting own workers
+        return $this->db->delete('docker_workers', 'id = ? AND user_id = ?', [$workerId, $userId]);
+    }
+    
+    /**
+     * Get selected Docker worker for user (stored in session or first available)
+     */
+    public function getSelectedDockerWorker($userId)
+    {
+        // Check if user has a selected worker in session
+        if (isset($_SESSION['selected_docker_worker_id'])) {
+            $workerId = $_SESSION['selected_docker_worker_id'];
+            $worker = $this->getDockerWorkerById($workerId);
+            if ($worker && $this->canAccessDockerWorker($userId, $workerId)) {
+                return $worker;
+            }
+        }
+        
+        // Otherwise return first available worker
+        return $this->getDockerWorker($userId);
+    }
+    
+    /**
+     * Set selected Docker worker for user
+     */
+    public function setSelectedDockerWorker($userId, $workerId)
+    {
+        if ($this->canAccessDockerWorker($userId, $workerId)) {
+            $_SESSION['selected_docker_worker_id'] = $workerId;
+            return true;
+        }
+        return false;
+    }
 }
 
 /**

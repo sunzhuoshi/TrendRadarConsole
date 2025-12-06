@@ -1,0 +1,483 @@
+<?php
+/**
+ * TrendRadarConsole - Docker Workers Management Page
+ * Manage Docker workers (create, edit, delete, set public/private)
+ * Only available in development mode
+ */
+
+session_start();
+require_once 'includes/helpers.php';
+require_once 'includes/auth.php';
+
+if (!file_exists('config/config.php')) {
+    header('Location: install.php');
+    exit;
+}
+
+// Require login
+Auth::requireLogin();
+$userId = Auth::getUserId();
+
+// Validate user ID is numeric
+if (!is_numeric($userId) || $userId <= 0) {
+    redirect('login.php');
+}
+$userId = (int)$userId;
+
+$auth = new Auth();
+
+// Check if development mode is enabled - redirect if not
+$isDevMode = $auth->isDevModeEnabled($userId);
+if (!$isDevMode) {
+    redirect('docker.php');
+}
+
+// Get user's Docker workers
+$userWorkers = $auth->getUserDockerWorkers($userId);
+
+$flash = getFlash();
+$currentPage = 'docker-workers';
+
+$csrfToken = generateCsrfToken();
+$currentLang = getCurrentLanguage();
+?>
+<!DOCTYPE html>
+<html lang="<?php echo $currentLang; ?>">
+<head>
+    <meta name="csrf-token" content="<?php echo $csrfToken; ?>">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TrendRadarConsole - <?php _e('docker_workers_management'); ?></title>
+    <link rel="stylesheet" href="assets/css/style.css">
+</head>
+<body>
+    <div class="app-container">
+        <?php include 'templates/sidebar.php'; ?>
+        
+        <main class="main-content">
+            <div class="page-header">
+                <h2>🖥️ <?php _e('docker_workers_management'); ?></h2>
+                <p><?php _e('docker_workers_desc'); ?></p>
+            </div>
+            
+            <?php if ($flash): ?>
+            <div class="alert alert-<?php echo $flash['type'] === 'error' ? 'danger' : $flash['type']; ?>">
+                <?php echo sanitize($flash['message']); ?>
+            </div>
+            <?php endif; ?>
+            
+            <!-- Add New Worker Card -->
+            <div class="card">
+                <div class="card-header">
+                    <h3>➕ <?php _e('add_docker_worker'); ?></h3>
+                </div>
+                <div class="card-body">
+                    <form id="add-worker-form">
+                        <div class="row mb-3">
+                            <div class="col-6">
+                                <label class="form-label"><?php _e('worker_name'); ?> <span class="text-danger">*</span></label>
+                                <input type="text" id="new-worker-name" class="form-control" 
+                                       placeholder="<?php _e('worker_name_placeholder'); ?>">
+                            </div>
+                            <div class="col-3">
+                                <label class="form-label"><?php _e('is_public'); ?></label>
+                                <select id="new-worker-public" class="form-control">
+                                    <option value="0"><?php _e('private_worker'); ?></option>
+                                    <option value="1"><?php _e('public_worker'); ?></option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="row mb-3">
+                            <div class="col-6">
+                                <label class="form-label"><?php _e('ssh_host'); ?> <span class="text-danger">*</span></label>
+                                <input type="text" id="new-ssh-host" class="form-control" 
+                                       placeholder="192.168.1.100">
+                            </div>
+                            <div class="col-3">
+                                <label class="form-label"><?php _e('ssh_port'); ?></label>
+                                <input type="number" id="new-ssh-port" class="form-control" 
+                                       value="22" placeholder="22">
+                            </div>
+                            <div class="col-3">
+                                <label class="form-label"><?php _e('ssh_username'); ?> <span class="text-danger">*</span></label>
+                                <input type="text" id="new-ssh-username" class="form-control" 
+                                       value="trendradarsrv" placeholder="trendradarsrv" readonly>
+                            </div>
+                        </div>
+                        <div class="row mb-3">
+                            <div class="col-6">
+                                <label class="form-label"><?php _e('ssh_password'); ?> <span class="text-danger">*</span></label>
+                                <input type="password" id="new-ssh-password" class="form-control" 
+                                       placeholder="<?php _e('ssh_password'); ?>">
+                            </div>
+                            <div class="col-6">
+                                <label class="form-label"><?php _e('workspace_path'); ?></label>
+                                <input type="text" id="new-workspace-path" class="form-control" 
+                                       value="/srv/trendradar" readonly>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-12">
+                                <button type="button" class="btn btn-success" onclick="addWorker()">
+                                    ➕ <?php _e('add_worker'); ?>
+                                </button>
+                            </div>
+                        </div>
+                    </form>
+                    
+                    <!-- Setup Script Prompt -->
+                    <div class="setup-prompt mt-4" style="background-color: #2d3748; border-radius: 8px; padding: 15px;">
+                        <p style="color: #e2e8f0; margin-bottom: 10px;"><strong>💡 <?php _e('setup_worker_hint'); ?></strong></p>
+                        <p style="color: #94a3b8; font-size: 14px; margin-bottom: 10px;"><?php _e('setup_worker_instructions'); ?></p>
+                        <pre style="background-color: #1a202c; color: #68d391; padding: 12px; border-radius: 6px; font-family: 'Consolas', 'Monaco', monospace; font-size: 13px; overflow-x: auto; margin: 0;"><code>curl -O https://trendingnews.cn/scripts/setup-docker-worker.sh
+chmod +x setup-docker-worker.sh
+sudo ./setup-docker-worker.sh</code></pre>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Existing Workers List -->
+            <div class="card">
+                <div class="card-header">
+                    <h3>📋 <?php _e('your_docker_workers'); ?></h3>
+                </div>
+                <div class="card-body">
+                    <?php if (empty($userWorkers)): ?>
+                    <div class="empty-state">
+                        <p><?php _e('no_workers_yet'); ?></p>
+                    </div>
+                    <?php else: ?>
+                    <div class="table-responsive">
+                        <table class="table">
+                            <thead>
+                                <tr>
+                                    <th><?php _e('worker_name'); ?></th>
+                                    <th><?php _e('ssh_host'); ?></th>
+                                    <th><?php _e('ssh_port'); ?></th>
+                                    <th><?php _e('visibility'); ?></th>
+                                    <th><?php _e('status'); ?></th>
+                                    <th><?php _e('actions'); ?></th>
+                                </tr>
+                            </thead>
+                            <tbody id="workers-list">
+                                <?php foreach ($userWorkers as $worker): ?>
+                                <tr data-worker-id="<?php echo (int)$worker['id']; ?>">
+                                    <td>
+                                        <strong><?php echo sanitize($worker['name']); ?></strong>
+                                    </td>
+                                    <td>
+                                        <code><?php echo sanitize($worker['ssh_host']); ?></code>
+                                    </td>
+                                    <td>
+                                        <?php echo (int)$worker['ssh_port']; ?>
+                                    </td>
+                                    <td>
+                                        <?php if ($worker['is_public']): ?>
+                                        <span class="badge badge-success"><?php _e('public'); ?></span>
+                                        <?php else: ?>
+                                        <span class="badge badge-secondary"><?php _e('private'); ?></span>
+                                        <?php endif; ?>
+                                    </td>
+                                    <td>
+                                        <?php if ($worker['is_active']): ?>
+                                        <span class="badge badge-success"><?php _e('active'); ?></span>
+                                        <?php else: ?>
+                                        <span class="badge badge-secondary"><?php _e('inactive'); ?></span>
+                                        <?php endif; ?>
+                                    </td>
+                                    <td>
+                                        <div class="btn-group">
+                                            <button type="button" class="btn btn-sm btn-outline" 
+                                                    onclick="editWorker(<?php echo (int)$worker['id']; ?>)">
+                                                ✏️ <?php _e('edit'); ?>
+                                            </button>
+                                            <button type="button" class="btn btn-sm btn-outline" 
+                                                    onclick="testWorkerConnection(<?php echo (int)$worker['id']; ?>)">
+                                                🔗 <?php _e('test'); ?>
+                                            </button>
+                                            <button type="button" class="btn btn-sm btn-danger" 
+                                                    onclick="deleteWorker(<?php echo (int)$worker['id']; ?>)">
+                                                🗑️ <?php _e('delete'); ?>
+                                            </button>
+                                        </div>
+                                    </td>
+                                </tr>
+                                <?php endforeach; ?>
+                            </tbody>
+                        </table>
+                    </div>
+                    <?php endif; ?>
+                </div>
+            </div>
+            
+            <!-- Back to Docker Deployment -->
+            <div class="mt-3">
+                <a href="docker.php" class="btn btn-outline">← <?php _e('back_to_docker'); ?></a>
+            </div>
+        </main>
+    </div>
+    
+    <!-- Edit Worker Modal -->
+    <div id="edit-modal" class="modal" style="display: none;">
+        <div class="modal-backdrop" onclick="closeEditModal()"></div>
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>✏️ <?php _e('edit_docker_worker'); ?></h3>
+                <button type="button" class="btn-close" onclick="closeEditModal()">×</button>
+            </div>
+            <div class="modal-body">
+                <form id="edit-worker-form">
+                    <input type="hidden" id="edit-worker-id">
+                    <div class="form-group mb-3">
+                        <label class="form-label"><?php _e('worker_name'); ?> <span class="text-danger">*</span></label>
+                        <input type="text" id="edit-worker-name" class="form-control">
+                    </div>
+                    <div class="row mb-3">
+                        <div class="col-6">
+                            <label class="form-label"><?php _e('ssh_host'); ?> <span class="text-danger">*</span></label>
+                            <input type="text" id="edit-ssh-host" class="form-control">
+                        </div>
+                        <div class="col-6">
+                            <label class="form-label"><?php _e('ssh_port'); ?></label>
+                            <input type="number" id="edit-ssh-port" class="form-control">
+                        </div>
+                    </div>
+                    <div class="form-group mb-3">
+                        <label class="form-label"><?php _e('ssh_password'); ?></label>
+                        <input type="password" id="edit-ssh-password" class="form-control" 
+                               placeholder="<?php _e('leave_empty_to_keep'); ?>">
+                    </div>
+                    <div class="form-group mb-3">
+                        <label class="form-label"><?php _e('is_public'); ?></label>
+                        <select id="edit-worker-public" class="form-control">
+                            <option value="0"><?php _e('private_worker'); ?></option>
+                            <option value="1"><?php _e('public_worker'); ?></option>
+                        </select>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-outline" onclick="closeEditModal()"><?php _e('cancel'); ?></button>
+                <button type="button" class="btn btn-primary" onclick="saveWorkerEdit()"><?php _e('save_changes'); ?></button>
+            </div>
+        </div>
+    </div>
+    
+    <script>var i18n = <?php echo getJsTranslations(); ?>;</script>
+    <script src="assets/js/app.js"></script>
+    <script>
+        // Workers data for editing
+        const workersData = <?php echo json_encode($userWorkers); ?>;
+        
+        // Add new worker
+        async function addWorker() {
+            const name = document.getElementById('new-worker-name').value.trim();
+            const host = document.getElementById('new-ssh-host').value.trim();
+            const port = document.getElementById('new-ssh-port').value || 22;
+            const username = document.getElementById('new-ssh-username').value.trim();
+            const password = document.getElementById('new-ssh-password').value;
+            const workspacePath = document.getElementById('new-workspace-path').value.trim();
+            const isPublic = document.getElementById('new-worker-public').value;
+            
+            if (!name) {
+                showToast('<?php _e('worker_name_required'); ?>', 'error');
+                return;
+            }
+            if (!host) {
+                showToast('<?php _e('ssh_host_required'); ?>', 'error');
+                return;
+            }
+            if (!password) {
+                showToast('<?php _e('ssh_password_required'); ?>', 'error');
+                return;
+            }
+            
+            try {
+                await apiRequest('api/docker-workers.php', 'POST', {
+                    action: 'create',
+                    name: name,
+                    ssh_host: host,
+                    ssh_port: port,
+                    ssh_username: username,
+                    ssh_password: password,
+                    workspace_path: workspacePath,
+                    is_public: isPublic
+                });
+                
+                showToast('<?php _e('worker_created'); ?>', 'success');
+                setTimeout(() => location.reload(), 1000);
+            } catch (error) {
+                showToast('<?php _e('worker_create_failed'); ?>: ' + error.message, 'error');
+            }
+        }
+        
+        // Edit worker - open modal
+        function editWorker(workerId) {
+            const worker = workersData.find(w => w.id == workerId);
+            if (!worker) return;
+            
+            document.getElementById('edit-worker-id').value = workerId;
+            document.getElementById('edit-worker-name').value = worker.name;
+            document.getElementById('edit-ssh-host').value = worker.ssh_host;
+            document.getElementById('edit-ssh-port').value = worker.ssh_port;
+            document.getElementById('edit-ssh-password').value = '';
+            document.getElementById('edit-worker-public').value = worker.is_public ? '1' : '0';
+            
+            document.getElementById('edit-modal').style.display = 'flex';
+        }
+        
+        // Close edit modal
+        function closeEditModal() {
+            document.getElementById('edit-modal').style.display = 'none';
+        }
+        
+        // Save worker edit
+        async function saveWorkerEdit() {
+            const workerId = document.getElementById('edit-worker-id').value;
+            const name = document.getElementById('edit-worker-name').value.trim();
+            const host = document.getElementById('edit-ssh-host').value.trim();
+            const port = document.getElementById('edit-ssh-port').value || 22;
+            const password = document.getElementById('edit-ssh-password').value;
+            const isPublic = document.getElementById('edit-worker-public').value;
+            
+            if (!name) {
+                showToast('<?php _e('worker_name_required'); ?>', 'error');
+                return;
+            }
+            if (!host) {
+                showToast('<?php _e('ssh_host_required'); ?>', 'error');
+                return;
+            }
+            
+            try {
+                await apiRequest('api/docker-workers.php', 'POST', {
+                    action: 'update',
+                    worker_id: workerId,
+                    name: name,
+                    ssh_host: host,
+                    ssh_port: port,
+                    ssh_password: password || null,
+                    is_public: isPublic
+                });
+                
+                showToast('<?php _e('worker_updated'); ?>', 'success');
+                closeEditModal();
+                setTimeout(() => location.reload(), 1000);
+            } catch (error) {
+                showToast('<?php _e('worker_update_failed'); ?>: ' + error.message, 'error');
+            }
+        }
+        
+        // Delete worker
+        async function deleteWorker(workerId) {
+            if (!confirm('<?php _e('confirm_delete_worker'); ?>')) return;
+            
+            try {
+                await apiRequest('api/docker-workers.php', 'POST', {
+                    action: 'delete',
+                    worker_id: workerId
+                });
+                
+                showToast('<?php _e('worker_deleted'); ?>', 'success');
+                setTimeout(() => location.reload(), 1000);
+            } catch (error) {
+                showToast('<?php _e('worker_delete_failed'); ?>: ' + error.message, 'error');
+            }
+        }
+        
+        // Test worker connection
+        async function testWorkerConnection(workerId) {
+            try {
+                const result = await apiRequest('api/docker-workers.php', 'POST', {
+                    action: 'test',
+                    worker_id: workerId
+                });
+                
+                const data = result.data;
+                if (data.ssh_connected && data.docker_available) {
+                    showToast('<?php _e('connection_successful'); ?> - Docker: ' + data.docker_version, 'success');
+                } else if (data.ssh_connected) {
+                    showToast('<?php _e('ssh_connected'); ?> - ' + data.message, 'warning');
+                }
+            } catch (error) {
+                showToast('<?php _e('connection_failed'); ?>: ' + error.message, 'error');
+            }
+        }
+    </script>
+    
+    <style>
+        .modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 1000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .modal-backdrop {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+        }
+        .modal-content {
+            position: relative;
+            background: #fff;
+            border-radius: 8px;
+            max-width: 500px;
+            width: 90%;
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px 20px;
+            border-bottom: 1px solid #eee;
+        }
+        .modal-header h3 {
+            margin: 0;
+        }
+        .modal-body {
+            padding: 20px;
+        }
+        .modal-footer {
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
+            padding: 15px 20px;
+            border-top: 1px solid #eee;
+        }
+        .btn-close {
+            background: none;
+            border: none;
+            font-size: 24px;
+            cursor: pointer;
+            color: #666;
+        }
+        .btn-close:hover {
+            color: #333;
+        }
+        @media (prefers-color-scheme: dark) {
+            .modal-content {
+                background: #1e293b;
+            }
+            .modal-header, .modal-footer {
+                border-color: #334155;
+            }
+            .btn-close {
+                color: #94a3b8;
+            }
+            .btn-close:hover {
+                color: #e2e8f0;
+            }
+        }
+    </style>
+</body>
+</html>
