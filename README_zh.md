@@ -12,7 +12,6 @@
 - **用户独立 GitHub 设置**：每个用户可以配置自己的 GitHub 仓库（所有者/仓库名/PAT）
 
 ### 配置管理
-- **默认配置**：用户注册时自动创建，包含预配置的平台和合理的默认设置
 - **平台管理**：配置要监控的平台（微博、知乎、头条等）
 - **关键词配置**：设置关键词及过滤器、必选词和限制条件
 - **通知 Webhooks**：配置多个通知渠道（企业微信、飞书、钉钉、Telegram、邮箱、ntfy、Bark、Slack）
@@ -26,52 +25,6 @@
 - **响应式设计**：支持移动浏览器，带有汉堡菜单导航
 - **触控友好**：优化了触屏控制
 - **自适应布局**：布局自动适配小屏幕
-
-## 快速开始指南
-
-开始使用 TrendRadarConsole 并部署 TrendRadar 的最快方式是使用 **Docker 部署**（推荐）。此方法提供自动配置文件生成和简化的容器管理。
-
-### 前置要求
-
-1. 运行 PHP 7.2+ 和 MySQL 5.6+ 的 Web 服务器
-2. 已安装 Docker 的服务器（可以是同一台或不同服务器）
-
-### 步骤
-
-1. **安装 TrendRadarConsole**
-   - 将 TrendRadarConsole 文件部署到您的 Web 服务器
-   - 在 `http://your-domain.com/install.php` 运行安装向导
-   - 注册账户 - 系统会自动创建默认配置
-
-2. **设置 Docker 工作机**（在您的 Docker 服务器上以 root 身份运行）：
-   ```bash
-   curl -O https://trendingnews.cn/scripts/setup-docker-worker.sh
-   chmod +x setup-docker-worker.sh
-   sudo ./setup-docker-worker.sh
-   ```
-
-3. **配置您的监控**
-   - 登录 TrendRadarConsole
-   - 根据需要自定义平台、关键词和通知 webhooks
-   - 默认配置开箱即用
-
-4. **使用 Docker 部署**
-   - 在侧边栏中导航至 **Docker 部署**
-   - 点击 **运行容器**
-   - 您的 `config.yaml` 和 `frequency_words.txt` 会自动生成
-   - 设置 CRON 计划（例如 `0 */3 * * *` 表示每 3 小时运行一次）
-   - 点击 **运行** 开始监控
-
-就这样！您的 TrendRadar 实例现在已在 Docker 中运行，根据您的配置自动监控热点话题并发送通知。
-
-**为什么推荐 Docker 部署：**
-- ✅ **零手动配置**：配置文件根据您的 Web 设置自动生成
-- ✅ **隔离环境**：每个用户拥有自己的容器和工作空间
-- ✅ **轻松管理**：一键启动、停止、重启和查看日志
-- ✅ **始终保持最新**：随时拉取最新的 TrendRadar 镜像
-- ✅ **灵活调度**：轻松配置 CRON，无需编辑文件
-
-有关详细安装说明和其他部署方法（GitHub Actions），请参阅下面的章节。
 
 ## 系统要求
 

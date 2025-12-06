@@ -196,7 +196,8 @@ $csrfToken = generateCsrfToken();
                     <h3><?php _e('quick_start_guide'); ?></h3>
                 </div>
                 <div class="card-body">
-                    <ol style="line-height: 2;">
+                    <p style="margin-bottom: 20px; color: #666;"><?php _e('quick_start_intro'); ?></p>
+                    <ol style="line-height: 2.5;">
                         <li><?php _e('step1_create_config'); ?></li>
                         <li><?php _e('step2_platforms'); ?></li>
                         <li><?php _e('step3_keywords'); ?></li>
@@ -204,6 +205,16 @@ $csrfToken = generateCsrfToken();
                         <li><?php _e('step5_settings'); ?></li>
                         <li><?php _e('step6_sync_github'); ?></li>
                     </ol>
+                    <div style="margin-top: 25px; padding: 20px; background-color: #f8f9fa; border-radius: 8px; border-left: 4px solid #667eea;">
+                        <p style="margin-bottom: 12px; font-weight: 600; color: #333;"><?php _e('docker_benefits_title'); ?></p>
+                        <ul style="line-height: 2; list-style: none; padding-left: 0; margin: 0;">
+                            <li><?php _e('docker_benefit_1'); ?></li>
+                            <li><?php _e('docker_benefit_2'); ?></li>
+                            <li><?php _e('docker_benefit_3'); ?></li>
+                            <li><?php _e('docker_benefit_4'); ?></li>
+                            <li><?php _e('docker_benefit_5'); ?></li>
+                        </ul>
+                    </div>
                 </div>
             </div>
             
