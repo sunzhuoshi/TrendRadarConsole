@@ -46,7 +46,7 @@ $currentLang = getCurrentLanguage();
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>TrendRadarConsole - <?php _e('login'); ?></title>
+    <title><?php _e('app_name'); ?> - <?php _e('login'); ?></title>
     <link rel="stylesheet" href="assets/css/style.css">
     <style>
         body {
@@ -101,7 +101,7 @@ $currentLang = getCurrentLanguage();
     
     <div class="login-container">
         <div class="login-header">
-            <h1>🚀 TrendRadarConsole</h1>
+            <h1>🚀 <?php _e('app_name'); ?></h1>
             <p><?php _e('sign_in_to_manage'); ?></p>
         </div>
         

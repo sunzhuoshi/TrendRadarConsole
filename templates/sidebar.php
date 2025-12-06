@@ -12,7 +12,7 @@ $isAdvancedMode = Auth::checkAdvancedMode();
 <button class="mobile-menu-toggle" onclick="toggleSidebar()">☰</button>
 <aside class="sidebar">
     <div class="sidebar-header">
-        <h1>TrendRadarConsole</h1>
+        <h1><?php _e('app_name'); ?></h1>
         <small>👤 <?php echo htmlspecialchars($currentUsername ?? __('guest')); ?></small>
         <?php if ($isAdvancedMode): ?>
         <div>
