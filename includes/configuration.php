@@ -399,7 +399,7 @@ class Configuration
             'email_to' => '',
             'email_smtp_server' => '',
             'email_smtp_port' => '',
-            'ntfy_server_url' => 'https://ntfy.sh',
+            'ntfy_server_url' => 'ntfy.sh',
             'ntfy_topic' => '',
             'ntfy_token' => '',
             'bark_url' => '',
@@ -444,7 +444,7 @@ class Configuration
                     $config['ntfy_topic'] = $webhook['webhook_url'];
                     if ($webhook['additional_config']) {
                         $extra = json_decode($webhook['additional_config'], true);
-                        $config['ntfy_server_url'] = $extra['server_url'] ?? 'https://ntfy.sh';
+                        $config['ntfy_server_url'] = $extra['server_url'] ?? 'ntfy.sh';
                         $config['ntfy_token'] = $extra['token'] ?? '';
                     }
                     break;

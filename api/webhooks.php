@@ -88,7 +88,7 @@ try {
                 case 'ntfy':
                     $webhookUrl = $input['webhook_url'] ?? ''; // Topic name
                     $additionalConfig = [
-                        'server_url' => $input['server_url'] ?? 'https://ntfy.sh',
+                        'server_url' => $input['server_url'] ?? 'ntfy.sh',
                         'token' => $input['token'] ?? '',
                     ];
                     break;
