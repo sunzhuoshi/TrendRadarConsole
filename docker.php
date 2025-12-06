@@ -573,6 +573,16 @@ $currentLang = getCurrentLanguage();
                         ? '<span class="badge badge-success"><?php _e('running'); ?></span>'
                         : '<span class="badge badge-secondary"><?php _e('stopped'); ?></span>';
                     
+                    // Extract CRON_SCHEDULE from environment variables
+                    let cronSchedule = '-';
+                    if (data.env && Array.isArray(data.env)) {
+                        const cronEnv = data.env.find(e => e.startsWith('CRON_SCHEDULE='));
+                        if (cronEnv) {
+                            const value = cronEnv.substring('CRON_SCHEDULE='.length);
+                            cronSchedule = value || '-'; // Show '-' if value is empty
+                        }
+                    }
+                    
                     statusDiv.innerHTML = `
                         <div class="row">
                             <div class="col-3">
@@ -597,6 +607,14 @@ $currentLang = getCurrentLanguage();
                                 <div class="stat-card">
                                     <div class="stat-card-label"><?php _e('started_at'); ?></div>
                                     <div class="stat-card-value" style="font-size: 14px;">${state.started_at ? formatDateTime(state.started_at) : '-'}</div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row mt-3">
+                            <div class="col-3">
+                                <div class="stat-card">
+                                    <div class="stat-card-label"><?php _e('cron_schedule'); ?></div>
+                                    <div class="stat-card-value" style="font-size: 14px;"><code>${escapeHtml(cronSchedule)}</code></div>
                                 </div>
                             </div>
                         </div>
