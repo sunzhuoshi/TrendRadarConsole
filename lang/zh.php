@@ -536,12 +536,12 @@ return [
     'ssh_connected' => 'SSH 连接成功',
     'ssh_not_configured_message' => 'SSH 连接未配置。请先配置上方的 SSH 设置以管理 Docker 容器。',
     
-    // Development Mode
-    'development_mode' => '开发者模式',
-    'dev_mode_desc' => '启用开发者模式可访问额外的功能和调试工具。此功能面向开发者和高级用户。',
-    'enable_dev_mode' => '启用开发者模式',
-    'dev_mode_warning' => '开发者模式可能会显示未经完全测试的功能。请谨慎使用。',
-    'dev_mode_saved' => '开发者模式设置已保存',
+    // Advanced Mode
+    'advanced_mode' => '高级模式',
+    'advanced_mode_desc' => '启用高级模式可访问额外的功能和调试工具。此功能面向高级用户。',
+    'enable_advanced_mode' => '启用高级模式',
+    'advanced_mode_warning' => '高级模式可能会显示未经完全测试的功能。请谨慎使用。',
+    'advanced_mode_saved' => '高级模式设置已保存',
     
     // Docker Workers Management
     'docker_workers' => 'Docker 工作机',

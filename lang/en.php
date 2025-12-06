@@ -536,12 +536,12 @@ return [
     'ssh_connected' => 'SSH connection successful',
     'ssh_not_configured_message' => 'SSH connection not configured. Please configure SSH settings above to manage Docker containers.',
     
-    // Development Mode
-    'development_mode' => 'Development Mode',
-    'dev_mode_desc' => 'Enable development mode to access additional features and debugging tools. This is intended for developers and advanced users.',
-    'enable_dev_mode' => 'Enable Development Mode',
-    'dev_mode_warning' => 'Development mode may expose additional features that are not fully tested. Use with caution.',
-    'dev_mode_saved' => 'Development mode settings saved',
+    // Advanced Mode
+    'advanced_mode' => 'Advanced Mode',
+    'advanced_mode_desc' => 'Enable advanced mode to access additional features and debugging tools. This is intended for advanced users.',
+    'enable_advanced_mode' => 'Enable Advanced Mode',
+    'advanced_mode_warning' => 'Advanced mode may expose additional features that are not fully tested. Use with caution.',
+    'advanced_mode_saved' => 'Advanced mode settings saved',
     
     // Docker Workers Management
     'docker_workers' => 'Docker Workers',

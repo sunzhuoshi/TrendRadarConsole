@@ -10,7 +10,7 @@ CREATE TABLE IF NOT EXISTS `users` (
     `github_owner` VARCHAR(100) COMMENT 'GitHub repository owner',
     `github_repo` VARCHAR(100) COMMENT 'GitHub repository name',
     `github_token` VARCHAR(255) COMMENT 'GitHub PAT (encrypted)',
-    `dev_mode` TINYINT(1) NOT NULL DEFAULT 0 COMMENT 'Development mode: 0=disabled, 1=enabled',
+    `advanced_mode` TINYINT(1) NOT NULL DEFAULT 0 COMMENT 'Advanced mode: 0=disabled, 1=enabled',
     `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     `last_login` TIMESTAMP NULL,
     `updated_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP

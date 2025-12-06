@@ -7,16 +7,16 @@ require_once __DIR__ . '/../includes/helpers.php';
 $currentUsername = Auth::getUsername();
 $currentLang = getCurrentLanguage();
 $lastUpdated = getLastUpdatedTime();
-$isDevMode = Auth::checkDevMode();
+$isAdvancedMode = Auth::checkAdvancedMode();
 ?>
 <button class="mobile-menu-toggle" onclick="toggleSidebar()">☰</button>
 <aside class="sidebar">
     <div class="sidebar-header">
         <h1>TrendRadarConsole</h1>
         <small>👤 <?php echo htmlspecialchars($currentUsername ?? __('guest')); ?></small>
-        <?php if ($isDevMode): ?>
+        <?php if ($isAdvancedMode): ?>
         <div>
-            <span class="dev-mode-badge">🛠️ DEV</span>
+            <span class="advanced-mode-badge">🛠️ ADV</span>
         </div>
         <?php endif; ?>
     </div>
@@ -39,7 +39,7 @@ $isDevMode = Auth::checkDevMode();
         <a href="docker.php" class="nav-item <?php echo ($currentPage ?? '') === 'docker' ? 'active' : ''; ?>">
             🐳 <?php _e('docker_deployment'); ?>
         </a>
-        <?php if ($isDevMode): ?>
+        <?php if ($isAdvancedMode): ?>
         <a href="docker-workers.php" class="nav-item <?php echo ($currentPage ?? '') === 'docker-workers' ? 'active' : ''; ?>">
             🖥️ <?php _e('docker_workers'); ?>
         </a>

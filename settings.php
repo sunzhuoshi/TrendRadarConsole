@@ -28,8 +28,8 @@ try {
                         !empty($githubSettings['github_repo']) && 
                         !empty($githubSettings['github_token']);
     
-    // Get development mode status
-    $devModeEnabled = $auth->isDevModeEnabled($userId);
+    // Get advanced mode status
+    $advancedModeEnabled = $auth->isAdvancedModeEnabled($userId);
     
     if (!$githubConfigured) {
         header('Location: github-deployment.php');
@@ -303,23 +303,23 @@ $currentLang = getCurrentLanguage();
                 </div>
             </form>
             
-            <!-- Development Mode Settings -->
+            <!-- Advanced Mode Settings -->
             <div class="card">
                 <div class="card-header">
-                    <h3>🛠️ <?php _e('development_mode'); ?></h3>
+                    <h3>🛠️ <?php _e('advanced_mode'); ?></h3>
                 </div>
                 <div class="card-body">
                     <p class="text-muted mb-3">
-                        <?php _e('dev_mode_desc'); ?>
+                        <?php _e('advanced_mode_desc'); ?>
                     </p>
-                    <form id="dev-mode-form">
+                    <form id="advanced-mode-form">
                         <div class="form-group">
-                            <label class="form-label"><?php _e('enable_dev_mode'); ?></label>
-                            <select name="dev_mode" class="form-control" id="dev-mode-toggle">
-                                <option value="false" <?php echo !$devModeEnabled ? 'selected' : ''; ?>><?php _e('disabled'); ?></option>
-                                <option value="true" <?php echo $devModeEnabled ? 'selected' : ''; ?>><?php _e('enabled'); ?></option>
+                            <label class="form-label"><?php _e('enable_advanced_mode'); ?></label>
+                            <select name="advanced_mode" class="form-control" id="advanced-mode-toggle">
+                                <option value="false" <?php echo !$advancedModeEnabled ? 'selected' : ''; ?>><?php _e('disabled'); ?></option>
+                                <option value="true" <?php echo $advancedModeEnabled ? 'selected' : ''; ?>><?php _e('enabled'); ?></option>
                             </select>
-                            <div class="form-text"><?php _e('dev_mode_warning'); ?></div>
+                            <div class="form-text"><?php _e('advanced_mode_warning'); ?></div>
                         </div>
                         <button type="submit" class="btn btn-primary"><?php _e('save_settings'); ?></button>
                     </form>
@@ -382,19 +382,19 @@ $currentLang = getCurrentLanguage();
             }
         });
         
-        // Development mode form submission
-        document.getElementById('dev-mode-form').addEventListener('submit', async function(e) {
+        // Advanced mode form submission
+        document.getElementById('advanced-mode-form').addEventListener('submit', async function(e) {
             e.preventDefault();
             
             const submitBtn = this.querySelector('button[type="submit"]');
-            const devMode = document.getElementById('dev-mode-toggle').value === 'true';
+            const advancedMode = document.getElementById('advanced-mode-toggle').value === 'true';
             
             setButtonLoading(submitBtn, true);
             try {
-                await apiRequest('api/dev-mode.php', 'POST', {
-                    dev_mode: devMode
+                await apiRequest('api/advanced-mode.php', 'POST', {
+                    advanced_mode: advancedMode
                 });
-                showToast(__('dev_mode_saved'), 'success');
+                showToast(__('advanced_mode_saved'), 'success');
             } catch (error) {
                 showToast(__('failed_to_save') + ': ' + error.message, 'error');
             } finally {

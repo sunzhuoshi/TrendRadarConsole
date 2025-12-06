@@ -2,7 +2,7 @@
 /**
  * TrendRadarConsole - Docker Workers Management Page
  * Manage Docker workers (create, edit, delete, set public/private)
- * Only available in development mode
+ * Only available in advanced mode
  */
 
 session_start();
@@ -26,9 +26,9 @@ $userId = (int)$userId;
 
 $auth = new Auth();
 
-// Check if development mode is enabled - redirect if not
-$isDevMode = $auth->isDevModeEnabled($userId);
-if (!$isDevMode) {
+// Check if advanced mode is enabled - redirect if not
+$isAdvancedMode = $auth->isAdvancedModeEnabled($userId);
+if (!$isAdvancedMode) {
     redirect('docker.php');
 }
 

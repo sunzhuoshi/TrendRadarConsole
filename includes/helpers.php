@@ -355,7 +355,7 @@ function getJsTranslations() {
         'confirm_test_crawling', 'crawling_triggered', 'crawling_trigger_failed',
         'workflow_status_queued', 'workflow_status_in_progress', 'workflow_status_completed',
         'workflow_status_success', 'workflow_status_failure', 'workflow_status_cancelled',
-        'workflow_status_unknown', 'workflow_checking_status', 'dev_mode_saved',
+        'workflow_status_unknown', 'workflow_checking_status', 'advanced_mode_saved',
         'workflow_status', 'workflow_enabled', 'workflow_disabled', 'workflow_enable',
         'workflow_disable', 'workflow_enable_confirm', 'workflow_disable_confirm',
         'workflow_enabled_success', 'workflow_disabled_success', 'workflow_enable_failed',

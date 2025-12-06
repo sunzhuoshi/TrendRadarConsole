@@ -25,8 +25,8 @@ $userId = (int)$userId;
 
 $auth = new Auth();
 
-// Check if development mode is enabled - required for worker management
-$isDevMode = $auth->isDevModeEnabled($userId);
+// Check if advanced mode is enabled - required for worker management
+$isAdvancedMode = $auth->isAdvancedModeEnabled($userId);
 
 try {
     $method = getMethod();
@@ -98,9 +98,9 @@ try {
             break;
             
         case 'create':
-            // Create a new worker (requires dev mode)
-            if (!$isDevMode) {
-                jsonError('Development mode required', 403);
+            // Create a new worker (requires advanced mode)
+            if (!$isAdvancedMode) {
+                jsonError('Advanced mode required', 403);
             }
             
             $name = trim($input['name'] ?? '');
@@ -138,9 +138,9 @@ try {
             break;
             
         case 'update':
-            // Update an existing worker (requires dev mode and ownership)
-            if (!$isDevMode) {
-                jsonError('Development mode required', 403);
+            // Update an existing worker (requires advanced mode and ownership)
+            if (!$isAdvancedMode) {
+                jsonError('Advanced mode required', 403);
             }
             
             $workerId = (int)($input['worker_id'] ?? 0);
@@ -183,9 +183,9 @@ try {
             break;
             
         case 'delete':
-            // Delete a worker (requires dev mode and ownership)
-            if (!$isDevMode) {
-                jsonError('Development mode required', 403);
+            // Delete a worker (requires advanced mode and ownership)
+            if (!$isAdvancedMode) {
+                jsonError('Advanced mode required', 403);
             }
             
             $workerId = (int)($input['worker_id'] ?? 0);
