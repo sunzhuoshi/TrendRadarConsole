@@ -5,6 +5,7 @@
 
 session_start();
 require_once 'includes/helpers.php';
+require_once 'includes/configuration.php';
 require_once 'includes/operation_log.php';
 require_once 'includes/auth.php';
 
@@ -24,12 +25,15 @@ $githubConfigured = !empty($githubSettings['github_owner']) &&
                     !empty($githubSettings['github_repo']) && 
                     !empty($githubSettings['github_token']);
 
-if (!$githubConfigured) {
-    header('Location: github-deployment.php');
-    exit;
-}
-
 try {
+    $config = new Configuration($userId);
+    $configurations = $config->getAll();
+
+    if (!$githubConfigured && empty($configurations)) {
+        header('Location: github-deployment.php');
+        exit;
+    }
+
     $operationLog = new OperationLog($userId);
     
     // Pagination
