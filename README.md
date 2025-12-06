@@ -15,9 +15,9 @@ A web-based configuration management system for [TrendRadar](https://github.com/
 - **Notification Webhooks**: Configure multiple notification channels (WeChat Work, Feishu, DingTalk, Telegram, Email, ntfy, Bark, Slack)
 - **Report Settings**: Customize report mode, weights, and push time windows
 
-### Export & Sync
-- **Export**: Export configurations as `config.yaml` and `frequency_words.txt` for use with TrendRadar
+### Configuration Sync
 - **GitHub Sync**: Load and save `CONFIG_YAML` and `FREQUENCY_WORDS` directly to your GitHub repository variables
+- **Docker Deployment**: Automatically generates `config.yaml` and `frequency_words.txt` when deploying containers
 
 ### Mobile Support
 - **Responsive Design**: Works on mobile browsers with hamburger menu navigation
@@ -119,11 +119,12 @@ This automatically sets `CONFIG_YAML` and `FREQUENCY_WORDS` repository variables
 
 Alternatively, you can manually copy configurations:
 
-1. Go to your TrendRadar fork's **Settings → Secrets and variables → Actions**
-2. Click on the **Variables** tab
-3. Create two repository variables:
-   - `CONFIG_YAML` - Paste the entire content from the exported `config.yaml`
-   - `FREQUENCY_WORDS` - Paste the content from the exported `frequency_words.txt`
+1. Use **GitHub Sync** in TrendRadarConsole to load your configuration (this will show you the generated `config.yaml` and `frequency_words.txt` content)
+2. Go to your TrendRadar fork's **Settings → Secrets and variables → Actions**
+3. Click on the **Variables** tab
+4. Create two repository variables:
+   - `CONFIG_YAML` - Paste the entire content of the generated `config.yaml`
+   - `FREQUENCY_WORDS` - Paste the content of the generated `frequency_words.txt`
 
 These variables will automatically override the config files during GitHub Actions workflow execution.
 
@@ -173,11 +174,14 @@ TrendRadarConsole now supports local Docker deployment as an alternative to GitH
 ```
 TrendRadarConsole/
 ├── api/                    # API endpoints
+│   ├── advanced-mode.php   # Advanced mode API
 │   ├── config-action.php
+│   ├── docker-workers.php  # Docker workers management API
 │   ├── docker.php          # Docker management API
-│   ├── export.php
 │   ├── github.php
 │   ├── keywords.php
+│   ├── language.php
+│   ├── logs.php
 │   ├── platforms.php
 │   ├── settings.php
 │   └── webhooks.php
@@ -204,11 +208,14 @@ TrendRadarConsole/
 ├── templates/
 │   └── sidebar.php         # Sidebar template with mobile hamburger menu
 ├── config-edit.php         # Configuration edit page
+├── docker-workers.php      # Docker workers management (advanced mode)
 ├── docker.php              # Docker deployment management page
+├── github-deployment.php   # GitHub deployment setup and management
 ├── index.php               # Dashboard
 ├── install.php             # Installation wizard
 ├── keywords.php            # Keywords management
 ├── login.php               # Login page
+├── logs.php                # Operation logs viewer
 ├── logout.php              # Logout handler
 ├── platforms.php           # Platforms management
 ├── register.php            # Registration page
