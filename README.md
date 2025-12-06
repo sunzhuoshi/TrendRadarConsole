@@ -27,6 +27,52 @@ A web-based configuration management system for [TrendRadar](https://github.com/
 - **Touch-Friendly**: Optimized controls for touch screens
 - **Adaptive Layout**: Layouts adjust for small screens
 
+## Quick Start Guide
+
+The fastest way to get started with TrendRadarConsole and deploy TrendRadar is using **Docker deployment** (recommended). This method provides automated configuration generation and simplified container management.
+
+### Prerequisites
+
+1. A web server running PHP 7.2+ with MySQL 5.6+
+2. A server with Docker installed (can be the same or different server)
+
+### Steps
+
+1. **Install TrendRadarConsole**
+   - Deploy TrendRadarConsole files to your web server
+   - Run the installation wizard at `http://your-domain.com/install.php`
+   - Register an account - a default configuration is automatically created
+
+2. **Set up Docker Worker** (on your Docker server, as root):
+   ```bash
+   curl -O https://trendingnews.cn/scripts/setup-docker-worker.sh
+   chmod +x setup-docker-worker.sh
+   sudo ./setup-docker-worker.sh
+   ```
+
+3. **Configure Your Monitoring**
+   - Log in to TrendRadarConsole
+   - Customize platforms, keywords, and notification webhooks as needed
+   - The default configuration works out of the box
+
+4. **Deploy with Docker**
+   - Navigate to **Docker Deployment** in the sidebar
+   - Click **Run Container**
+   - Your `config.yaml` and `frequency_words.txt` are automatically generated
+   - Set the CRON schedule (e.g., `0 */3 * * *` for every 3 hours)
+   - Click **Run** to start monitoring
+
+That's it! Your TrendRadar instance is now running in Docker, automatically monitoring hot topics and sending notifications according to your configuration.
+
+**Why Docker deployment is recommended:**
+- ✅ **Zero manual configuration**: Config files are auto-generated from your web settings
+- ✅ **Isolated environment**: Each user gets their own container and workspace
+- ✅ **Easy management**: One-click start, stop, restart, and log viewing
+- ✅ **Always up-to-date**: Pull the latest TrendRadar image anytime
+- ✅ **Flexible scheduling**: Easy CRON configuration without editing files
+
+For detailed installation instructions and alternative deployment methods (GitHub Actions), see the sections below.
+
 ## Requirements
 
 - PHP 7.2+ with cURL extension
