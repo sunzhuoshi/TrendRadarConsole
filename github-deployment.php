@@ -341,7 +341,7 @@ $csrfToken = generateCsrfToken();
                         
                         <div class="btn-group">
                             <button type="submit" class="btn btn-primary"><?php _e('save_settings'); ?></button>
-                            <button type="button" class="btn btn-secondary" data-action="test-connection" onclick="testConnection()"><?php _e('test_connection'); ?></button>
+                            <button type="button" class="btn btn-secondary" data-action="test-connection"><?php _e('test_connection'); ?></button>
                         </div>
                     </form>
                 </div>
@@ -360,14 +360,14 @@ $csrfToken = generateCsrfToken();
                             <div class="info-box">
                                 <h4>⬇️ <?php _e('load_from_github'); ?></h4>
                                 <p class="text-muted"><?php _e('load_from_github_desc'); ?></p>
-                                <button type="button" class="btn btn-primary" data-action="load-github" onclick="loadFromGitHub()"><?php _e('load_from_github'); ?></button>
+                                <button type="button" class="btn btn-primary" data-action="load-github"><?php _e('load_from_github'); ?></button>
                             </div>
                         </div>
                         <div class="col-6">
                             <div class="info-box">
                                 <h4>⬆️ <?php _e('save_to_github'); ?></h4>
                                 <p class="text-muted"><?php _e('save_to_github_desc'); ?></p>
-                                <button type="button" class="btn btn-success" data-action="save-github" onclick="saveToGitHub()"><?php _e('save_to_github'); ?></button>
+                                <button type="button" class="btn btn-success" data-action="save-github"><?php _e('save_to_github'); ?></button>
                             </div>
                         </div>
                     </div>
@@ -384,7 +384,7 @@ $csrfToken = generateCsrfToken();
                     <div class="mb-4">
                         <label class="form-label"><strong><?php _e('workflow_status'); ?>:</strong></label>
                         <div>
-                            <button type="button" id="workflow-toggle-btn" class="btn btn-secondary" onclick="toggleWorkflow()">
+                            <button type="button" id="workflow-toggle-btn" class="btn btn-secondary" data-action="workflow-toggle">
                                 <?php _e('workflow_status_loading'); ?>
                             </button>
                         </div>
@@ -394,7 +394,7 @@ $csrfToken = generateCsrfToken();
                     
                     <!-- Test Crawling Button -->
                     <p class="text-muted mb-3"><?php _e('test_crawling_desc'); ?></p>
-                    <button type="button" class="btn btn-warning" data-action="test-crawling" onclick="testCrawling()"><?php _e('test_crawling'); ?></button>
+                    <button type="button" class="btn btn-warning" data-action="test-crawling"><?php _e('test_crawling'); ?></button>
                 </div>
             </div>
             
@@ -743,9 +743,35 @@ $csrfToken = generateCsrfToken();
             }
         }
         
-        // Load workflow status on page load
+        // Load workflow status on page load and attach event listeners
         document.addEventListener('DOMContentLoaded', function() {
             refreshWorkflowStatus();
+            
+            // Attach event listeners to buttons
+            const testConnectionBtn = document.querySelector('button[data-action="test-connection"]');
+            if (testConnectionBtn) {
+                testConnectionBtn.addEventListener('click', testConnection);
+            }
+            
+            const loadGitHubBtn = document.querySelector('button[data-action="load-github"]');
+            if (loadGitHubBtn) {
+                loadGitHubBtn.addEventListener('click', loadFromGitHub);
+            }
+            
+            const saveGitHubBtn = document.querySelector('button[data-action="save-github"]');
+            if (saveGitHubBtn) {
+                saveGitHubBtn.addEventListener('click', saveToGitHub);
+            }
+            
+            const workflowToggleBtn = document.querySelector('button[data-action="workflow-toggle"]');
+            if (workflowToggleBtn) {
+                workflowToggleBtn.addEventListener('click', toggleWorkflow);
+            }
+            
+            const testCrawlingBtn = document.querySelector('button[data-action="test-crawling"]');
+            if (testCrawlingBtn) {
+                testCrawlingBtn.addEventListener('click', testCrawling);
+            }
         });
         
         <?php endif; ?>
