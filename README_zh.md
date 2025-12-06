@@ -1,5 +1,7 @@
 # TrendRadarConsole
 
+[English](README.md) | [简体中文](README_zh.md)
+
 [TrendRadar](https://github.com/sunzhuoshi/TrendRadar) - 热点话题监控和通知系统的网页配置管理系统。
 
 ## 功能特性

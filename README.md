@@ -1,5 +1,7 @@
 # TrendRadarConsole
 
+[English](README.md) | [简体中文](README_zh.md)
+
 A web-based configuration management system for [TrendRadar](https://github.com/sunzhuoshi/TrendRadar) - the hot topic monitoring and notification system.
 
 ## Features
