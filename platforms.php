@@ -63,7 +63,7 @@ $availablePlatforms = [
     ['id' => 'kr-hotnews', 'name' => '36氪热闻'],
     ['id' => 'hackernews', 'name' => 'Hacker News'],
     ['id' => 'producthunt', 'name' => 'Product Hunt'],
-    ['id' => 'github-trending', 'name' => 'GitHub Trending'],
+    ['id' => 'github', 'name' => 'GitHub Trending'],
     ['id' => 'v2ex', 'name' => 'V2EX'],
     ['id' => 'coolapk', 'name' => '酷安'],
 ];

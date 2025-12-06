@@ -192,19 +192,19 @@ $currentLang = getCurrentLanguage();
                 </div>
                 <div class="card-body">
                     <div class="btn-group">
-                        <button type="button" class="btn btn-success" onclick="runContainer()" id="btn-run">
+                        <button type="button" class="btn btn-success" onclick="runContainer()" id="btn-run" style="display: none;">
                             ▶️ <?php _e('run_container'); ?>
                         </button>
-                        <button type="button" class="btn btn-primary" onclick="startContainer()" id="btn-start">
+                        <button type="button" class="btn btn-primary" onclick="startContainer()" id="btn-start" style="display: none;">
                             ▶️ <?php _e('start_container'); ?>
                         </button>
-                        <button type="button" class="btn btn-warning" onclick="stopContainer()" id="btn-stop">
+                        <button type="button" class="btn btn-warning" onclick="stopContainer()" id="btn-stop" style="display: none;">
                             ⏹️ <?php _e('stop_container'); ?>
                         </button>
-                        <button type="button" class="btn btn-secondary" onclick="restartContainer()" id="btn-restart">
+                        <button type="button" class="btn btn-secondary" onclick="restartContainer()" id="btn-restart" style="display: none;">
                             🔄 <?php _e('restart_container'); ?>
                         </button>
-                        <button type="button" class="btn btn-danger" onclick="removeContainer()" id="btn-remove">
+                        <button type="button" class="btn btn-danger" onclick="removeContainer()" id="btn-remove" style="display: none;">
                             🗑️ <?php _e('remove_container'); ?>
                         </button>
                     </div>
@@ -580,6 +580,16 @@ $currentLang = getCurrentLanguage();
                         ? '<span class="badge badge-success"><?php _e('running'); ?></span>'
                         : '<span class="badge badge-secondary"><?php _e('stopped'); ?></span>';
                     
+                    // Extract CRON_SCHEDULE from environment variables
+                    let cronSchedule = '-';
+                    if (data.env && Array.isArray(data.env)) {
+                        const cronEnv = data.env.find(e => e.startsWith('CRON_SCHEDULE='));
+                        if (cronEnv) {
+                            const value = cronEnv.substring('CRON_SCHEDULE='.length);
+                            cronSchedule = value || '-'; // Show '-' if value is empty
+                        }
+                    }
+                    
                     statusDiv.innerHTML = `
                         <div class="row">
                             <div class="col-3">
@@ -604,6 +614,14 @@ $currentLang = getCurrentLanguage();
                                 <div class="stat-card">
                                     <div class="stat-card-label"><?php _e('started_at'); ?></div>
                                     <div class="stat-card-value" style="font-size: 14px;">${state.started_at ? formatDateTime(state.started_at) : '-'}</div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row mt-3">
+                            <div class="col-3">
+                                <div class="stat-card">
+                                    <div class="stat-card-label"><?php _e('cron_schedule'); ?></div>
+                                    <div class="stat-card-value" style="font-size: 14px;"><code>${escapeHtml(cronSchedule)}</code></div>
                                 </div>
                             </div>
                         </div>

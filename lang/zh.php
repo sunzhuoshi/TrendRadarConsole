@@ -492,6 +492,7 @@ return [
     'image' => '镜像',
     'created' => '创建时间',
     'started_at' => '启动时间',
+    'cron_schedule' => 'Cron 调度',
     'volume_mounts' => '卷挂载',
     'source' => '源路径',
     'destination' => '目标路径',
