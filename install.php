@@ -66,7 +66,7 @@ $currentLang = getCurrentLanguage();
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>TrendRadarConsole - <?php _e('installation'); ?></title>
+    <title><?php _e('app_name'); ?> - <?php _e('installation'); ?></title>
     <link rel="stylesheet" href="assets/css/style.css">
     <style>
         body {
@@ -136,7 +136,7 @@ $currentLang = getCurrentLanguage();
         </div>
         <?php else: ?>
         <div class="install-header">
-            <h1>🚀 TrendRadarConsole</h1>
+            <h1>🚀 <?php _e('app_name'); ?></h1>
             <p><?php _e('configure_database'); ?></p>
         </div>
         
