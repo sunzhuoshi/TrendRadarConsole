@@ -27,6 +27,7 @@ CREATE TABLE IF NOT EXISTS `docker_workers` (
     `ssh_password` VARCHAR(255) DEFAULT NULL COMMENT 'Docker worker SSH password (encrypted)',
     `workspace_path` VARCHAR(255) DEFAULT '/srv/trendradar' COMMENT 'Docker workspace path on remote server',
     `is_active` TINYINT(1) DEFAULT 1 COMMENT 'Whether this worker is active',
+    `is_public` TINYINT(1) DEFAULT 0 COMMENT 'Whether this worker is public (0=private, 1=public)',
     `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     `updated_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     INDEX `idx_user_id` (`user_id`),

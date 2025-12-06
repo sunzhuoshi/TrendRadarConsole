@@ -24,9 +24,19 @@ if (!is_numeric($userId) || $userId <= 0) {
 }
 $userId = (int)$userId;
 
-// Get Docker SSH settings
+// Get Docker SSH settings using selected worker
 $auth = new Auth();
-$sshSettings = $auth->getDockerSSHSettings($userId);
+$selectedWorker = $auth->getSelectedDockerWorker($userId);
+
+$sshSettings = [
+    'docker_ssh_host' => $selectedWorker['ssh_host'] ?? '',
+    'docker_ssh_port' => $selectedWorker['ssh_port'] ?? 22,
+    'docker_ssh_username' => $selectedWorker['ssh_username'] ?? '',
+    'docker_ssh_password' => $selectedWorker['ssh_password'] ?? '',
+    'docker_workspace_path' => $selectedWorker['workspace_path'] ?? '/srv/trendradar',
+];
+
+$sshConfigured = !empty($sshSettings['docker_ssh_host']) && !empty($sshSettings['docker_ssh_username']);
 
 // Docker settings are calculated based on user ID (not user-configurable)
 // No environment suffix - container name is just trend-radar-{userId}
@@ -141,7 +151,7 @@ try {
     }
     
     // Actions that require SSH connection
-    if (!$auth->isDockerSSHConfigured($userId)) {
+    if (!$sshConfigured) {
         jsonError('SSH connection not configured. Please configure SSH settings first.');
     }
     

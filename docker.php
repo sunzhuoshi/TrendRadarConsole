@@ -36,10 +36,25 @@ try {
 $flash = getFlash();
 $currentPage = 'docker';
 
-// Get Docker SSH settings
+// Get Docker SSH settings using selected worker
 $auth = new Auth();
-$sshSettings = $auth->getDockerSSHSettings($userId);
-$sshConfigured = $auth->isDockerSSHConfigured($userId);
+$isDevMode = $auth->isDevModeEnabled($userId);
+
+// Get available workers and selected worker
+$availableWorkers = $auth->getAvailableDockerWorkers($userId);
+$selectedWorker = $auth->getSelectedDockerWorker($userId);
+
+$sshSettings = [
+    'docker_ssh_host' => $selectedWorker['ssh_host'] ?? '',
+    'docker_ssh_port' => $selectedWorker['ssh_port'] ?? 22,
+    'docker_ssh_username' => $selectedWorker['ssh_username'] ?? '',
+    'docker_ssh_password' => $selectedWorker['ssh_password'] ?? '',
+    'docker_workspace_path' => $selectedWorker['workspace_path'] ?? '/srv/trendradar',
+    'worker_id' => $selectedWorker['id'] ?? null,
+    'worker_name' => $selectedWorker['name'] ?? ''
+];
+
+$sshConfigured = !empty($sshSettings['docker_ssh_host']) && !empty($sshSettings['docker_ssh_username']);
 
 // Docker settings are calculated based on user ID (not user-configurable)
 // No environment suffix - container name is just trend-radar-{userId}
@@ -51,9 +66,6 @@ $dockerImage = 'wantcat/trendradar:latest';
 
 $csrfToken = generateCsrfToken();
 $currentLang = getCurrentLanguage();
-
-// Check if development mode is enabled
-$isDevMode = $auth->isDevModeEnabled($userId);
 ?>
 <!DOCTYPE html>
 <html lang="<?php echo $currentLang; ?>">
@@ -83,6 +95,50 @@ $isDevMode = $auth->isDevModeEnabled($userId);
             <?php if (isset($error)): ?>
             <div class="alert alert-danger"><?php echo sanitize($error); ?></div>
             <?php else: ?>
+            
+            <!-- Docker Worker Selection -->
+            <div class="card">
+                <div class="card-header">
+                    <h3>🖥️ <?php _e('select_docker_worker'); ?></h3>
+                    <?php if ($isDevMode): ?>
+                    <a href="docker-workers.php" class="btn btn-sm btn-outline">⚙️ <?php _e('manage_workers'); ?></a>
+                    <?php endif; ?>
+                </div>
+                <div class="card-body">
+                    <?php if (empty($availableWorkers)): ?>
+                    <div class="alert alert-info">
+                        <?php _e('no_workers_available'); ?>
+                        <?php if ($isDevMode): ?>
+                        <br><a href="docker-workers.php"><?php _e('create_worker_now'); ?></a>
+                        <?php endif; ?>
+                    </div>
+                    <?php else: ?>
+                    <div class="row">
+                        <div class="col-6">
+                            <label class="form-label"><?php _e('docker_worker'); ?></label>
+                            <select id="worker-select" class="form-control" onchange="selectWorker(this.value)">
+                                <?php foreach ($availableWorkers as $worker): ?>
+                                <option value="<?php echo (int)$worker['id']; ?>" 
+                                        <?php echo ($selectedWorker && $selectedWorker['id'] == $worker['id']) ? 'selected' : ''; ?>>
+                                    <?php echo sanitize($worker['name']); ?> 
+                                    (<?php echo sanitize($worker['ssh_host']); ?>)
+                                    <?php if ($worker['is_public'] && $worker['user_id'] != $userId): ?>
+                                    - <?php _e('public'); ?>
+                                    <?php endif; ?>
+                                </option>
+                                <?php endforeach; ?>
+                            </select>
+                        </div>
+                        <div class="col-6 d-flex align-items-end">
+                            <button type="button" class="btn btn-outline" onclick="testSelectedWorker()">
+                                🔗 <?php _e('test_connection'); ?>
+                            </button>
+                        </div>
+                    </div>
+                    <div id="worker-test-status" class="mt-3" style="display: none;"></div>
+                    <?php endif; ?>
+                </div>
+            </div>
             
             <!-- SSH Connection Settings (only available in development mode) -->
             <?php if ($isDevMode): ?>
@@ -327,6 +383,7 @@ sudo ./setup-docker-worker.sh</code></pre>
         let containerRunning = false;
         let sshConfigured = <?php echo $sshConfigured ? 'true' : 'false'; ?>;
         const isDevMode = <?php echo $isDevMode ? 'true' : 'false'; ?>;
+        let selectedWorkerId = <?php echo json_encode($selectedWorker['id'] ?? null); ?>;
         
         // Check container status on page load if SSH is configured
         document.addEventListener('DOMContentLoaded', function() {
@@ -334,6 +391,82 @@ sudo ./setup-docker-worker.sh</code></pre>
                 inspectContainer();
             }
         });
+        
+        // Select a Docker worker
+        async function selectWorker(workerId) {
+            if (!workerId) return;
+            
+            try {
+                await apiRequest('api/docker-workers.php', 'POST', {
+                    action: 'select',
+                    worker_id: workerId
+                });
+                
+                selectedWorkerId = workerId;
+                showToast('<?php _e('worker_selected'); ?>', 'success');
+                
+                // Reload page to update all settings based on new worker
+                setTimeout(() => location.reload(), 500);
+                
+            } catch (error) {
+                showToast('<?php _e('worker_select_failed'); ?>: ' + error.message, 'error');
+            }
+        }
+        
+        // Test selected worker connection
+        async function testSelectedWorker() {
+            const workerSelect = document.getElementById('worker-select');
+            if (!workerSelect) return;
+            
+            const workerId = workerSelect.value;
+            if (!workerId) {
+                showToast('<?php _e('select_worker_first'); ?>', 'error');
+                return;
+            }
+            
+            const statusDiv = document.getElementById('worker-test-status');
+            statusDiv.style.display = 'block';
+            statusDiv.innerHTML = '<div class="alert alert-info"><?php _e('testing_connection'); ?>...</div>';
+            
+            try {
+                const result = await apiRequest('api/docker-workers.php', 'POST', {
+                    action: 'test',
+                    worker_id: workerId
+                });
+                
+                const data = result.data;
+                
+                if (data.ssh_connected && data.docker_available) {
+                    statusDiv.innerHTML = `
+                        <div class="alert alert-success">
+                            ✅ <?php _e('connection_successful'); ?><br>
+                            🐳 Docker: ${escapeHtml(data.docker_version)}
+                        </div>
+                    `;
+                    
+                    // Show container control cards
+                    sshConfigured = true;
+                    document.getElementById('container-control-card').style.display = '';
+                    document.getElementById('container-status-card').style.display = '';
+                    document.getElementById('container-logs-card').style.display = '';
+                    document.getElementById('not-configured-message').style.display = 'none';
+                    inspectContainer();
+                } else if (data.ssh_connected) {
+                    statusDiv.innerHTML = `
+                        <div class="alert alert-warning">
+                            ✅ <?php _e('ssh_connected'); ?><br>
+                            ⚠️ ${escapeHtml(data.message)}
+                        </div>
+                    `;
+                }
+            } catch (error) {
+                statusDiv.innerHTML = `
+                    <div class="alert alert-danger">
+                        ❌ ${escapeHtml(error.message)}
+                    </div>
+                `;
+            }
+        }
         
         // Save SSH settings
         async function saveSSHSettings() {
