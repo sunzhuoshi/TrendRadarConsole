@@ -165,7 +165,7 @@ TrendRadarConsole now supports local Docker deployment as an alternative to GitH
 - **Real-time monitoring**: View container status and logs
 
 **Technical Details**:
-- Container name: `trend-radar-{userId}`
+- Container name: `trendradar{userId}`
 - Config path: `/srv/trendradar/{userId}/config`
 - Output path: `/srv/trendradar/{userId}/output`
 - Docker image: `wantcat/trendradar:latest`
