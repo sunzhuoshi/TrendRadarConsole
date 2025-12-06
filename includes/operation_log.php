@@ -29,8 +29,10 @@ class OperationLog
     const ACTION_WEBHOOK_DELETE = 'webhook_delete';
     const ACTION_SETTING_UPDATE = 'setting_update';
     const ACTION_SETTINGS_SAVE = 'settings_save';
+    const ACTION_USER_REGISTER = 'user_register';
     
     // Target type constants
+    const TARGET_USER = 'user';
     const TARGET_CONFIGURATION = 'configuration';
     const TARGET_PLATFORM = 'platform';
     const TARGET_KEYWORD = 'keyword';

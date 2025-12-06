@@ -20,6 +20,7 @@ $userId = Auth::getUserId();
 try {
     $config = new Configuration($userId);
     $activeConfig = $config->getActive();
+    $configurations = $config->getAll();
     
     // Check if GitHub is configured
     $auth = new Auth();
@@ -28,7 +29,7 @@ try {
                         !empty($githubSettings['github_repo']) && 
                         !empty($githubSettings['github_token']);
     
-    if (!$githubConfigured) {
+    if (!$githubConfigured && empty($configurations)) {
         header('Location: github-deployment.php');
         exit;
     }
