@@ -542,3 +542,13 @@ class Auth
         return false;
     }
 }
+
+/**
+ * Require user to be logged in, or redirect to login page.
+ */
+function requireLogin() {
+    if (!isset($_SESSION['user_id'])) {
+        header('Location: login.php');
+        exit();
+    }
+}
