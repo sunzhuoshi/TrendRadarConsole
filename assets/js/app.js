@@ -374,37 +374,6 @@ const webhookManager = {
     }
 };
 
-// Export configuration
-async function exportConfig(configId, format = 'yaml') {
-    try {
-        const response = await fetch(`api/export.php?config_id=${configId}&format=${format}`);
-        const data = await response.text();
-        
-        if (format === 'yaml') {
-            // Download as file
-            const blob = new Blob([data], { type: 'text/yaml' });
-            const url = URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.href = url;
-            a.download = 'config.yaml';
-            a.click();
-            URL.revokeObjectURL(url);
-        } else if (format === 'keywords') {
-            const blob = new Blob([data], { type: 'text/plain' });
-            const url = URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.href = url;
-            a.download = 'frequency_words.txt';
-            a.click();
-            URL.revokeObjectURL(url);
-        }
-        
-        showToast('Configuration exported', 'success');
-    } catch (error) {
-        showToast('Failed to export: ' + error.message, 'error');
-    }
-}
-
 // Initialize on DOM ready
 document.addEventListener('DOMContentLoaded', function() {
     initTabs();
