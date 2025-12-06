@@ -67,7 +67,7 @@ $csrfToken = generateCsrfToken();
             <div class="alert alert-danger">
                 <?php echo sanitize($error); ?>
             </div>
-            <?php elseif (!$githubConfigured): ?>
+            <?php elseif (!$githubConfigured && empty($configurations)): ?>
             
             <!-- GitHub Setup Required -->
             <div class="card" style="border-left: 4px solid #667eea;">
