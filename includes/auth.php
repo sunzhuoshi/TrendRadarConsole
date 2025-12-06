@@ -112,7 +112,7 @@ class Auth
             ['keyword' => '技术', 'type' => 'required', 'group' => 0, 'order' => 3],
             ['keyword' => '培训', 'type' => 'filter', 'group' => 0, 'order' => 4],
             ['keyword' => '广告', 'type' => 'filter', 'group' => 0, 'order' => 5],
-            ['keyword' => '15', 'type' => 'limit', 'group' => 0, 'order' => 6, 'limit' => 15],
+            ['keyword' => '', 'type' => 'limit', 'group' => 0, 'order' => 6, 'limit' => 15],
             // Group 1: Tech Companies & Products
             ['keyword' => '苹果', 'type' => 'normal', 'group' => 1, 'order' => 0],
             ['keyword' => '华为', 'type' => 'normal', 'group' => 1, 'order' => 1],
