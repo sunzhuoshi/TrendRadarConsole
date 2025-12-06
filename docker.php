@@ -211,19 +211,19 @@ $currentLang = getCurrentLanguage();
                     
                     <!-- Environment Variables for new container -->
                     <div id="env-vars-section" class="mt-4" style="display: none;">
-                        <h4><?php _e('environment_variables'); ?> <small class="text-muted">(<?php _e('optional'); ?>)</small></h4>
+                        <h4><?php _e('environment_variables'); ?></h4>
                         
                         <div class="row">
                             <div class="col-4">
                                 <div class="form-group">
-                                    <label class="form-label"><small>CRON_SCHEDULE</small></label>
+                                    <label class="form-label"><small><?php _e('cron_schedule_label'); ?></small></label>
                                     <input type="text" id="env-cron" class="form-control env-var" value="*/30 * * * *" placeholder="*/30 * * * *">
                                     <div class="form-text"><?php _e('cron_schedule_desc'); ?></div>
                                 </div>
                             </div>
                             <div class="col-4">
                                 <div class="form-group">
-                                    <label class="form-label"><small>RUN_MODE</small></label>
+                                    <label class="form-label"><small><?php _e('run_mode_label'); ?></small></label>
                                     <select id="env-run-mode" class="form-control env-var">
                                         <option value="cron"><?php _e('cron_mode'); ?></option>
                                         <option value="once"><?php _e('once_mode'); ?></option>
@@ -232,7 +232,7 @@ $currentLang = getCurrentLanguage();
                             </div>
                             <div class="col-4">
                                 <div class="form-group">
-                                    <label class="form-label"><small>IMMEDIATE_RUN</small></label>
+                                    <label class="form-label"><small><?php _e('immediate_run_label'); ?></small></label>
                                     <select id="env-immediate-run" class="form-control env-var">
                                         <option value="true"><?php _e('yes'); ?></option>
                                         <option value="false"><?php _e('no'); ?></option>
