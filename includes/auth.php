@@ -4,6 +4,7 @@
  */
 
 require_once __DIR__ . '/database.php';
+require_once __DIR__ . '/operation_log.php';
 
 class Auth
 {
@@ -103,7 +104,6 @@ class Auth
         }
         
         // Log the user registration and default configuration creation
-        require_once __DIR__ . '/operation_log.php';
         $opLog = new OperationLog($userId);
         $opLog->log(
             OperationLog::ACTION_USER_REGISTER,
