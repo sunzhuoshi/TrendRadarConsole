@@ -60,8 +60,11 @@ $sshConfigured = !empty($sshSettings['docker_ssh_host']) && !empty($sshSettings[
 // No environment suffix - container name is just trend-radar-{userId}
 $containerName = 'trend-radar-' . $userId;
 $workspacePath = $sshSettings['docker_workspace_path'] ?: '/srv/trendradar';
-$configPath = $workspacePath . '/' . $userId . '/config';
-$outputPath = $workspacePath . '/' . $userId . '/output';
+// Add 'user-' prefix and '-dev' suffix based on advanced mode
+$envSuffix = $isAdvancedMode ? '-dev' : '';
+$userFolder = 'user-' . $userId . $envSuffix;
+$configPath = $workspacePath . '/' . $userFolder . '/config';
+$outputPath = $workspacePath . '/' . $userFolder . '/output';
 $dockerImage = 'wantcat/trendradar:latest';
 
 $csrfToken = generateCsrfToken();
@@ -399,10 +402,12 @@ $currentLang = getCurrentLanguage();
         function updateDisplayPaths(workspacePath) {
             if (!isAdvancedMode) return; // Skip if not in advanced mode
             const userId = <?php echo json_encode($userId); ?>;
+            const envSuffix = isAdvancedMode ? '-dev' : '';
+            const userFolder = 'user-' + userId + envSuffix;
             const configPathEl = document.getElementById('config-path-display');
             const outputPathEl = document.getElementById('output-path-display');
-            if (configPathEl) configPathEl.value = workspacePath + '/' + userId + '/config';
-            if (outputPathEl) outputPathEl.value = workspacePath + '/' + userId + '/output';
+            if (configPathEl) configPathEl.value = workspacePath + '/' + userFolder + '/config';
+            if (outputPathEl) outputPathEl.value = workspacePath + '/' + userFolder + '/output';
         }
         
         // Update button states based on container status

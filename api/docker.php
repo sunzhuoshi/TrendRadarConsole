@@ -42,8 +42,12 @@ $sshConfigured = !empty($sshSettings['docker_ssh_host']) && !empty($sshSettings[
 // No environment suffix - container name is just trend-radar-{userId}
 $containerName = 'trend-radar-' . $userId;
 $workspacePath = $sshSettings['docker_workspace_path'] ?: '/srv/trendradar';
-$configPath = $workspacePath . '/' . $userId . '/config';
-$outputPath = $workspacePath . '/' . $userId . '/output';
+// Add 'user-' prefix and '-dev' suffix based on advanced mode
+$isAdvancedMode = $auth->isAdvancedModeEnabled($userId);
+$envSuffix = $isAdvancedMode ? '-dev' : '';
+$userFolder = 'user-' . $userId . $envSuffix;
+$configPath = $workspacePath . '/' . $userFolder . '/config';
+$outputPath = $workspacePath . '/' . $userFolder . '/output';
 $dockerImage = 'wantcat/trendradar:latest';
 
 try {
