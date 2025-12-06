@@ -578,7 +578,8 @@ $currentLang = getCurrentLanguage();
                     if (data.env && Array.isArray(data.env)) {
                         const cronEnv = data.env.find(e => e.startsWith('CRON_SCHEDULE='));
                         if (cronEnv) {
-                            cronSchedule = cronEnv.substring('CRON_SCHEDULE='.length);
+                            const value = cronEnv.substring('CRON_SCHEDULE='.length);
+                            cronSchedule = value || '-'; // Show '-' if value is empty
                         }
                     }
                     
