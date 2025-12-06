@@ -62,7 +62,7 @@ $workspacePath = $sshSettings['docker_workspace_path'] ?: '/srv/trendradar';
 // Add 'user-' prefix and '-dev' suffix based on deployment environment
 $deploymentEnv = getDeploymentEnvironment();
 $envSuffix = $deploymentEnv === 'development' ? '-dev' : '';
-$containerName = 'trendradar' . $userId . $envSuffix;
+$containerName = 'trendradar-' . $userId . $envSuffix;
 $userFolder = 'user-' . $userId . $envSuffix;
 $configPath = $workspacePath . '/' . $userFolder . '/config';
 $outputPath = $workspacePath . '/' . $userFolder . '/output';
