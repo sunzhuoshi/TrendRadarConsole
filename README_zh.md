@@ -162,7 +162,7 @@ TrendRadarConsole 现在支持本地 Docker 部署，作为 GitHub Actions 的�
 - **实时监控**：查看容器状态和日志
 
 **技术细节**：
-- 容器名称：`trend-radar-{userId}`
+- 容器名称：`trendradar-{userId}`
 - 配置路径：`/srv/trendradar/{userId}/config`
 - 输出路径：`/srv/trendradar/{userId}/output`
 - Docker 镜像：`wantcat/trendradar:latest`
