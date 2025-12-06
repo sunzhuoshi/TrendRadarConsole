@@ -211,8 +211,6 @@ $currentLang = getCurrentLanguage();
                     
                     <!-- Environment Variables for new container -->
                     <div id="env-vars-section" class="mt-4" style="display: none;">
-                        <h4><?php _e('environment_variables'); ?></h4>
-                        
                         <div class="row">
                             <div class="col-4">
                                 <div class="form-group">
