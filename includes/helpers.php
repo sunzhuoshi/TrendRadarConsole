@@ -398,3 +398,30 @@ function getStepClass($currentStep, $targetStep) {
 function jsonEncodeForJs($data) {
     return json_encode($data, JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT);
 }
+
+/**
+ * Get deployment environment from version.php
+ * Returns 'development' or 'production' based on CD workflow deployment
+ * Defaults to 'production' if version.php doesn't exist or doesn't specify environment
+ *
+ * @return string The deployment environment ('development' or 'production')
+ */
+function getDeploymentEnvironment() {
+    $versionFile = __DIR__ . '/../version.php';
+    
+    if (!file_exists($versionFile)) {
+        return 'production'; // Default to production if file doesn't exist
+    }
+    
+    try {
+        $versionData = require $versionFile;
+        if (is_array($versionData) && isset($versionData['environment'])) {
+            return $versionData['environment'] === 'development' ? 'development' : 'production';
+        }
+    } catch (Exception $e) {
+        // If there's any error reading the file, default to production
+        error_log('Failed to read environment from version.php: ' . $e->getMessage());
+    }
+    
+    return 'production'; // Default to production
+}

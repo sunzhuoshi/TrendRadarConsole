@@ -8,4 +8,5 @@
 
 return [
     'updated_at' => '2025-12-01T02:35:51+00:00',
+    'environment' => 'production',
 ];
