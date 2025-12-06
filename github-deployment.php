@@ -518,29 +518,29 @@ $csrfToken = generateCsrfToken();
         // GitHub settings form submission
         const githubSettingsForm = document.getElementById('github-settings-form');
         if (githubSettingsForm) {
-        githubSettingsForm.addEventListener('submit', async function(e) {
-            e.preventDefault();
-            
-            const submitBtn = this.querySelector('button[type="submit"]');
-            const owner = document.querySelector('input[name="github_owner"]').value;
-            const repo = document.querySelector('input[name="github_repo"]').value;
-            const token = document.querySelector('input[name="github_token"]').value;
-            
-            setButtonLoading(submitBtn, true);
-            try {
-                await apiRequest('api/github.php', 'POST', {
-                    action: 'save_settings',
-                    owner: owner,
-                    repo: repo,
-                    token: token
-                });
-                showToast(__('github_settings_saved'), 'success');
-            } catch (error) {
-                showToast(__('failed_to_save') + ': ' + error.message, 'error');
-            } finally {
-                setButtonLoading(submitBtn, false);
-            }
-        });
+            githubSettingsForm.addEventListener('submit', async function(e) {
+                e.preventDefault();
+                
+                const submitBtn = this.querySelector('button[type="submit"]');
+                const owner = document.querySelector('input[name="github_owner"]').value;
+                const repo = document.querySelector('input[name="github_repo"]').value;
+                const token = document.querySelector('input[name="github_token"]').value;
+                
+                setButtonLoading(submitBtn, true);
+                try {
+                    await apiRequest('api/github.php', 'POST', {
+                        action: 'save_settings',
+                        owner: owner,
+                        repo: repo,
+                        token: token
+                    });
+                    showToast(__('github_settings_saved'), 'success');
+                } catch (error) {
+                    showToast(__('failed_to_save') + ': ' + error.message, 'error');
+                } finally {
+                    setButtonLoading(submitBtn, false);
+                }
+            });
         }
         
         // Test GitHub connection
