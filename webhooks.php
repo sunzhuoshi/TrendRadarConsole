@@ -76,7 +76,7 @@ $webhookGroups = [
                 'homepage' => 'ntfy.sh',
                 'fields' => [
                     ['name' => 'webhook_url', 'label' => __('topic_name'), 'type' => 'text', 'required' => true, 'placeholder' => 'TrendRadar'],
-                    ['name' => 'server_url', 'label' => __('server_url'), 'type' => 'url', 'placeholder' => 'ntfy.sh (default)'],
+                    ['name' => 'server_url', 'label' => __('server_url'), 'type' => 'text', 'placeholder' => 'ntfy.sh (default)'],
                     ['name' => 'token', 'label' => __('access_token'), 'type' => 'password'],
                 ]
             ],
