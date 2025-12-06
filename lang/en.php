@@ -571,6 +571,8 @@ return [
     'confirm_delete_worker' => 'Are you sure you want to delete this Docker worker? This cannot be undone.',
     'test' => 'Test',
     'back_to_docker' => 'Back to Docker Deployment',
+    'setup_worker_hint' => 'First, run this script on the Docker worker server:',
+    'setup_worker_instructions' => 'This creates the trendradarsrv user account with Docker access and workspace directory.',
     
     // Docker Worker Selection
     'select_docker_worker' => 'Select Docker Worker',

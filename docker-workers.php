@@ -124,6 +124,15 @@ $currentLang = getCurrentLanguage();
                             </div>
                         </div>
                     </form>
+                    
+                    <!-- Setup Script Prompt -->
+                    <div class="setup-prompt mt-4" style="background-color: #2d3748; border-radius: 8px; padding: 15px;">
+                        <p style="color: #e2e8f0; margin-bottom: 10px;"><strong>💡 <?php _e('setup_worker_hint'); ?></strong></p>
+                        <p style="color: #94a3b8; font-size: 14px; margin-bottom: 10px;"><?php _e('setup_worker_instructions'); ?></p>
+                        <pre style="background-color: #1a202c; color: #68d391; padding: 12px; border-radius: 6px; font-family: 'Consolas', 'Monaco', monospace; font-size: 13px; overflow-x: auto; margin: 0;"><code>curl -O https://trendingnews.cn/scripts/setup-docker-worker.sh
+chmod +x setup-docker-worker.sh
+sudo ./setup-docker-worker.sh</code></pre>
+                    </div>
                 </div>
             </div>
             

@@ -571,6 +571,8 @@ return [
     'confirm_delete_worker' => '确定要删除此 Docker 工作机吗？此操作不可撤销。',
     'test' => '测试',
     'back_to_docker' => '返回 Docker 部署',
+    'setup_worker_hint' => '首先，在 Docker 工作机服务器上运行此脚本：',
+    'setup_worker_instructions' => '这将创建具有 Docker 访问权限和工作区目录的 trendradarsrv 用户帐户。',
     
     // Docker Worker Selection
     'select_docker_worker' => '选择 Docker 工作机',
