@@ -492,6 +492,7 @@ return [
     'image' => 'Image',
     'created' => 'Created',
     'started_at' => 'Started At',
+    'cron_schedule' => 'Cron Schedule',
     'volume_mounts' => 'Volume Mounts',
     'source' => 'Source',
     'destination' => 'Destination',
