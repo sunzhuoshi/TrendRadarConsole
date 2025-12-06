@@ -29,10 +29,11 @@ try {
     $config = new Configuration($userId);
     $configurations = $config->getAll();
 
-if (!$githubConfigured && empty($configurations)) {
-    header('Location: github-deployment.php');
-    exit;
-}
+    if (!$githubConfigured && empty($configurations)) {
+        header('Location: github-deployment.php');
+        exit;
+    }
+    
     $opLog = new OperationLog($userId);
     
     // Handle form submission
