@@ -38,7 +38,7 @@ $currentPage = 'docker';
 
 // Get Docker SSH settings using selected worker
 $auth = new Auth();
-$isDevMode = $auth->isDevModeEnabled($userId);
+$isAdvancedMode = $auth->isAdvancedModeEnabled($userId);
 
 // Get available workers and selected worker
 $availableWorkers = $auth->getAvailableDockerWorkers($userId);
@@ -100,7 +100,7 @@ $currentLang = getCurrentLanguage();
             <div class="card">
                 <div class="card-header">
                     <h3>🖥️ <?php _e('select_docker_worker'); ?></h3>
-                    <?php if ($isDevMode): ?>
+                    <?php if ($isAdvancedMode): ?>
                     <a href="docker-workers.php" class="btn btn-sm btn-outline">⚙️ <?php _e('manage_workers'); ?></a>
                     <?php endif; ?>
                 </div>
@@ -108,7 +108,7 @@ $currentLang = getCurrentLanguage();
                     <?php if (empty($availableWorkers)): ?>
                     <div class="alert alert-info">
                         <?php _e('no_workers_available'); ?>
-                        <?php if ($isDevMode): ?>
+                        <?php if ($isAdvancedMode): ?>
                         <br><a href="docker-workers.php"><?php _e('create_worker_now'); ?></a>
                         <?php endif; ?>
                     </div>
@@ -140,8 +140,8 @@ $currentLang = getCurrentLanguage();
                 </div>
             </div>
             
-            <!-- Docker Settings (Auto-calculated) - Only visible in development mode -->
-            <?php if ($isDevMode): ?>
+            <!-- Docker Settings (Auto-calculated) - Only visible in advanced mode -->
+            <?php if ($isAdvancedMode): ?>
             <div class="card">
                 <div class="card-header">
                     <h3>⚙️ <?php _e('docker_settings'); ?></h3>
@@ -309,7 +309,7 @@ $currentLang = getCurrentLanguage();
         let containerExists = false;
         let containerRunning = false;
         let sshConfigured = <?php echo $sshConfigured ? 'true' : 'false'; ?>;
-        const isDevMode = <?php echo $isDevMode ? 'true' : 'false'; ?>;
+        const isAdvancedMode = <?php echo $isAdvancedMode ? 'true' : 'false'; ?>;
         let selectedWorkerId = <?php echo json_encode($selectedWorker['id'] ?? null); ?>;
         
         // Check container status on page load if SSH is configured
@@ -395,9 +395,9 @@ $currentLang = getCurrentLanguage();
             }
         }
         
-        // Update display paths (only in dev mode when elements exist)
+        // Update display paths (only in advanced mode when elements exist)
         function updateDisplayPaths(workspacePath) {
-            if (!isDevMode) return; // Skip if not in dev mode
+            if (!isAdvancedMode) return; // Skip if not in advanced mode
             const userId = <?php echo json_encode($userId); ?>;
             const configPathEl = document.getElementById('config-path-display');
             const outputPathEl = document.getElementById('output-path-display');
@@ -600,7 +600,7 @@ $currentLang = getCurrentLanguage();
                                 </div>
                             </div>
                         </div>
-                        ${isDevMode && data.mounts.length > 0 ? `
+                        ${isAdvancedMode && data.mounts.length > 0 ? `
                         <div class="mt-3">
                             <h4><?php _e('volume_mounts'); ?></h4>
                             <table class="table">

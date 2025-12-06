@@ -965,8 +965,8 @@ pre {
 }
 
 
-/* Development Mode Badge */
-.dev-mode-badge {
+/* Advanced Mode Badge */
+.advanced-mode-badge {
     background: #ff9800;
     color: #000;
     font-size: 0.65rem;

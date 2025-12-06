@@ -93,6 +93,22 @@ function verifyMigration($pdo, $migrationName) {
             }
             
             return ['success' => true, 'message' => 'All verifications passed'];
+        },
+        '005_rename_dev_mode_to_advanced_mode.sql' => function($pdo) {
+            // Verify advanced_mode column exists in users table
+            $stmt = $pdo->query("DESCRIBE users");
+            $columns = $stmt->fetchAll(PDO::FETCH_COLUMN);
+            
+            if (!in_array('advanced_mode', $columns)) {
+                return ['success' => false, 'message' => 'Column advanced_mode does not exist in users table'];
+            }
+            
+            // Verify dev_mode column no longer exists
+            if (in_array('dev_mode', $columns)) {
+                return ['success' => false, 'message' => 'Column dev_mode still exists in users table'];
+            }
+            
+            return ['success' => true, 'message' => 'All verifications passed'];
         }
     ];
     

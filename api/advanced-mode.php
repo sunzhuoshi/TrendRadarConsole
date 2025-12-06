@@ -1,6 +1,6 @@
 <?php
 /**
- * TrendRadarConsole - Development Mode API
+ * TrendRadarConsole - Advanced Mode API
  */
 
 session_start();
@@ -30,21 +30,21 @@ try {
     switch ($method) {
         case 'GET':
             $auth = new Auth();
-            $devModeEnabled = $auth->isDevModeEnabled($userId);
-            jsonSuccess(['dev_mode' => $devModeEnabled]);
+            $advancedModeEnabled = $auth->isAdvancedModeEnabled($userId);
+            jsonSuccess(['advanced_mode' => $advancedModeEnabled]);
             break;
             
         case 'POST':
-            if (!isset($input['dev_mode'])) {
-                jsonError('dev_mode parameter is required');
+            if (!isset($input['advanced_mode'])) {
+                jsonError('advanced_mode parameter is required');
             }
             
-            $devMode = filter_var($input['dev_mode'], FILTER_VALIDATE_BOOLEAN);
+            $advancedMode = filter_var($input['advanced_mode'], FILTER_VALIDATE_BOOLEAN);
             
             $auth = new Auth();
-            $auth->setDevMode($userId, $devMode);
+            $auth->setAdvancedMode($userId, $advancedMode);
             
-            jsonSuccess(['dev_mode' => $devMode], 'Development mode ' . ($devMode ? 'enabled' : 'disabled'));
+            jsonSuccess(['advanced_mode' => $advancedMode], 'Advanced mode ' . ($advancedMode ? 'enabled' : 'disabled'));
             break;
             
         default:
@@ -53,3 +53,4 @@ try {
 } catch (Exception $e) {
     jsonError($e->getMessage(), 500);
 }
+

@@ -254,38 +254,38 @@ class Auth
     }
     
     /**
-     * Check if development mode is enabled for user
+     * Check if advanced mode is enabled for user
      */
-    public function isDevModeEnabled($userId)
+    public function isAdvancedModeEnabled($userId)
     {
         $user = $this->db->fetchOne(
-            'SELECT dev_mode FROM users WHERE id = ?',
+            'SELECT advanced_mode FROM users WHERE id = ?',
             [$userId]
         );
         
-        return $user && (int)$user['dev_mode'] === 1;
+        return $user && (int)$user['advanced_mode'] === 1;
     }
     
     /**
-     * Set development mode for user
+     * Set advanced mode for user
      */
-    public function setDevMode($userId, $enabled)
+    public function setAdvancedMode($userId, $enabled)
     {
         return $this->db->update(
             'users',
-            ['dev_mode' => $enabled ? 1 : 0],
+            ['advanced_mode' => $enabled ? 1 : 0],
             'id = ?',
             [$userId]
         );
     }
     
     /**
-     * Get development mode status for user
+     * Get advanced mode status for user
      * Static method for convenience with caching
      */
-    public static function checkDevMode()
+    public static function checkAdvancedMode()
     {
-        static $devModeCache = null;
+        static $advancedModeCache = null;
         static $cachedUserId = null;
         
         $userId = self::getUserId();
@@ -294,15 +294,15 @@ class Auth
         }
         
         // Return cached result if available for the same user
-        if ($devModeCache !== null && $cachedUserId === $userId) {
-            return $devModeCache;
+        if ($advancedModeCache !== null && $cachedUserId === $userId) {
+            return $advancedModeCache;
         }
         
         $auth = new self();
-        $devModeCache = $auth->isDevModeEnabled($userId);
+        $advancedModeCache = $auth->isAdvancedModeEnabled($userId);
         $cachedUserId = $userId;
         
-        return $devModeCache;
+        return $advancedModeCache;
     }
     
     /**
@@ -541,12 +541,4 @@ class Auth
         }
         return false;
     }
-}
-
-/**
- * Helper function to require login
- */
-function requireLogin()
-{
-    Auth::requireLogin();
 }
