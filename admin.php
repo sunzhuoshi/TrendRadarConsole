@@ -316,12 +316,19 @@ $currentLang = getCurrentLanguage();
                     user_id: userId
                 })
             })
-            .then(response => response.json())
-            .then(data => {
-                if (data.success) {
+            .then(response => {
+                return response.json().then(data => ({
+                    ok: response.ok,
+                    status: response.status,
+                    data: data
+                }));
+            })
+            .then(({ok, status, data}) => {
+                if (ok && data.success) {
                     showFlash('success', '<?php _e('admin_granted'); ?>');
                     setTimeout(() => location.reload(), 1000);
                 } else {
+                    console.error('Grant admin failed:', status, data);
                     showFlash('error', data.message || '<?php _e('admin_grant_failed'); ?>');
                 }
             })
@@ -347,12 +354,19 @@ $currentLang = getCurrentLanguage();
                     user_id: userId
                 })
             })
-            .then(response => response.json())
-            .then(data => {
-                if (data.success) {
+            .then(response => {
+                return response.json().then(data => ({
+                    ok: response.ok,
+                    status: response.status,
+                    data: data
+                }));
+            })
+            .then(({ok, status, data}) => {
+                if (ok && data.success) {
                     showFlash('success', '<?php _e('admin_revoked'); ?>');
                     setTimeout(() => location.reload(), 1000);
                 } else {
+                    console.error('Revoke admin failed:', status, data);
                     showFlash('error', data.message || '<?php _e('admin_revoke_failed'); ?>');
                 }
             })
@@ -375,11 +389,19 @@ $currentLang = getCurrentLanguage();
                     enabled: enabled
                 })
             })
-            .then(response => response.json())
-            .then(data => {
-                if (data.success) {
+            .then(response => {
+                // Parse JSON regardless of status code
+                return response.json().then(data => ({
+                    ok: response.ok,
+                    status: response.status,
+                    data: data
+                }));
+            })
+            .then(({ok, status, data}) => {
+                if (ok && data.success) {
                     showFlash('success', '<?php _e('feature_toggled'); ?>');
                 } else {
+                    console.error('Toggle failed:', status, data);
                     showFlash('error', data.message || '<?php _e('feature_toggle_failed'); ?>');
                     // Reload to reset toggle state
                     setTimeout(() => location.reload(), 1000);
