@@ -16,4 +16,6 @@ CREATE TABLE IF NOT EXISTS `feature_toggles` (
 INSERT INTO `feature_toggles` (`feature_key`, `is_enabled`, `description`) VALUES
     ('github_deployment', 1, 'GitHub deployment functionality'),
     ('docker_deployment', 1, 'Docker deployment functionality'),
-    ('advanced_mode', 1, 'Advanced mode features');
+    ('advanced_mode', 1, 'Advanced mode features')
+ON DUPLICATE KEY UPDATE `feature_key`=`feature_key`;
+

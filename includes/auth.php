@@ -719,8 +719,13 @@ class Auth
             [$featureKey]
         );
         
-        // If feature not found, default to enabled
-        return !$feature || (int)$feature['is_enabled'] === 1;
+        // If feature not found in database, default to disabled for security
+        // (deny by default principle)
+        if (!$feature) {
+            return false;
+        }
+        
+        return (int)$feature['is_enabled'] === 1;
     }
     
     /**

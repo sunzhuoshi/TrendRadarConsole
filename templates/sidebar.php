@@ -7,14 +7,14 @@ require_once __DIR__ . '/../includes/helpers.php';
 $currentUsername = Auth::getUsername();
 $currentLang = getCurrentLanguage();
 $lastUpdated = getLastUpdatedTime();
-$isAdvancedMode = Auth::checkAdvancedMode();
+$isAdvancedMode = Auth::checkAdvancedMode(); // User's personal advanced mode preference
 $isAdmin = Auth::checkIsAdmin();
 
-// Get feature toggle status
+// Get feature toggle status (global admin-controlled feature availability)
 $auth = new Auth();
-$dockerEnabled = $auth->isFeatureEnabled('docker_deployment');
-$githubEnabled = $auth->isFeatureEnabled('github_deployment');
-$advancedModeEnabled = $auth->isFeatureEnabled('advanced_mode');
+$dockerFeatureEnabled = $auth->isFeatureEnabled('docker_deployment');
+$githubFeatureEnabled = $auth->isFeatureEnabled('github_deployment');
+$advancedModeFeatureEnabled = $auth->isFeatureEnabled('advanced_mode');
 ?>
 <button class="mobile-menu-toggle" onclick="toggleSidebar()">☰</button>
 <aside class="sidebar">
@@ -48,17 +48,17 @@ $advancedModeEnabled = $auth->isFeatureEnabled('advanced_mode');
         <a href="settings.php" class="nav-item <?php echo ($currentPage ?? '') === 'settings' ? 'active' : ''; ?>">
             ⚙️ <?php _e('settings'); ?>
         </a>
-        <?php if ($dockerEnabled): ?>
+        <?php if ($dockerFeatureEnabled): ?>
         <a href="docker.php" class="nav-item <?php echo ($currentPage ?? '') === 'docker' ? 'active' : ''; ?>">
             🐳 <?php _e('docker_deployment'); ?>
         </a>
         <?php endif; ?>
-        <?php if ($isAdvancedMode && $advancedModeEnabled): ?>
+        <?php if ($isAdvancedMode && $advancedModeFeatureEnabled): ?>
         <a href="docker-workers.php" class="nav-item <?php echo ($currentPage ?? '') === 'docker-workers' ? 'active' : ''; ?>">
             🖥️ <?php _e('docker_workers'); ?>
         </a>
         <?php endif; ?>
-        <?php if ($githubEnabled): ?>
+        <?php if ($githubFeatureEnabled): ?>
         <a href="github-deployment.php" class="nav-item <?php echo ($currentPage ?? '') === 'github-deployment' ? 'active' : ''; ?>">
             🐙 <?php _e('github_deployment'); ?>
         </a>
