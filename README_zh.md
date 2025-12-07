@@ -12,6 +12,10 @@
 - **用户独立 GitHub 设置**：每个用户可以配置自己的 GitHub 仓库（所有者/仓库名/PAT）
 
 ### 配置管理
+- **默认配置**：注册时自动创建，包含：
+  - 11个预配置的热门中文平台（今日头条、百度、微博、知乎、Bilibili等）
+  - "技术与AI监控"默认关键词（2个关键词组，共12个关键词）
+  - 默认报告设置（增量模式、排名阈值、权重配置）
 - **平台管理**：配置要监控的平台（微博、知乎、头条等）
 - **关键词配置**：设置关键词及过滤器、必选词和限制条件
 - **通知 Webhooks**：配置多个通知渠道（企业微信、飞书、钉钉、Telegram、邮箱、ntfy、Bark、Slack）
@@ -20,6 +24,11 @@
 ### 配置同步
 - **GitHub 同步**：直接加载和保存 `CONFIG_YAML` 和 `FREQUENCY_WORDS` 到您的 GitHub 仓库变量
 - **Docker 部署**：部署容器时自动生成 `config.yaml` 和 `frequency_words.txt`
+
+### 附加功能
+- **高级模式**：启用 Docker 工作机管理和其他高级功能
+- **操作日志**：跟踪所有配置更改的详细审计日志
+- **多语言支持**：在中英文界面之间切换
 
 ### 移动端支持
 - **响应式设计**：支持移动浏览器，带有汉堡菜单导航
@@ -89,26 +98,33 @@ CREATE DATABASE trendradar_console CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode
 ### 5. 注册和登录
 
 1. 访问 `http://your-domain.com/register.php` 创建您的账户
-2. 注册后，您将自动登录
-3. 每个用户都有自己独立的配置空间
+2. 注册后，您将自动登录并跳转到仪表盘
+3. **系统会自动创建默认配置**，包含：
+   - 11个预配置的热门中文平台（今日头条、百度、微博、知乎、Bilibili等）
+   - 2个关键词组，共12个"技术与AI监控"默认关键词（包括AI、ChatGPT等）
+   - 默认报告设置（增量模式、排名阈值：5、权重配置）
+   - 基本通知和爬虫设置
+4. 每个用户都有自己独立的配置空间
 
 ### 6. 开始使用
 
 登录后，您可以：
-1. 在 **GitHub 同步** 中设置您的 GitHub 仓库
-2. 管理平台
-3. 配置关键词
-4. 设置通知 webhooks
-5. 调整报告设置
-6. 将配置同步到 GitHub
+1. 在 **GitHub 部署** 中设置您的 GitHub 仓库
+2. 在 **平台** 中管理平台
+3. 在 **关键词** 中配置关键词
+4. 在 **通知** 中设置 webhooks
+5. 在 **设置** 中调整报告设置
+6. 在 **Docker 部署** 中通过 Docker 部署，或同步到 GitHub
+7. 在 **设置** 中启用 **高级模式** 以管理 Docker 工作机
+8. 在 **操作日志** 中查看操作历史
 
 ## 与 TrendRadar 配合使用
 
-### GitHub 同步（推荐）
+### GitHub 部署（推荐）
 
 TrendRadarConsole 可以直接将配置同步到您的 GitHub 仓库。每个用户存储自己的 GitHub 设置：
 
-1. 在侧边栏中导航至 **GitHub 同步**
+1. 在侧边栏中导航至 **GitHub 部署**
 2. 输入您的 GitHub 仓库详情（所有者/仓库名）
 3. 创建一个具有 **Variables: Read and write** 权限的 **Fine-grained Personal Access Token**
 4. 点击 **保存设置** 来存储您的 GitHub 凭据
@@ -121,7 +137,7 @@ TrendRadarConsole 可以直接将配置同步到您的 GitHub 仓库。每个用
 
 或者，您可以手动复制配置：
 
-1. 在 TrendRadarConsole 中使用 **GitHub 同步** 加载您的配置（这将显示生成的 `config.yaml` 和 `frequency_words.txt` 内容）
+1. 在 TrendRadarConsole 中使用 **GitHub 部署** 加载您的配置（这将显示生成的 `config.yaml` 和 `frequency_words.txt` 内容）
 2. 前往您的 TrendRadar fork 的 **Settings → Secrets and variables → Actions**
 3. 点击 **Variables** 标签
 4. 创建两个仓库变量：
@@ -157,14 +173,14 @@ TrendRadarConsole 现在支持本地 Docker 部署，作为 GitHub Actions 的�
 
 **功能特性**：
 - **自动生成配置**：运行/重启容器时，配置文件会根据当前设置自动创建
-- **隔离的工作空间**：每个用户拥有自己的容器和工作空间
+- **隔离的工作空间**：每个用户拥有自己的容器和工作空间（在高级模式下带有可选的 `-dev` 后缀）
 - **简单控制**：一键运行、启动、停止、重启或删除容器
 - **实时监控**：查看容器状态和日志
 
 **技术细节**：
 - 容器名称：`trendradar-{userId}`
-- 配置路径：`/srv/trendradar/{userId}/config`
-- 输出路径：`/srv/trendradar/{userId}/output`
+- 配置路径：`/srv/trendradar/user-{userId}/config`（或高级模式下的 `user-{userId}-dev`）
+- 输出路径：`/srv/trendradar/user-{userId}/output`（或高级模式下的 `user-{userId}-dev`）
 - Docker 镜像：`wantcat/trendradar:latest`
 
 **系统要求**：
@@ -201,16 +217,17 @@ TrendRadarConsole/
 │   ├── database.php        # 数据库连接
 │   ├── github.php          # GitHub API 集成
 │   ├── helpers.php         # 辅助函数
+│   ├── operation_log.php   # 操作日志类
 │   └── ssh.php             # Docker 部署的 SSH 连接辅助类
 ├── scripts/
 │   └── setup-docker-worker.sh  # Docker 工作机设置脚本（在 Docker 服务器上运行）
 ├── sql/
 │   ├── migrations/         # 数据库迁移
-│   └── schema.sql          # 数据库架构（users, configurations 等）
+│   └── schema.sql          # 数据库架构（users, configurations, docker_workers, operation_logs 等）
 ├── templates/
 │   └── sidebar.php         # 侧边栏模板，带有移动端汉堡菜单
 ├── config-edit.php         # 配置编辑页面
-├── docker-workers.php      # Docker 工作机管理（高级模式）
+├── docker-workers.php      # Docker 工作机管理（仅限高级模式）
 ├── docker.php              # Docker 部署管理页面
 ├── github-deployment.php   # GitHub 部署设置和管理
 ├── index.php               # 仪表盘
@@ -221,7 +238,9 @@ TrendRadarConsole/
 ├── logout.php              # 登出处理器
 ├── platforms.php           # 平台管理
 ├── register.php            # 注册页面
-├── settings.php            # 设置页面
+├── settings.php            # 设置页面（包含高级模式开关）
+├── setup-github.php        # 新用户的 GitHub 设置向导
+├── version.php             # 版本跟踪文件
 └── webhooks.php            # Webhooks 管理
 ```
 
