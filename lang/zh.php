@@ -611,7 +611,7 @@ return [
     'admin_revoke_failed' => '撤销管理员角色失败',
     'cannot_revoke_self' => '您不能撤销自己的管理员角色',
     'cannot_revoke_last_admin' => '不能撤销最后一个管理员',
-    'cannot_revoke_first_user' => '不能撤销第一个用户（ID: 1）的管理员角色',
+    'cannot_revoke_first_user' => '不能撤销内置管理员的管理员角色',
     'only_admins_can_access' => '只有管理员可以访问此页面',
     'feature_disabled_by_admin' => '此功能已被管理员禁用',
     'user_id' => '用户 ID',
