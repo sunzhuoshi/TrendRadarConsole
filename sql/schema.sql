@@ -12,6 +12,7 @@ CREATE TABLE IF NOT EXISTS `users` (
     `github_token` VARCHAR(255) COMMENT 'GitHub PAT (encrypted)',
     `advanced_mode` TINYINT(1) NOT NULL DEFAULT 0 COMMENT 'Advanced mode: 0=disabled, 1=enabled',
     `is_admin` TINYINT(1) NOT NULL DEFAULT 0 COMMENT 'Admin role: 0=regular user, 1=admin',
+    `docker_config_synced_at` TIMESTAMP NULL DEFAULT NULL COMMENT 'Last time configuration was synced to Docker container',
     `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     `last_login` TIMESTAMP NULL,
     `updated_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,

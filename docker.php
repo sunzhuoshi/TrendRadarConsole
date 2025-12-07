@@ -212,6 +212,9 @@ $currentLang = getCurrentLanguage();
                         <button type="button" class="btn btn-secondary" onclick="restartContainer()" id="btn-restart" style="display: none;">
                             🔄 <?php _e('restart_container'); ?>
                         </button>
+                        <button type="button" class="btn btn-info" onclick="syncConfiguration()" id="btn-sync" style="display: none;">
+                            ⬆️ <?php _e('sync_configuration'); ?>
+                        </button>
                         <button type="button" class="btn btn-danger" onclick="removeContainer()" id="btn-remove" style="display: none;">
                             🗑️ <?php _e('remove_container'); ?>
                         </button>
@@ -318,6 +321,7 @@ $currentLang = getCurrentLanguage();
         
         let containerExists = false;
         let containerRunning = false;
+        let configChanged = false;
         let sshConfigured = <?php echo $sshConfigured ? 'true' : 'false'; ?>;
         const isAdvancedMode = <?php echo $isAdvancedMode ? 'true' : 'false'; ?>;
         const deploymentEnv = <?php echo json_encode($deploymentEnv); ?>;
@@ -327,6 +331,7 @@ $currentLang = getCurrentLanguage();
         document.addEventListener('DOMContentLoaded', function() {
             if (sshConfigured) {
                 inspectContainer();
+                checkConfigChanged();
             }
         });
         
@@ -424,11 +429,21 @@ $currentLang = getCurrentLanguage();
             const btnStart = document.getElementById('btn-start');
             const btnStop = document.getElementById('btn-stop');
             const btnRestart = document.getElementById('btn-restart');
+            const btnSync = document.getElementById('btn-sync');
             const btnRemove = document.getElementById('btn-remove');
             const envSection = document.getElementById('env-vars-section');
             
-            // Check if elements exist before accessing them
-            if (!btnRun || !btnStart || !btnStop || !btnRestart || !btnRemove) {
+            // Return early only if critical buttons are missing
+            // This shouldn't happen in normal operation as all buttons are in the HTML
+            if (!btnRun || !btnStart || !btnStop || !btnRestart || !btnSync || !btnRemove) {
+                console.error('Critical button elements missing:', {
+                    btnRun: !!btnRun,
+                    btnStart: !!btnStart,
+                    btnStop: !!btnStop,
+                    btnRestart: !!btnRestart,
+                    btnSync: !!btnSync,
+                    btnRemove: !!btnRemove
+                });
                 return;
             }
             
@@ -438,6 +453,7 @@ $currentLang = getCurrentLanguage();
                 btnStart.style.display = 'none';
                 btnStop.style.display = 'none';
                 btnRestart.style.display = 'none';
+                btnSync.style.display = 'none';
                 btnRemove.style.display = 'none';
                 if (envSection) envSection.style.display = 'block';
             } else if (containerRunning) {
@@ -446,6 +462,8 @@ $currentLang = getCurrentLanguage();
                 btnStart.style.display = 'none';
                 btnStop.style.display = 'inline-flex';
                 btnRestart.style.display = 'inline-flex';
+                // Show sync button only if configuration has changed
+                btnSync.style.display = configChanged ? 'inline-flex' : 'none';
                 btnRemove.style.display = 'none';
                 if (envSection) envSection.style.display = 'none';
             } else {
@@ -454,8 +472,43 @@ $currentLang = getCurrentLanguage();
                 btnStart.style.display = 'inline-flex';
                 btnStop.style.display = 'none';
                 btnRestart.style.display = 'none';
+                btnSync.style.display = 'none';
                 btnRemove.style.display = 'inline-flex';
                 if (envSection) envSection.style.display = 'none';
+            }
+        }
+        
+        // Check if configuration has changed
+        async function checkConfigChanged() {
+            try {
+                const result = await apiRequest('api/docker.php', 'POST', {
+                    action: 'check_config_changed'
+                });
+                
+                configChanged = result.data.config_changed;
+                updateButtonStates();
+            } catch (error) {
+                console.error('Failed to check config changes:', error);
+            }
+        }
+        
+        // Sync configuration to container
+        async function syncConfiguration() {
+            const btn = document.getElementById('btn-sync');
+            setButtonLoading(btn, true);
+            
+            try {
+                await apiRequest('api/docker.php', 'POST', {
+                    action: 'sync_config'
+                });
+                
+                showToast('<?php _e('configuration_synced_success'); ?>', 'success');
+                configChanged = false;
+                updateButtonStates();
+            } catch (error) {
+                showToast('<?php _e('configuration_sync_failed'); ?>: ' + error.message, 'error');
+            } finally {
+                setButtonLoading(btn, false);
             }
         }
         
@@ -475,6 +528,7 @@ $currentLang = getCurrentLanguage();
                 });
                 
                 showToast('<?php _e('container_started_success'); ?>', 'success');
+                configChanged = false; // Config synced during run
                 inspectContainer();
             } catch (error) {
                 showToast('<?php _e('container_start_failed'); ?>: ' + error.message, 'error');
@@ -491,6 +545,7 @@ $currentLang = getCurrentLanguage();
             try {
                 await apiRequest('api/docker.php', 'POST', { action: 'start' });
                 showToast('<?php _e('container_started_success'); ?>', 'success');
+                configChanged = false; // Config synced during start
                 inspectContainer();
             } catch (error) {
                 showToast('<?php _e('container_start_failed'); ?>: ' + error.message, 'error');
@@ -525,6 +580,7 @@ $currentLang = getCurrentLanguage();
             try {
                 await apiRequest('api/docker.php', 'POST', { action: 'restart' });
                 showToast('<?php _e('container_restarted_success'); ?>', 'success');
+                configChanged = false; // Config synced during restart
                 inspectContainer();
             } catch (error) {
                 showToast('<?php _e('container_restart_failed'); ?>: ' + error.message, 'error');
