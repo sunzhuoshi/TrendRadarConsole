@@ -30,6 +30,9 @@ class OperationLog
     const ACTION_SETTING_UPDATE = 'setting_update';
     const ACTION_SETTINGS_SAVE = 'settings_save';
     const ACTION_USER_REGISTER = 'user_register';
+    const ACTION_ADMIN_GRANT = 'admin_grant';
+    const ACTION_ADMIN_REVOKE = 'admin_revoke';
+    const ACTION_FEATURE_TOGGLE = 'feature_toggle';
     
     // Target type constants
     const TARGET_USER = 'user';
@@ -39,6 +42,7 @@ class OperationLog
     const TARGET_WEBHOOK = 'webhook';
     const TARGET_SETTING = 'setting';
     const TARGET_GITHUB = 'github';
+    const TARGET_FEATURE = 'feature';
     
     public function __construct($userId = null)
     {
@@ -179,6 +183,10 @@ class OperationLog
             self::ACTION_WEBHOOK_DELETE => 'log_action_webhook_delete',
             self::ACTION_SETTING_UPDATE => 'log_action_setting_update',
             self::ACTION_SETTINGS_SAVE => 'log_action_settings_save',
+            self::ACTION_USER_REGISTER => 'log_action_user_register',
+            self::ACTION_ADMIN_GRANT => 'log_action_admin_grant',
+            self::ACTION_ADMIN_REVOKE => 'log_action_admin_revoke',
+            self::ACTION_FEATURE_TOGGLE => 'log_action_feature_toggle',
         ];
         
         return $map[$action] ?? 'log_action_unknown';
@@ -196,6 +204,8 @@ class OperationLog
             self::TARGET_WEBHOOK => 'log_target_webhook',
             self::TARGET_SETTING => 'log_target_setting',
             self::TARGET_GITHUB => 'log_target_github',
+            self::TARGET_USER => 'log_target_user',
+            self::TARGET_FEATURE => 'log_target_feature',
         ];
         
         return $map[$targetType] ?? '';

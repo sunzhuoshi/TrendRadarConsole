@@ -8,12 +8,18 @@ $currentUsername = Auth::getUsername();
 $currentLang = getCurrentLanguage();
 $lastUpdated = getLastUpdatedTime();
 $isAdvancedMode = Auth::checkAdvancedMode();
+$isAdmin = Auth::checkIsAdmin();
 ?>
 <button class="mobile-menu-toggle" onclick="toggleSidebar()">☰</button>
 <aside class="sidebar">
     <div class="sidebar-header">
         <h1><?php _e('app_name'); ?></h1>
         <small>👤 <?php echo htmlspecialchars($currentUsername ?? __('guest')); ?></small>
+        <?php if ($isAdmin): ?>
+        <div>
+            <span class="admin-badge">🔑 <?php _e('admin_badge'); ?></span>
+        </div>
+        <?php endif; ?>
         <?php if ($isAdvancedMode): ?>
         <div>
             <span class="advanced-mode-badge">🛠️ ADV</span>
@@ -50,6 +56,11 @@ $isAdvancedMode = Auth::checkAdvancedMode();
         <a href="logs.php" class="nav-item <?php echo ($currentPage ?? '') === 'logs' ? 'active' : ''; ?>">
             📋 <?php _e('operation_logs'); ?>
         </a>
+        <?php if ($isAdmin): ?>
+        <a href="admin.php" class="nav-item <?php echo ($currentPage ?? '') === 'admin' ? 'active' : ''; ?>">
+            🔑 <?php _e('admin_panel'); ?>
+        </a>
+        <?php endif; ?>
         <div class="nav-item language-switcher" style="border-top: 1px solid rgba(255,255,255,0.1); padding-top: 10px; margin-top: 10px;">
             🌐 <?php _e('language'); ?>:
             <select id="language-select" onchange="switchLanguage(this.value)" style="margin-left: 8px; padding: 4px 8px; border-radius: 4px; border: none; background: rgba(255,255,255,0.1); color: inherit; cursor: pointer;">
