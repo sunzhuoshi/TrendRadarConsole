@@ -302,11 +302,21 @@ $currentLang = getCurrentLanguage();
     <script>
         // Helper function to handle API responses with proper error logging
         function handleApiResponse(response) {
-            return response.json().then(data => ({
-                ok: response.ok,
-                status: response.status,
-                data: data
-            }));
+            return response.json()
+                .then(data => ({
+                    ok: response.ok,
+                    status: response.status,
+                    data: data
+                }))
+                .catch(parseError => {
+                    // If JSON parsing fails, return error info
+                    console.error('Failed to parse JSON response:', parseError);
+                    return {
+                        ok: false,
+                        status: response.status,
+                        data: { success: false, message: 'Invalid response format' }
+                    };
+                });
         }
 
         function grantAdmin(userId, username) {
@@ -327,12 +337,12 @@ $currentLang = getCurrentLanguage();
             })
             .then(handleApiResponse)
             .then(({ok, status, data}) => {
-                if (ok && data.success) {
+                if (ok && data && data.success) {
                     showFlash('success', '<?php _e('admin_granted'); ?>');
                     setTimeout(() => location.reload(), 1000);
                 } else {
                     console.error('Grant admin failed:', status, data);
-                    showFlash('error', data.message || '<?php _e('admin_grant_failed'); ?>');
+                    showFlash('error', (data && data.message) || '<?php _e('admin_grant_failed'); ?>');
                 }
             })
             .catch(error => {
@@ -359,12 +369,12 @@ $currentLang = getCurrentLanguage();
             })
             .then(handleApiResponse)
             .then(({ok, status, data}) => {
-                if (ok && data.success) {
+                if (ok && data && data.success) {
                     showFlash('success', '<?php _e('admin_revoked'); ?>');
                     setTimeout(() => location.reload(), 1000);
                 } else {
                     console.error('Revoke admin failed:', status, data);
-                    showFlash('error', data.message || '<?php _e('admin_revoke_failed'); ?>');
+                    showFlash('error', (data && data.message) || '<?php _e('admin_revoke_failed'); ?>');
                 }
             })
             .catch(error => {
@@ -388,11 +398,11 @@ $currentLang = getCurrentLanguage();
             })
             .then(handleApiResponse)
             .then(({ok, status, data}) => {
-                if (ok && data.success) {
+                if (ok && data && data.success) {
                     showFlash('success', '<?php _e('feature_toggled'); ?>');
                 } else {
                     console.error('Toggle failed:', status, data);
-                    showFlash('error', data.message || '<?php _e('feature_toggle_failed'); ?>');
+                    showFlash('error', (data && data.message) || '<?php _e('feature_toggle_failed'); ?>');
                     // Reload to reset toggle state
                     setTimeout(() => location.reload(), 1000);
                 }
