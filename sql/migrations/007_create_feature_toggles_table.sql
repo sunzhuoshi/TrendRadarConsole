@@ -16,6 +16,7 @@ CREATE TABLE IF NOT EXISTS `feature_toggles` (
 INSERT INTO `feature_toggles` (`feature_key`, `is_enabled`, `description`) VALUES
     ('github_deployment', 1, 'GitHub deployment functionality'),
     ('docker_deployment', 1, 'Docker deployment functionality'),
-    ('advanced_mode', 1, 'Advanced mode features')
+    ('advanced_mode', 1, 'Advanced mode features'),
+    ('user_registration', 1, 'User registration functionality')
 ON DUPLICATE KEY UPDATE `id`=`id`; -- No-op to allow re-running migration safely
 

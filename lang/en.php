@@ -68,6 +68,7 @@ return [
     'passwords_not_match' => 'Passwords do not match',
     'username_invalid_chars' => 'Username can only contain letters, numbers, and underscores',
     'registration_success' => 'Registration successful!',
+    'registration_disabled' => 'User registration has been disabled by an administrator',
     'click_to_login' => 'Click here to login',
     'already_have_account' => 'Already have an account?',
     

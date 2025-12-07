@@ -68,6 +68,7 @@ return [
     'passwords_not_match' => '两次输入的密码不一致',
     'username_invalid_chars' => '用户名只能包含字母、数字和下划线',
     'registration_success' => '注册成功！',
+    'registration_disabled' => '管理员已禁用用户注册',
     'click_to_login' => '点击这里登录',
     'already_have_account' => '已有账户？',
     

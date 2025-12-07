@@ -146,7 +146,7 @@ function verifyMigration($pdo, $migrationName) {
                 }
             }
             
-            // Verify default features are inserted
+            // Verify default features are inserted (check for at least the original 3, user_registration may be added later)
             $stmt = $pdo->query("SELECT COUNT(*) as count FROM feature_toggles WHERE feature_key IN ('github_deployment', 'docker_deployment', 'advanced_mode')");
             $result = $stmt->fetch();
             if ($result['count'] < 3) {
