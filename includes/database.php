@@ -18,7 +18,8 @@ class Database
         'settings',
         'operation_logs',
         'migrations',
-        'docker_workers'
+        'docker_workers',
+        'feature_toggles'
     ];
     
     private function __construct()
