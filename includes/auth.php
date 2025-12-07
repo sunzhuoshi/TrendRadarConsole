@@ -10,6 +10,12 @@ class Auth
 {
     private $db;
     
+    /**
+     * The first user ID - this user is automatically granted admin privileges
+     * and cannot have admin revoked to ensure system integrity
+     */
+    const FIRST_USER_ID = 1;
+    
     public function __construct()
     {
         $this->db = Database::getInstance();
@@ -682,13 +688,18 @@ class Auth
         
         // Prevent revoking own admin role
         if ((int)$userId === (int)$revokedByUserId) {
-            throw new Exception('Cannot revoke your own admin role');
+            throw new Exception(__('cannot_revoke_self'));
+        }
+        
+        // Prevent revoking admin from the first user (ID: 1)
+        if ((int)$userId === self::FIRST_USER_ID) {
+            throw new Exception(__('cannot_revoke_first_user'));
         }
         
         // Check if this is the last admin
         $adminCount = $this->db->fetchOne('SELECT COUNT(*) as count FROM users WHERE is_admin = 1');
         if ($adminCount && (int)$adminCount['count'] <= 1) {
-            throw new Exception('Cannot revoke the last admin');
+            throw new Exception(__('cannot_revoke_last_admin'));
         }
         
         return $this->db->update(
