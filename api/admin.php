@@ -21,8 +21,8 @@ if (!Auth::isLoggedIn()) {
     exit;
 }
 
-// Verify CSRF token
-$csrfToken = $_SERVER['HTTP_X_CSRF_TOKEN'] ?? '';
+// Verify CSRF token (check both possible header formats for compatibility)
+$csrfToken = $_SERVER['HTTP_X_CSRF_TOKEN'] ?? ($_SERVER['HTTP_X-CSRF-TOKEN'] ?? '');
 if (!verifyCsrfToken($csrfToken)) {
     http_response_code(403);
     echo json_encode(['success' => false, 'message' => 'Invalid CSRF token']);

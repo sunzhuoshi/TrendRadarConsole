@@ -681,7 +681,7 @@ class Auth
         }
         
         // Prevent revoking own admin role
-        if ($userId == $revokedByUserId) {
+        if ((int)$userId === (int)$revokedByUserId) {
             throw new Exception('Cannot revoke your own admin role');
         }
         

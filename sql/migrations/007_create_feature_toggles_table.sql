@@ -17,5 +17,5 @@ INSERT INTO `feature_toggles` (`feature_key`, `is_enabled`, `description`) VALUE
     ('github_deployment', 1, 'GitHub deployment functionality'),
     ('docker_deployment', 1, 'Docker deployment functionality'),
     ('advanced_mode', 1, 'Advanced mode features')
-ON DUPLICATE KEY UPDATE `feature_key`=`feature_key`;
+ON DUPLICATE KEY UPDATE `id`=`id`; -- No-op to allow re-running migration safely
 
