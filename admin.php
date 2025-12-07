@@ -260,7 +260,6 @@ $currentLang = getCurrentLanguage();
                             <tr>
                                 <th><?php _e('feature_key'); ?></th>
                                 <th><?php _e('description'); ?></th>
-                                <th><?php _e('status'); ?></th>
                                 <th><?php _e('actions'); ?></th>
                             </tr>
                         </thead>
@@ -270,11 +269,6 @@ $currentLang = getCurrentLanguage();
                                     <tr>
                                         <td><code><?php echo htmlspecialchars($feature['feature_key']); ?></code></td>
                                         <td><?php echo htmlspecialchars($feature['description'] ?? '-'); ?></td>
-                                        <td>
-                                            <span class="badge badge-<?php echo $feature['is_enabled'] ? 'success' : 'secondary'; ?>">
-                                                <?php _e($feature['is_enabled'] ? 'feature_enabled' : 'feature_disabled'); ?>
-                                            </span>
-                                        </td>
                                         <td>
                                             <label class="toggle-switch">
                                                 <input type="checkbox" 
@@ -287,7 +281,7 @@ $currentLang = getCurrentLanguage();
                                 <?php endforeach; ?>
                             <?php else: ?>
                                 <tr>
-                                    <td colspan="4" style="text-align: center; padding: 20px;">
+                                    <td colspan="3" style="text-align: center; padding: 20px;">
                                         <?php _e('no_features_found'); ?>
                                     </td>
                                 </tr>
