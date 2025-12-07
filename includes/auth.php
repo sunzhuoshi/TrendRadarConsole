@@ -685,6 +685,11 @@ class Auth
             throw new Exception('Cannot revoke your own admin role');
         }
         
+        // Prevent revoking admin from the first user (ID: 1)
+        if ((int)$userId === 1) {
+            throw new Exception(__('cannot_revoke_first_user'));
+        }
+        
         // Check if this is the last admin
         $adminCount = $this->db->fetchOne('SELECT COUNT(*) as count FROM users WHERE is_admin = 1');
         if ($adminCount && (int)$adminCount['count'] <= 1) {
