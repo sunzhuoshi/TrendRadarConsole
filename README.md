@@ -12,7 +12,10 @@ A web-based configuration management system for [TrendRadar](https://github.com/
 - **Per-User GitHub Settings**: Each user can configure their own GitHub repository (owner/repo/PAT)
 
 ### Configuration Management
-- **Default Configuration**: Automatically created on user registration with pre-configured platforms and sensible defaults
+- **Default Configuration**: Automatically created on user registration with:
+  - Pre-configured popular Chinese platforms (11 platforms including Toutiao, Baidu, Weibo, Zhihu, etc.)
+  - Default keywords for "Tech & AI Monitoring" (2 keyword groups with 12 total keywords)
+  - Default report settings (incremental mode, rank threshold, weights)
 - **Platform Management**: Configure which platforms to monitor (Weibo, Zhihu, Toutiao, etc.)
 - **Keyword Configuration**: Set up keywords with filters, required words, and limits
 - **Notification Webhooks**: Configure multiple notification channels (WeChat Work, Feishu, DingTalk, Telegram, Email, ntfy, Bark, Slack)
@@ -21,6 +24,11 @@ A web-based configuration management system for [TrendRadar](https://github.com/
 ### Configuration Sync
 - **GitHub Sync**: Load and save `CONFIG_YAML` and `FREQUENCY_WORDS` directly to your GitHub repository variables
 - **Docker Deployment**: Automatically generates `config.yaml` and `frequency_words.txt` when deploying containers
+
+### Additional Features
+- **Advanced Mode**: Enable Docker workers management and additional features for power users
+- **Operation Logs**: Track all configuration changes with detailed audit logs
+- **Multi-Language Support**: Switch between English and Chinese interface
 
 ### Mobile Support
 - **Responsive Design**: Works on mobile browsers with hamburger menu navigation
@@ -90,30 +98,33 @@ The installer will automatically:
 ### 5. Register and Login
 
 1. Visit `http://your-domain.com/register.php` to create your account
-2. After registration, you'll be automatically logged in
+2. After registration, you'll be automatically logged in and redirected to the Dashboard
 3. **A default configuration will be automatically created** with:
-   - Pre-configured popular Chinese platforms (Toutiao, Baidu, Weibo, Zhihu, etc.)
-   - Default report settings (incremental mode, rank threshold, weights)
+   - 11 pre-configured popular Chinese platforms (Toutiao, Baidu, Weibo, Zhihu, Bilibili, etc.)
+   - 2 keyword groups with 12 default keywords for "Tech & AI Monitoring" (including AI, ChatGPT, etc.)
+   - Default report settings (incremental mode, rank threshold: 5, weights configured)
    - Basic notification and crawler settings
 4. Each user has their own isolated configurations
 
 ### 6. Start Using
 
 After login, you can:
-1. Set up your GitHub repository in **GitHub Sync**
-2. Manage platforms
-3. Configure keywords
-4. Set up notification webhooks
-5. Adjust report settings
-6. Sync configurations to GitHub
+1. Set up your GitHub repository in **GitHub Deployment**
+2. Manage platforms in **Platforms**
+3. Configure keywords in **Keywords**
+4. Set up notification webhooks in **Notifications**
+5. Adjust report settings in **Settings**
+6. Deploy via Docker in **Docker Deployment** or sync to GitHub
+7. Enable **Advanced Mode** in Settings for Docker workers management
+8. View operation history in **Operation Logs**
 
 ## Using with TrendRadar
 
-### GitHub Sync (Recommended)
+### GitHub Deployment (Recommended)
 
 TrendRadarConsole can directly sync configurations to your GitHub repository. Each user stores their own GitHub settings:
 
-1. Navigate to **GitHub Sync** in the sidebar
+1. Navigate to **GitHub Deployment** in the sidebar
 2. Enter your GitHub repository details (owner/repo)
 3. Create a **Fine-grained Personal Access Token** with **Variables: Read and write** permission
 4. Click **Save Settings** to store your GitHub credentials
@@ -126,7 +137,7 @@ This automatically sets `CONFIG_YAML` and `FREQUENCY_WORDS` repository variables
 
 Alternatively, you can manually copy configurations:
 
-1. Use **GitHub Sync** in TrendRadarConsole to load your configuration (this will show you the generated `config.yaml` and `frequency_words.txt` content)
+1. Use **GitHub Deployment** in TrendRadarConsole to load your configuration (this will show you the generated `config.yaml` and `frequency_words.txt` content)
 2. Go to your TrendRadar fork's **Settings → Secrets and variables → Actions**
 3. Click on the **Variables** tab
 4. Create two repository variables:
@@ -162,14 +173,14 @@ TrendRadarConsole now supports local Docker deployment as an alternative to GitH
 
 **Features**:
 - **Auto-generated config**: Configuration files are created from your current settings when running/restarting the container
-- **Isolated workspace**: Each user has their own container and workspace
+- **Isolated workspace**: Each user has their own container and workspace (with optional `-dev` suffix in Advanced Mode)
 - **Simple controls**: Run, start, stop, restart, or remove your container with one click
 - **Real-time monitoring**: View container status and logs
 
 **Technical Details**:
 - Container name: `trendradar-{userId}`
-- Config path: `/srv/trendradar/{userId}/config`
-- Output path: `/srv/trendradar/{userId}/output`
+- Config path: `/srv/trendradar/user-{userId}/config` (or `user-{userId}-dev` in Advanced Mode)
+- Output path: `/srv/trendradar/user-{userId}/output` (or `user-{userId}-dev` in Advanced Mode)
 - Docker image: `wantcat/trendradar:latest`
 
 **Requirements**:
@@ -206,16 +217,17 @@ TrendRadarConsole/
 │   ├── database.php        # Database connection
 │   ├── github.php          # GitHub API integration
 │   ├── helpers.php         # Helper functions
+│   ├── operation_log.php   # Operation logging class
 │   └── ssh.php             # SSH connection helper for Docker deployment
 ├── scripts/
 │   └── setup-docker-worker.sh  # Docker worker setup script (run on Docker server)
 ├── sql/
 │   ├── migrations/         # Database migrations
-│   └── schema.sql          # Database schema (users, configurations, etc.)
+│   └── schema.sql          # Database schema (users, configurations, docker_workers, operation_logs, etc.)
 ├── templates/
 │   └── sidebar.php         # Sidebar template with mobile hamburger menu
 ├── config-edit.php         # Configuration edit page
-├── docker-workers.php      # Docker workers management (advanced mode)
+├── docker-workers.php      # Docker workers management (advanced mode only)
 ├── docker.php              # Docker deployment management page
 ├── github-deployment.php   # GitHub deployment setup and management
 ├── index.php               # Dashboard
@@ -226,7 +238,9 @@ TrendRadarConsole/
 ├── logout.php              # Logout handler
 ├── platforms.php           # Platforms management
 ├── register.php            # Registration page
-├── settings.php            # Settings page
+├── settings.php            # Settings page (includes advanced mode toggle)
+├── setup-github.php        # GitHub setup wizard for new users
+├── version.php             # Version tracking file
 └── webhooks.php            # Webhooks management
 ```
 
