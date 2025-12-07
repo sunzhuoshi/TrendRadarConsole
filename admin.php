@@ -300,6 +300,15 @@ $currentLang = getCurrentLanguage();
     </div>
 
     <script>
+        // Helper function to handle API responses with proper error logging
+        function handleApiResponse(response) {
+            return response.json().then(data => ({
+                ok: response.ok,
+                status: response.status,
+                data: data
+            }));
+        }
+
         function grantAdmin(userId, username) {
             if (!confirm('<?php _e('confirm_grant_admin'); ?>')) {
                 return;
@@ -316,13 +325,7 @@ $currentLang = getCurrentLanguage();
                     user_id: userId
                 })
             })
-            .then(response => {
-                return response.json().then(data => ({
-                    ok: response.ok,
-                    status: response.status,
-                    data: data
-                }));
-            })
+            .then(handleApiResponse)
             .then(({ok, status, data}) => {
                 if (ok && data.success) {
                     showFlash('success', '<?php _e('admin_granted'); ?>');
@@ -354,13 +357,7 @@ $currentLang = getCurrentLanguage();
                     user_id: userId
                 })
             })
-            .then(response => {
-                return response.json().then(data => ({
-                    ok: response.ok,
-                    status: response.status,
-                    data: data
-                }));
-            })
+            .then(handleApiResponse)
             .then(({ok, status, data}) => {
                 if (ok && data.success) {
                     showFlash('success', '<?php _e('admin_revoked'); ?>');
@@ -389,14 +386,7 @@ $currentLang = getCurrentLanguage();
                     enabled: enabled
                 })
             })
-            .then(response => {
-                // Parse JSON regardless of status code
-                return response.json().then(data => ({
-                    ok: response.ok,
-                    status: response.status,
-                    data: data
-                }));
-            })
+            .then(handleApiResponse)
             .then(({ok, status, data}) => {
                 if (ok && data.success) {
                     showFlash('success', '<?php _e('feature_toggled'); ?>');
