@@ -123,7 +123,7 @@ CREATE DATABASE trendradar_console CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode
 
 ## 与 TrendRadar 配合使用
 
-### GitHub 部署（推荐）
+### GitHub 部署
 
 TrendRadarConsole 可以直接将配置同步到您的 GitHub 仓库。每个用户存储自己的 GitHub 设置：
 
@@ -155,7 +155,7 @@ TrendRadarConsole 可以直接将配置同步到您的 GitHub 仓库。每个用
 - `EMAIL_FROM`, `EMAIL_PASSWORD`, `EMAIL_TO`
 - 等
 
-### Docker 部署
+### Docker 部署（推荐）
 
 TrendRadarConsole 现在支持本地 Docker 部署，作为 GitHub Actions 的替代方案。Docker 命令通过 SSH 在远程 Docker 工作机服务器上执行。
 

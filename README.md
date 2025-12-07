@@ -123,7 +123,7 @@ After login, you can:
 
 ## Using with TrendRadar
 
-### GitHub Deployment (Recommended)
+### GitHub Deployment
 
 TrendRadarConsole can directly sync configurations to your GitHub repository. Each user stores their own GitHub settings:
 
@@ -155,7 +155,7 @@ These variables will automatically override the config files during GitHub Actio
 - `EMAIL_FROM`, `EMAIL_PASSWORD`, `EMAIL_TO`
 - etc.
 
-### Docker Deployment
+### Docker Deployment (Recommended)
 
 TrendRadarConsole now supports local Docker deployment as an alternative to GitHub Actions. Docker commands are executed via SSH to a remote Docker worker server.
 
