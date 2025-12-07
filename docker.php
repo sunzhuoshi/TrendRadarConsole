@@ -433,8 +433,10 @@ $currentLang = getCurrentLanguage();
             const btnRemove = document.getElementById('btn-remove');
             const envSection = document.getElementById('env-vars-section');
             
-            // Check if elements exist before accessing them
+            // Return early only if critical buttons are missing
+            // This shouldn't happen in normal operation as all buttons are in the HTML
             if (!btnRun || !btnStart || !btnStop || !btnRestart || !btnSync || !btnRemove) {
+                console.error('Critical button elements missing');
                 return;
             }
             
