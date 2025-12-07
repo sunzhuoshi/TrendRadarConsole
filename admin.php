@@ -410,6 +410,6 @@ $currentLang = getCurrentLanguage();
         }
     </script>
 
-    <script src="assets/js/main.js"></script>
+    <script src="assets/js/app.js"></script>
 </body>
 </html>
