@@ -70,6 +70,14 @@ try {
     
     // Actions that don't require SSH connection
     switch ($action) {
+        case 'check_config_changed':
+            // Check if configuration has changed since last sync
+            $hasChanged = $auth->hasDockerConfigChanged($userId);
+            jsonSuccess([
+                'config_changed' => $hasChanged
+            ], $hasChanged ? 'Configuration has changed' : 'Configuration is up to date');
+            break;
+            
         case 'get_settings':
             jsonSuccess([
                 'container_name' => $containerName,
@@ -296,6 +304,9 @@ try {
             $result = $ssh->exec($cmd);
             
             if ($result['success'] && !empty($result['output'])) {
+                // Update sync timestamp
+                $auth->updateDockerConfigSyncTime($userId);
+                
                 jsonSuccess([
                     'container_name' => $containerName,
                     'container_id' => trim($result['output']),
@@ -308,10 +319,19 @@ try {
             
         case 'start':
             // Start an existing stopped container via SSH
+            // Generate config files from current configuration before start
+            $escapedConfigPath = escapeshellarg($configPath);
+            $escapedOutputPath = escapeshellarg($outputPath);
+            $ssh->exec("mkdir -p {$escapedConfigPath} {$escapedOutputPath}");
+            generateConfigFiles($userId, $ssh, $configPath);
+            
             $escapedName = escapeshellarg($containerName);
             $result = $ssh->exec("docker start {$escapedName} 2>&1");
             
             if ($result['success']) {
+                // Update sync timestamp
+                $auth->updateDockerConfigSyncTime($userId);
+                
                 jsonSuccess([
                     'container_name' => $containerName,
                     'message' => 'Container started successfully'
@@ -368,6 +388,9 @@ try {
             $result = $ssh->exec("docker restart {$escapedName} 2>&1");
             
             if ($result['success']) {
+                // Update sync timestamp
+                $auth->updateDockerConfigSyncTime($userId);
+                
                 jsonSuccess([
                     'container_name' => $containerName,
                     'message' => 'Container restarted successfully'
@@ -375,6 +398,23 @@ try {
             } else {
                 jsonError('Failed to restart container: ' . ($result['error'] ?: $result['output']));
             }
+            break;
+            
+        case 'sync_config':
+            // Sync configuration files to running container
+            // Generate config files from current configuration
+            $escapedConfigPath = escapeshellarg($configPath);
+            $escapedOutputPath = escapeshellarg($outputPath);
+            $ssh->exec("mkdir -p {$escapedConfigPath} {$escapedOutputPath}");
+            generateConfigFiles($userId, $ssh, $configPath);
+            
+            // Update sync timestamp
+            $auth->updateDockerConfigSyncTime($userId);
+            
+            jsonSuccess([
+                'container_name' => $containerName,
+                'message' => 'Configuration synced successfully'
+            ], 'Configuration synced');
             break;
             
         default:

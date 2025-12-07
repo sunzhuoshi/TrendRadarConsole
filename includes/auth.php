@@ -776,6 +776,104 @@ class Auth
             'SELECT * FROM feature_toggles ORDER BY feature_key ASC'
         );
     }
+    
+    /**
+     * Update Docker configuration sync timestamp
+     */
+    public function updateDockerConfigSyncTime($userId)
+    {
+        return $this->db->update(
+            'users',
+            ['docker_config_synced_at' => date('Y-m-d H:i:s')],
+            'id = ?',
+            [$userId]
+        );
+    }
+    
+    /**
+     * Check if Docker configuration has changed since last sync
+     * Returns true if configuration changed after last sync or if never synced
+     */
+    public function hasDockerConfigChanged($userId)
+    {
+        // Get last sync time
+        $user = $this->db->fetchOne(
+            'SELECT docker_config_synced_at FROM users WHERE id = ?',
+            [$userId]
+        );
+        
+        if (!$user || !$user['docker_config_synced_at']) {
+            // Never synced - consider as changed if there's an active config
+            $activeConfig = $this->db->fetchOne(
+                'SELECT id FROM configurations WHERE user_id = ? AND is_active = 1',
+                [$userId]
+            );
+            return (bool)$activeConfig;
+        }
+        
+        $lastSyncTime = $user['docker_config_synced_at'];
+        
+        // Check if any configuration-related data has been updated after last sync
+        // Check configurations table
+        $configChanged = $this->db->fetchOne(
+            'SELECT id FROM configurations WHERE user_id = ? AND updated_at > ?',
+            [$userId, $lastSyncTime]
+        );
+        
+        if ($configChanged) {
+            return true;
+        }
+        
+        // Check platforms table (through configurations)
+        $platformsChanged = $this->db->fetchOne(
+            'SELECT p.id FROM platforms p 
+             INNER JOIN configurations c ON p.config_id = c.id 
+             WHERE c.user_id = ? AND p.updated_at > ?',
+            [$userId, $lastSyncTime]
+        );
+        
+        if ($platformsChanged) {
+            return true;
+        }
+        
+        // Check keywords table (through configurations)
+        $keywordsChanged = $this->db->fetchOne(
+            'SELECT k.id FROM keywords k 
+             INNER JOIN configurations c ON k.config_id = c.id 
+             WHERE c.user_id = ? AND k.updated_at > ?',
+            [$userId, $lastSyncTime]
+        );
+        
+        if ($keywordsChanged) {
+            return true;
+        }
+        
+        // Check webhooks table (through configurations)
+        $webhooksChanged = $this->db->fetchOne(
+            'SELECT w.id FROM webhooks w 
+             INNER JOIN configurations c ON w.config_id = c.id 
+             WHERE c.user_id = ? AND w.updated_at > ?',
+            [$userId, $lastSyncTime]
+        );
+        
+        if ($webhooksChanged) {
+            return true;
+        }
+        
+        // Check settings table (through configurations)
+        $settingsChanged = $this->db->fetchOne(
+            'SELECT s.id FROM settings s 
+             INNER JOIN configurations c ON s.config_id = c.id 
+             WHERE c.user_id = ? AND s.updated_at > ?',
+            [$userId, $lastSyncTime]
+        );
+        
+        if ($settingsChanged) {
+            return true;
+        }
+        
+        return false;
+    }
 }
 
 /**
