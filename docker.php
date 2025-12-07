@@ -436,7 +436,14 @@ $currentLang = getCurrentLanguage();
             // Return early only if critical buttons are missing
             // This shouldn't happen in normal operation as all buttons are in the HTML
             if (!btnRun || !btnStart || !btnStop || !btnRestart || !btnSync || !btnRemove) {
-                console.error('Critical button elements missing');
+                console.error('Critical button elements missing:', {
+                    btnRun: !!btnRun,
+                    btnStart: !!btnStart,
+                    btnStop: !!btnStop,
+                    btnRestart: !!btnRestart,
+                    btnSync: !!btnSync,
+                    btnRemove: !!btnRemove
+                });
                 return;
             }
             
