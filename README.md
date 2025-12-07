@@ -31,7 +31,7 @@ A web-based configuration management system for [TrendRadar](https://github.com/
 - **Advanced Mode**: Enable Docker workers management and additional features for power users
 - **Operation Logs**: Track all configuration changes with detailed audit logs
 - **Multi-Language Support**: Switch between English and Chinese interface
-- **Feature Toggles**: Admins can enable or disable features (GitHub Deployment, Docker Deployment, Advanced Mode) for all users
+- **Feature Toggles**: Admins can enable or disable features (GitHub Deployment, Docker Deployment, Advanced Mode, User Registration) for all users
 
 ### Mobile Support
 - **Responsive Design**: Works on mobile browsers with hamburger menu navigation
@@ -203,9 +203,10 @@ The first registered user automatically receives admin privileges. Admins have a
 
 2. **Feature Toggles**
    - Enable or disable features globally for all users:
-     - **GitHub Deployment**: Turn on/off access to GitHub integration
+     - **GitHub Deployment**: Turn on/off access to GitHub integration (disabled by default)
      - **Docker Deployment**: Turn on/off access to Docker deployment
      - **Advanced Mode**: Turn on/off advanced features like Docker workers management
+     - **User Registration**: Turn on/off new user registration capability
 
 ### Accessing Admin Panel
 
@@ -214,6 +215,16 @@ The first registered user automatically receives admin privileges. Admins have a
 3. Manage users and features from the admin interface
 
 All admin actions are logged in the **Operation Logs** for audit purposes.
+
+### User Registration Control
+
+When the **User Registration** feature is disabled by an admin:
+- The registration link is hidden from the login page
+- Direct access to the registration page (`register.php`) redirects to login with an error message
+- Existing users can still log in normally
+- Only admins can enable registration again through the Admin Panel
+
+This is useful for controlling user access after initial setup or during maintenance periods.
 
 ## Directory Structure
 
