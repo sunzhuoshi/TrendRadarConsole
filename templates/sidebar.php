@@ -9,6 +9,12 @@ $currentLang = getCurrentLanguage();
 $lastUpdated = getLastUpdatedTime();
 $isAdvancedMode = Auth::checkAdvancedMode();
 $isAdmin = Auth::checkIsAdmin();
+
+// Get feature toggle status
+$auth = new Auth();
+$dockerEnabled = $auth->isFeatureEnabled('docker_deployment');
+$githubEnabled = $auth->isFeatureEnabled('github_deployment');
+$advancedModeEnabled = $auth->isFeatureEnabled('advanced_mode');
 ?>
 <button class="mobile-menu-toggle" onclick="toggleSidebar()">☰</button>
 <aside class="sidebar">
@@ -42,17 +48,21 @@ $isAdmin = Auth::checkIsAdmin();
         <a href="settings.php" class="nav-item <?php echo ($currentPage ?? '') === 'settings' ? 'active' : ''; ?>">
             ⚙️ <?php _e('settings'); ?>
         </a>
+        <?php if ($dockerEnabled): ?>
         <a href="docker.php" class="nav-item <?php echo ($currentPage ?? '') === 'docker' ? 'active' : ''; ?>">
             🐳 <?php _e('docker_deployment'); ?>
         </a>
-        <?php if ($isAdvancedMode): ?>
+        <?php endif; ?>
+        <?php if ($isAdvancedMode && $advancedModeEnabled): ?>
         <a href="docker-workers.php" class="nav-item <?php echo ($currentPage ?? '') === 'docker-workers' ? 'active' : ''; ?>">
             🖥️ <?php _e('docker_workers'); ?>
         </a>
         <?php endif; ?>
+        <?php if ($githubEnabled): ?>
         <a href="github-deployment.php" class="nav-item <?php echo ($currentPage ?? '') === 'github-deployment' ? 'active' : ''; ?>">
             🐙 <?php _e('github_deployment'); ?>
         </a>
+        <?php endif; ?>
         <a href="logs.php" class="nav-item <?php echo ($currentPage ?? '') === 'logs' ? 'active' : ''; ?>">
             📋 <?php _e('operation_logs'); ?>
         </a>

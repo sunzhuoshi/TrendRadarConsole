@@ -611,6 +611,7 @@ return [
     'cannot_revoke_self' => 'You cannot revoke your own admin role',
     'cannot_revoke_last_admin' => 'Cannot revoke the last admin',
     'only_admins_can_access' => 'Only administrators can access this page',
+    'feature_disabled_by_admin' => 'This feature has been disabled by an administrator',
     'user_id' => 'User ID',
     'is_admin' => 'Admin',
     'last_login' => 'Last Login',

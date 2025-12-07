@@ -19,6 +19,14 @@ if (!file_exists('config/config.php')) {
 Auth::requireLogin();
 $userId = Auth::getUserId();
 
+// Check if Docker deployment feature is enabled
+$auth = new Auth();
+if (!$auth->isFeatureEnabled('docker_deployment')) {
+    setFlash('error', __('feature_disabled_by_admin'));
+    header('Location: index.php');
+    exit;
+}
+
 // Validate user ID is numeric
 if (!is_numeric($userId) || $userId <= 0) {
     redirect('login.php');

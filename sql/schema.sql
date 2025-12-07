@@ -11,9 +11,11 @@ CREATE TABLE IF NOT EXISTS `users` (
     `github_repo` VARCHAR(100) COMMENT 'GitHub repository name',
     `github_token` VARCHAR(255) COMMENT 'GitHub PAT (encrypted)',
     `advanced_mode` TINYINT(1) NOT NULL DEFAULT 0 COMMENT 'Advanced mode: 0=disabled, 1=enabled',
+    `is_admin` TINYINT(1) NOT NULL DEFAULT 0 COMMENT 'Admin role: 0=regular user, 1=admin',
     `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     `last_login` TIMESTAMP NULL,
-    `updated_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+    `updated_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    INDEX `idx_is_admin` (`is_admin`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='User accounts';
 
 -- Docker workers table for storing Docker worker SSH connection settings
@@ -133,6 +135,23 @@ CREATE TABLE IF NOT EXISTS `migrations` (
     `batch` INT NOT NULL COMMENT 'Batch number for grouping migrations',
     `executed_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='Database migrations tracking';
+
+-- Feature toggles table for admin-controlled features
+CREATE TABLE IF NOT EXISTS `feature_toggles` (
+    `id` INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    `feature_key` VARCHAR(100) NOT NULL UNIQUE COMMENT 'Feature identifier (e.g., github_deployment, docker_deployment)',
+    `is_enabled` TINYINT(1) NOT NULL DEFAULT 1 COMMENT 'Whether this feature is enabled: 0=disabled, 1=enabled',
+    `description` TEXT COMMENT 'Feature description',
+    `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    `updated_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='Admin-controlled feature toggles';
+
+-- Insert default feature toggles
+INSERT INTO `feature_toggles` (`feature_key`, `is_enabled`, `description`) VALUES
+    ('github_deployment', 1, 'GitHub deployment functionality'),
+    ('docker_deployment', 1, 'Docker deployment functionality'),
+    ('advanced_mode', 1, 'Advanced mode features')
+ON DUPLICATE KEY UPDATE `feature_key`=`feature_key`;
 
 -- Note: Default user and configuration are created during registration
 -- No default data is inserted here

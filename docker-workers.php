@@ -26,6 +26,13 @@ $userId = (int)$userId;
 
 $auth = new Auth();
 
+// Check if advanced mode feature is enabled
+if (!$auth->isFeatureEnabled('advanced_mode')) {
+    setFlash('error', __('feature_disabled_by_admin'));
+    header('Location: index.php');
+    exit;
+}
+
 // Check if advanced mode is enabled - redirect if not
 $isAdvancedMode = $auth->isAdvancedModeEnabled($userId);
 if (!$isAdvancedMode) {

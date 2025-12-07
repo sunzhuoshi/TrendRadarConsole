@@ -611,6 +611,7 @@ return [
     'cannot_revoke_self' => '您不能撤销自己的管理员角色',
     'cannot_revoke_last_admin' => '不能撤销最后一个管理员',
     'only_admins_can_access' => '只有管理员可以访问此页面',
+    'feature_disabled_by_admin' => '此功能已被管理员禁用',
     'user_id' => '用户 ID',
     'is_admin' => '管理员',
     'last_login' => '最后登录',
