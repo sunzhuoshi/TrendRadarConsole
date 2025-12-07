@@ -110,6 +110,50 @@ function verifyMigration($pdo, $migrationName) {
             }
             
             return ['success' => true, 'message' => 'All verifications passed'];
+        },
+        '006_add_is_admin_to_users.sql' => function($pdo) {
+            // Verify is_admin column exists in users table
+            $stmt = $pdo->query("DESCRIBE users");
+            $columns = $stmt->fetchAll(PDO::FETCH_COLUMN);
+            
+            if (!in_array('is_admin', $columns)) {
+                return ['success' => false, 'message' => 'Column is_admin does not exist in users table'];
+            }
+            
+            // Verify index exists
+            $stmt = $pdo->query("SHOW INDEX FROM users WHERE Key_name = 'idx_is_admin'");
+            if ($stmt->rowCount() === 0) {
+                return ['success' => false, 'message' => 'Missing index: idx_is_admin'];
+            }
+            
+            return ['success' => true, 'message' => 'All verifications passed'];
+        },
+        '007_create_feature_toggles_table.sql' => function($pdo) {
+            // Check if feature_toggles table exists
+            $stmt = $pdo->query("SHOW TABLES LIKE 'feature_toggles'");
+            if ($stmt->rowCount() === 0) {
+                return ['success' => false, 'message' => 'Table feature_toggles does not exist'];
+            }
+            
+            // Verify table structure
+            $stmt = $pdo->query("DESCRIBE feature_toggles");
+            $columns = $stmt->fetchAll(PDO::FETCH_COLUMN);
+            $requiredColumns = ['id', 'feature_key', 'is_enabled', 'description', 'created_at', 'updated_at'];
+            
+            foreach ($requiredColumns as $col) {
+                if (!in_array($col, $columns)) {
+                    return ['success' => false, 'message' => "Missing column: {$col}"];
+                }
+            }
+            
+            // Verify default features are inserted (check for at least the original 3, user_registration may be added later)
+            $stmt = $pdo->query("SELECT COUNT(*) as count FROM feature_toggles WHERE feature_key IN ('github_deployment', 'docker_deployment', 'advanced_mode')");
+            $result = $stmt->fetch();
+            if ($result['count'] < 3) {
+                return ['success' => false, 'message' => 'Default feature toggles not inserted'];
+            }
+            
+            return ['success' => true, 'message' => 'All verifications passed'];
         }
     ];
     

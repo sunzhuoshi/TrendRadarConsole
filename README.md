@@ -10,6 +10,8 @@ A web-based configuration management system for [TrendRadar](https://github.com/
 - **User Authentication**: Login and registration system with secure password hashing
 - **Per-User Configurations**: Each user has their own isolated configurations
 - **Per-User GitHub Settings**: Each user can configure their own GitHub repository (owner/repo/PAT)
+- **Admin Role**: First registered user automatically becomes admin with elevated privileges
+- **User Administration**: Admins can grant or revoke admin rights to other users
 
 ### Configuration Management
 - **Default Configuration**: Automatically created on user registration with:
@@ -29,6 +31,7 @@ A web-based configuration management system for [TrendRadar](https://github.com/
 - **Advanced Mode**: Enable Docker workers management and additional features for power users
 - **Operation Logs**: Track all configuration changes with detailed audit logs
 - **Multi-Language Support**: Switch between English and Chinese interface
+- **Feature Toggles**: Admins can enable or disable features (GitHub Deployment, Docker Deployment, Advanced Mode, User Registration) for all users
 
 ### Mobile Support
 - **Responsive Design**: Works on mobile browsers with hamburger menu navigation
@@ -186,6 +189,42 @@ TrendRadarConsole now supports local Docker deployment as an alternative to GitH
 **Requirements**:
 - Docker worker server with Docker installed
 - PHP SSH2 extension (`php-ssh2`) on the web server
+
+## Admin Features
+
+### Admin Role
+
+The first registered user automatically receives admin privileges. Admins have access to the **Admin Panel** where they can:
+
+1. **User Management**
+   - View all registered users and their login history
+   - Grant admin role to other users
+   - Revoke admin role from users (cannot revoke their own or the last admin)
+
+2. **Feature Toggles**
+   - Enable or disable features globally for all users:
+     - **GitHub Deployment**: Turn on/off access to GitHub integration (disabled by default)
+     - **Docker Deployment**: Turn on/off access to Docker deployment
+     - **Advanced Mode**: Turn on/off advanced features like Docker workers management
+     - **User Registration**: Turn on/off new user registration capability
+
+### Accessing Admin Panel
+
+1. Login as an admin user (first registered user or granted admin)
+2. Click **Admin Panel** (🔑) in the sidebar
+3. Manage users and features from the admin interface
+
+All admin actions are logged in the **Operation Logs** for audit purposes.
+
+### User Registration Control
+
+When the **User Registration** feature is disabled by an admin:
+- The registration link is hidden from the login page
+- Direct access to the registration page (`register.php`) redirects to login with an error message
+- Existing users can still log in normally
+- Only admins can enable registration again through the Admin Panel
+
+This is useful for controlling user access after initial setup or during maintenance periods.
 
 ## Directory Structure
 

@@ -21,8 +21,15 @@ if (!file_exists('config/config.php')) {
 Auth::requireLogin();
 $userId = Auth::getUserId();
 
-// Get GitHub settings
+// Check if GitHub deployment feature is enabled
 $auth = new Auth();
+if (!$auth->isFeatureEnabled('github_deployment')) {
+    setFlash('error', __('feature_disabled_by_admin'));
+    header('Location: index.php');
+    exit;
+}
+
+// Get GitHub settings
 $githubSettings = $auth->getGitHubSettings($userId);
 
 // Check if GitHub is fully configured (PAT is set)

@@ -39,6 +39,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 }
 
+// Check if registration is enabled
+$auth = new Auth();
+$registrationEnabled = $auth->isFeatureEnabled('user_registration');
+
 $currentLang = getCurrentLanguage();
 ?>
 <!DOCTYPE html>
@@ -127,9 +131,11 @@ $currentLang = getCurrentLanguage();
             </button>
         </form>
         
+        <?php if ($registrationEnabled): ?>
         <div class="text-center mt-4">
             <p><?php _e('no_account'); ?> <a href="register.php"><?php _e('register'); ?></a></p>
         </div>
+        <?php endif; ?>
     </div>
     
     <script>

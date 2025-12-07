@@ -33,11 +33,16 @@ class Auth
         // Hash password
         $passwordHash = password_hash($password, PASSWORD_DEFAULT);
         
+        // Check if this is the first user - if so, make them admin
+        $userCount = $this->db->fetchOne('SELECT COUNT(*) as count FROM users');
+        $isFirstUser = ($userCount && (int)$userCount['count'] === 0);
+        
         // Insert user
         $userId = $this->db->insert('users', [
             'username' => $username,
             'password_hash' => $passwordHash,
-            'email' => $email
+            'email' => $email,
+            'is_admin' => $isFirstUser ? 1 : 0
         ]);
         
         // Create default configuration for user
@@ -607,6 +612,158 @@ class Auth
             return true;
         }
         return false;
+    }
+    
+    /**
+     * Check if a user is an admin
+     */
+    public function isAdmin($userId)
+    {
+        $user = $this->db->fetchOne(
+            'SELECT is_admin FROM users WHERE id = ?',
+            [$userId]
+        );
+        
+        return $user && (int)$user['is_admin'] === 1;
+    }
+    
+    /**
+     * Check if current logged-in user is an admin (static method)
+     */
+    public static function checkIsAdmin()
+    {
+        static $isAdminCache = null;
+        static $cachedUserId = null;
+        
+        $userId = self::getUserId();
+        if (!$userId) {
+            return false;
+        }
+        
+        // Return cached result if available for the same user
+        if ($isAdminCache !== null && $cachedUserId === $userId) {
+            return $isAdminCache;
+        }
+        
+        $auth = new self();
+        $isAdminCache = $auth->isAdmin($userId);
+        $cachedUserId = $userId;
+        
+        return $isAdminCache;
+    }
+    
+    /**
+     * Grant admin role to a user
+     */
+    public function grantAdmin($userId, $grantedByUserId)
+    {
+        // Check if the granting user is an admin
+        if (!$this->isAdmin($grantedByUserId)) {
+            throw new Exception('Only admins can grant admin role');
+        }
+        
+        return $this->db->update(
+            'users',
+            ['is_admin' => 1],
+            'id = ?',
+            [$userId]
+        );
+    }
+    
+    /**
+     * Revoke admin role from a user
+     */
+    public function revokeAdmin($userId, $revokedByUserId)
+    {
+        // Check if the revoking user is an admin
+        if (!$this->isAdmin($revokedByUserId)) {
+            throw new Exception('Only admins can revoke admin role');
+        }
+        
+        // Prevent revoking own admin role
+        if ((int)$userId === (int)$revokedByUserId) {
+            throw new Exception('Cannot revoke your own admin role');
+        }
+        
+        // Check if this is the last admin
+        $adminCount = $this->db->fetchOne('SELECT COUNT(*) as count FROM users WHERE is_admin = 1');
+        if ($adminCount && (int)$adminCount['count'] <= 1) {
+            throw new Exception('Cannot revoke the last admin');
+        }
+        
+        return $this->db->update(
+            'users',
+            ['is_admin' => 0],
+            'id = ?',
+            [$userId]
+        );
+    }
+    
+    /**
+     * Get all users (admin only)
+     */
+    public function getAllUsers()
+    {
+        return $this->db->fetchAll(
+            'SELECT id, username, email, is_admin, created_at, last_login FROM users ORDER BY created_at DESC'
+        );
+    }
+    
+    /**
+     * Get feature toggle status
+     */
+    public function isFeatureEnabled($featureKey)
+    {
+        $feature = $this->db->fetchOne(
+            'SELECT is_enabled FROM feature_toggles WHERE feature_key = ?',
+            [$featureKey]
+        );
+        
+        // If feature not found in database, default to disabled for security
+        // (deny by default principle)
+        if (!$feature) {
+            return false;
+        }
+        
+        return (int)$feature['is_enabled'] === 1;
+    }
+    
+    /**
+     * Toggle feature on/off (admin only)
+     */
+    public function toggleFeature($featureKey, $enabled, $adminUserId)
+    {
+        // Check if the user is an admin
+        if (!$this->isAdmin($adminUserId)) {
+            throw new Exception('Only admins can toggle features');
+        }
+        
+        // Check if feature exists
+        $feature = $this->db->fetchOne(
+            'SELECT id FROM feature_toggles WHERE feature_key = ?',
+            [$featureKey]
+        );
+        
+        if (!$feature) {
+            throw new Exception('Feature not found');
+        }
+        
+        return $this->db->update(
+            'feature_toggles',
+            ['is_enabled' => $enabled ? 1 : 0],
+            'feature_key = ?',
+            [$featureKey]
+        );
+    }
+    
+    /**
+     * Get all feature toggles
+     */
+    public function getAllFeatureToggles()
+    {
+        return $this->db->fetchAll(
+            'SELECT * FROM feature_toggles ORDER BY feature_key ASC'
+        );
     }
 }
 

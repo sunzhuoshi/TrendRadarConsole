@@ -7,6 +7,14 @@ session_start();
 require_once 'includes/helpers.php';
 require_once 'includes/auth.php';
 
+// Check if registration is enabled
+$auth = new Auth();
+if (!$auth->isFeatureEnabled('user_registration')) {
+    setFlash('error', __('registration_disabled'));
+    header('Location: login.php');
+    exit;
+}
+
 // Redirect if already logged in
 if (Auth::isLoggedIn()) {
     header('Location: index.php');
