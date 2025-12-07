@@ -213,7 +213,7 @@ $currentLang = getCurrentLanguage();
                             🔄 <?php _e('restart_container'); ?>
                         </button>
                         <button type="button" class="btn btn-info" onclick="syncConfiguration()" id="btn-sync" style="display: none;">
-                            🔄 <?php _e('sync_configuration'); ?>
+                            🔃 <?php _e('sync_configuration'); ?>
                         </button>
                         <button type="button" class="btn btn-danger" onclick="removeContainer()" id="btn-remove" style="display: none;">
                             🗑️ <?php _e('remove_container'); ?>
