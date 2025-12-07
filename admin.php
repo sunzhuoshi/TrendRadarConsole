@@ -348,7 +348,7 @@ $currentLang = getCurrentLanguage();
         function revokeAdmin(userId, username) {
             // Check if trying to revoke admin from the first user (ID: 1)
             if (parseInt(userId) === <?php echo Auth::FIRST_USER_ID; ?>) {
-                showFlash('error', '<?php _e('cannot_revoke_first_user'); ?>');
+                showToast('<?php _e('cannot_revoke_first_user'); ?>', 'error');
                 return;
             }
             
