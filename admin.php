@@ -228,7 +228,7 @@ $currentLang = getCurrentLanguage();
                                                     <?php _e('grant_admin'); ?>
                                                 </button>
                                             <?php else: ?>
-                                                <button class="btn btn-revoke btn-small" onclick="revokeAdmin(<?php echo $user['id']; ?>, '<?php echo htmlspecialchars($user['username'], ENT_QUOTES); ?>')" <?php echo ((int)$user['id'] === (int)$userId || (int)$user['id'] === Auth::FIRST_USER_ID) ? 'disabled' : ''; ?>>
+                                                <button class="btn btn-revoke btn-small" onclick="revokeAdmin(<?php echo $user['id']; ?>, '<?php echo htmlspecialchars($user['username'], ENT_QUOTES); ?>')" <?php echo (int)$user['id'] === (int)$userId ? 'disabled' : ''; ?>>
                                                     <?php _e('revoke_admin'); ?>
                                                 </button>
                                             <?php endif; ?>
@@ -346,6 +346,12 @@ $currentLang = getCurrentLanguage();
         }
 
         function revokeAdmin(userId, username) {
+            // Check if trying to revoke admin from the first user (ID: 1)
+            if (userId === <?php echo Auth::FIRST_USER_ID; ?>) {
+                showFlash('error', '<?php _e('cannot_revoke_first_user'); ?>');
+                return;
+            }
+            
             if (!confirm('<?php _e('confirm_revoke_admin'); ?>')) {
                 return;
             }
