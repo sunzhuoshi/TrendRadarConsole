@@ -332,16 +332,16 @@ $currentLang = getCurrentLanguage();
             .then(handleApiResponse)
             .then(({ok, status, data}) => {
                 if (ok && data && data.success) {
-                    showFlash('success', '<?php _e('admin_granted'); ?>');
+                    showToast('<?php _e('admin_granted'); ?>', 'success');
                     setTimeout(() => location.reload(), 1000);
                 } else {
                     console.error('Grant admin failed:', status, data);
-                    showFlash('error', (data && data.message) || '<?php _e('admin_grant_failed'); ?>');
+                    showToast((data && data.message) || '<?php _e('admin_grant_failed'); ?>', 'error');
                 }
             })
             .catch(error => {
                 console.error('Error:', error);
-                showFlash('error', '<?php _e('admin_grant_failed'); ?>');
+                showToast('<?php _e('admin_grant_failed'); ?>', 'error');
             });
         }
 
@@ -364,16 +364,16 @@ $currentLang = getCurrentLanguage();
             .then(handleApiResponse)
             .then(({ok, status, data}) => {
                 if (ok && data && data.success) {
-                    showFlash('success', '<?php _e('admin_revoked'); ?>');
+                    showToast('<?php _e('admin_revoked'); ?>', 'success');
                     setTimeout(() => location.reload(), 1000);
                 } else {
                     console.error('Revoke admin failed:', status, data);
-                    showFlash('error', (data && data.message) || '<?php _e('admin_revoke_failed'); ?>');
+                    showToast((data && data.message) || '<?php _e('admin_revoke_failed'); ?>', 'error');
                 }
             })
             .catch(error => {
                 console.error('Error:', error);
-                showFlash('error', '<?php _e('admin_revoke_failed'); ?>');
+                showToast('<?php _e('admin_revoke_failed'); ?>', 'error');
             });
         }
 
@@ -393,37 +393,23 @@ $currentLang = getCurrentLanguage();
             .then(handleApiResponse)
             .then(({ok, status, data}) => {
                 if (ok && data && data.success) {
-                    showFlash('success', '<?php _e('feature_toggled'); ?>');
+                    showToast('<?php _e('feature_toggled'); ?>', 'success');
                 } else {
                     console.error('Toggle failed:', status, data);
-                    showFlash('error', (data && data.message) || '<?php _e('feature_toggle_failed'); ?>');
+                    showToast((data && data.message) || '<?php _e('feature_toggle_failed'); ?>', 'error');
                     // Reload to reset toggle state
                     setTimeout(() => location.reload(), 1000);
                 }
             })
             .catch(error => {
                 console.error('Error:', error);
-                showFlash('error', '<?php _e('feature_toggle_failed'); ?>');
+                showToast('<?php _e('feature_toggle_failed'); ?>', 'error');
                 // Reload to reset toggle state
                 setTimeout(() => location.reload(), 1000);
             });
         }
 
-        function showFlash(type, message) {
-            const existingFlash = document.querySelector('.flash-message');
-            if (existingFlash) {
-                existingFlash.remove();
-            }
 
-            const flash = document.createElement('div');
-            flash.className = `flash-message flash-${type}`;
-            flash.textContent = message;
-            
-            const mainContent = document.querySelector('.main-content');
-            mainContent.insertBefore(flash, mainContent.firstChild);
-
-            setTimeout(() => flash.remove(), 5000);
-        }
     </script>
 
     <script src="assets/js/app.js"></script>
