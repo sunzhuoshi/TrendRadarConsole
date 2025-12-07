@@ -228,7 +228,7 @@ $currentLang = getCurrentLanguage();
                                                     <?php _e('grant_admin'); ?>
                                                 </button>
                                             <?php else: ?>
-                                                <button class="btn btn-revoke btn-small" onclick="revokeAdmin(<?php echo $user['id']; ?>, '<?php echo htmlspecialchars($user['username'], ENT_QUOTES); ?>')" <?php echo ((int)$user['id'] === (int)$userId || (int)$user['id'] === 1) ? 'disabled' : ''; ?>>
+                                                <button class="btn btn-revoke btn-small" onclick="revokeAdmin(<?php echo $user['id']; ?>, '<?php echo htmlspecialchars($user['username'], ENT_QUOTES); ?>')" <?php echo ((int)$user['id'] === (int)$userId || (int)$user['id'] === Auth::FIRST_USER_ID) ? 'disabled' : ''; ?>>
                                                     <?php _e('revoke_admin'); ?>
                                                 </button>
                                             <?php endif; ?>

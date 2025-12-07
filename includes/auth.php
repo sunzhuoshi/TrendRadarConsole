@@ -10,6 +10,12 @@ class Auth
 {
     private $db;
     
+    /**
+     * The first user ID - this user is automatically granted admin privileges
+     * and cannot have admin revoked to ensure system integrity
+     */
+    const FIRST_USER_ID = 1;
+    
     public function __construct()
     {
         $this->db = Database::getInstance();
@@ -686,7 +692,7 @@ class Auth
         }
         
         // Prevent revoking admin from the first user (ID: 1)
-        if ((int)$userId === 1) {
+        if ((int)$userId === self::FIRST_USER_ID) {
             throw new Exception(__('cannot_revoke_first_user'));
         }
         
