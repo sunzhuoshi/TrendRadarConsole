@@ -622,6 +622,27 @@ return [
     'containers_load_failed' => 'Failed to load containers',
     'view_all_containers' => 'View All Containers',
     
+    // Docker Status Localization
+    'status_up': 'Up',
+    'status_exited': 'Exited',
+    'status_ago': ' ago',
+    'time_second': 'second',
+    'time_seconds': 'seconds',
+    'time_minute': 'minute',
+    'time_minutes': 'minutes',
+    'time_hour': 'hour',
+    'time_hours': 'hours',
+    'time_day': 'day',
+    'time_days': 'days',
+    'time_week': 'week',
+    'time_weeks': 'weeks',
+    'time_month': 'month',
+    'time_months': 'months',
+    'time_year': 'year',
+    'time_years': 'years',
+    'time_about': 'About',
+    'time_less_than': 'Less than',
+    
     // Admin Features
     'admin_panel' => 'Admin Panel',
     'user_management' => 'User Management',
