@@ -599,6 +599,26 @@ return [
     'worker_select_failed' => 'Failed to select Docker worker',
     'select_worker_first' => 'Please select a worker first',
     
+    // Docker Container Status
+    'container_status' => 'Container Status',
+    'all_containers' => 'All Containers',
+    'container_status_desc' => 'View all TrendRadar containers running on this Docker worker',
+    'container_id' => 'Container ID',
+    'container_name' => 'Container Name',
+    'container_image' => 'Image',
+    'container_state' => 'State',
+    'container_created' => 'Created',
+    'no_containers_found' => 'No containers found with "trendradar-" prefix',
+    'refresh_containers' => 'Refresh',
+    'container_running' => 'Running',
+    'container_exited' => 'Exited',
+    'container_created_state' => 'Created',
+    'container_paused' => 'Paused',
+    'container_restarting' => 'Restarting',
+    'containers_loaded' => 'Containers loaded successfully',
+    'containers_load_failed' => 'Failed to load containers',
+    'view_all_containers' => 'View All Containers',
+    
     // Admin Features
     'admin_panel' => 'Admin Panel',
     'user_management' => 'User Management',

@@ -160,6 +160,69 @@ try {
                 jsonError($testResult['message']);
             }
             break;
+            
+        case 'list_all_containers':
+            // List all containers with "trendradar-" prefix
+            // Only accessible by the worker owner or admins
+            if (!$sshConfigured) {
+                jsonError('SSH connection not configured.');
+            }
+            
+            // Check if user is admin or owner of the selected worker
+            $isAdmin = $auth->isAdmin($userId);
+            $isOwner = $selectedWorker && isset($selectedWorker['user_id']) && $selectedWorker['user_id'] == $userId;
+            
+            if (!$isAdmin && !$isOwner) {
+                jsonError('Access denied. Only worker owner or admins can view all containers.', 403);
+            }
+            
+            // Connect to SSH
+            $ssh = new SSHHelper(
+                $sshSettings['docker_ssh_host'],
+                $sshSettings['docker_ssh_username'],
+                $sshSettings['docker_ssh_password'],
+                $sshSettings['docker_ssh_port']
+            );
+            
+            if (!$ssh->connect()) {
+                jsonError('Failed to connect to Docker worker: ' . $ssh->getLastError());
+            }
+            
+            // List all containers with "trendradar-" prefix
+            // Using --format to get JSON output for easier parsing
+            $result = $ssh->exec('docker ps -a --filter "name=trendradar-" --format "{{json .}}" 2>&1');
+            
+            if ($result['success']) {
+                $containers = [];
+                $lines = explode("\n", trim($result['output']));
+                
+                foreach ($lines as $line) {
+                    $line = trim($line);
+                    if (empty($line)) continue;
+                    
+                    $containerData = json_decode($line, true);
+                    if ($containerData) {
+                        $containers[] = [
+                            'id' => $containerData['ID'] ?? '',
+                            'name' => $containerData['Names'] ?? '',
+                            'image' => $containerData['Image'] ?? '',
+                            'status' => $containerData['Status'] ?? '',
+                            'state' => $containerData['State'] ?? '',
+                            'created' => $containerData['CreatedAt'] ?? '',
+                            'ports' => $containerData['Ports'] ?? ''
+                        ];
+                    }
+                }
+                
+                jsonSuccess([
+                    'containers' => $containers,
+                    'worker_name' => $selectedWorker['name'] ?? '',
+                    'worker_host' => $sshSettings['docker_ssh_host']
+                ], 'Containers listed successfully');
+            } else {
+                jsonError('Failed to list containers: ' . ($result['error'] ?: $result['output']));
+            }
+            break;
     }
     
     // Actions that require SSH connection

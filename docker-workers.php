@@ -202,6 +202,10 @@ sudo ./setup-docker-worker.sh</code></pre>
                                                     onclick="testWorkerConnection(<?php echo (int)$worker['id']; ?>)">
                                                 🔗 <?php _e('test'); ?>
                                             </button>
+                                            <button type="button" class="btn btn-sm btn-info" 
+                                                    onclick="selectAndViewContainers(<?php echo (int)$worker['id']; ?>)">
+                                                📦 <?php _e('view_all_containers'); ?>
+                                            </button>
                                             <button type="button" class="btn btn-sm btn-danger" 
                                                     onclick="deleteWorker(<?php echo (int)$worker['id']; ?>)">
                                                 🗑️ <?php _e('delete'); ?>
@@ -216,6 +220,33 @@ sudo ./setup-docker-worker.sh</code></pre>
                     <?php endif; ?>
                 </div>
             </div>
+            
+            <!-- Container Status Section (only for owner and admins) -->
+            <?php if (!empty($userWorkers)): ?>
+            <div class="card" id="container-status-card">
+                <div class="card-header">
+                    <h3>📦 <?php _e('container_status'); ?></h3>
+                    <button type="button" class="btn btn-sm btn-outline" onclick="loadContainers()">
+                        🔄 <?php _e('refresh_containers'); ?>
+                    </button>
+                </div>
+                <div class="card-body">
+                    <p class="text-muted mb-3"><?php _e('container_status_desc'); ?></p>
+                    
+                    <div id="container-status-loading" style="display: none; text-align: center; padding: 20px;">
+                        <div class="spinner-border" role="status">
+                            <span class="sr-only">Loading...</span>
+                        </div>
+                    </div>
+                    
+                    <div id="container-status-content">
+                        <div class="alert alert-info">
+                            <?php _e('select_worker_first'); ?>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <?php endif; ?>
             
             <!-- Back to Docker Deployment -->
             <div class="mt-3">
@@ -408,6 +439,92 @@ sudo ./setup-docker-worker.sh</code></pre>
                 }
             } catch (error) {
                 showToast('<?php _e('connection_failed'); ?>: ' + error.message, 'error');
+            }
+        }
+        
+        // Load containers for selected worker
+        async function loadContainers() {
+            const loadingDiv = document.getElementById('container-status-loading');
+            const contentDiv = document.getElementById('container-status-content');
+            
+            loadingDiv.style.display = 'block';
+            contentDiv.style.display = 'none';
+            
+            try {
+                const result = await apiRequest('api/docker.php', 'POST', {
+                    action: 'list_all_containers'
+                });
+                
+                const data = result.data;
+                const containers = data.containers || [];
+                
+                if (containers.length === 0) {
+                    contentDiv.innerHTML = '<div class="alert alert-info"><?php _e('no_containers_found'); ?></div>';
+                } else {
+                    let html = '<div class="table-responsive"><table class="table">';
+                    html += '<thead><tr>';
+                    html += '<th><?php _e('container_name'); ?></th>';
+                    html += '<th><?php _e('container_image'); ?></th>';
+                    html += '<th><?php _e('container_state'); ?></th>';
+                    html += '<th><?php _e('status'); ?></th>';
+                    html += '<th><?php _e('container_created'); ?></th>';
+                    html += '</tr></thead><tbody>';
+                    
+                    containers.forEach(container => {
+                        const stateClass = container.state === 'running' ? 'badge-success' : 
+                                         container.state === 'exited' ? 'badge-secondary' : 'badge-warning';
+                        
+                        html += '<tr>';
+                        html += '<td><code>' + sanitizeHtml(container.name) + '</code></td>';
+                        html += '<td>' + sanitizeHtml(container.image) + '</td>';
+                        html += '<td><span class="badge ' + stateClass + '">' + sanitizeHtml(container.state) + '</span></td>';
+                        html += '<td>' + sanitizeHtml(container.status) + '</td>';
+                        html += '<td>' + sanitizeHtml(container.created) + '</td>';
+                        html += '</tr>';
+                    });
+                    
+                    html += '</tbody></table></div>';
+                    contentDiv.innerHTML = html;
+                }
+                
+                showToast('<?php _e('containers_loaded'); ?>', 'success');
+            } catch (error) {
+                contentDiv.innerHTML = '<div class="alert alert-danger"><?php _e('containers_load_failed'); ?>: ' + sanitizeHtml(error.message) + '</div>';
+                showToast('<?php _e('containers_load_failed'); ?>: ' + error.message, 'error');
+            } finally {
+                loadingDiv.style.display = 'none';
+                contentDiv.style.display = 'block';
+            }
+        }
+        
+        // Helper function to sanitize HTML
+        function sanitizeHtml(str) {
+            const div = document.createElement('div');
+            div.textContent = str;
+            return div.innerHTML;
+        }
+        
+        // Select worker and view containers
+        async function selectAndViewContainers(workerId) {
+            try {
+                // First, select the worker
+                await apiRequest('api/docker-workers.php', 'POST', {
+                    action: 'select',
+                    worker_id: workerId
+                });
+                
+                // Scroll to container status section
+                document.getElementById('container-status-card').scrollIntoView({ 
+                    behavior: 'smooth', 
+                    block: 'start' 
+                });
+                
+                // Wait a bit for scroll, then load containers
+                setTimeout(() => {
+                    loadContainers();
+                }, 300);
+            } catch (error) {
+                showToast('<?php _e('worker_select_failed'); ?>: ' + error.message, 'error');
             }
         }
     </script>

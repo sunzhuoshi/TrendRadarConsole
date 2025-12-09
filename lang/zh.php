@@ -599,6 +599,26 @@ return [
     'worker_select_failed' => '选择 Docker 工作机失败',
     'select_worker_first' => '请先选择一个工作机',
     
+    // Docker Container Status
+    'container_status' => '容器状态',
+    'all_containers' => '所有容器',
+    'container_status_desc' => '查看在此 Docker 工作机上运行的所有 TrendRadar 容器',
+    'container_id' => '容器 ID',
+    'container_name' => '容器名称',
+    'container_image' => '镜像',
+    'container_state' => '状态',
+    'container_created' => '创建时间',
+    'no_containers_found' => '未找到前缀为 "trendradar-" 的容器',
+    'refresh_containers' => '刷新',
+    'container_running' => '运行中',
+    'container_exited' => '已退出',
+    'container_created_state' => '已创建',
+    'container_paused' => '已暂停',
+    'container_restarting' => '重启中',
+    'containers_loaded' => '容器列表加载成功',
+    'containers_load_failed' => '加载容器列表失败',
+    'view_all_containers' => '查看所有容器',
+    
     // Admin Features
     'admin_panel' => '管理面板',
     'user_management' => '用户管理',
