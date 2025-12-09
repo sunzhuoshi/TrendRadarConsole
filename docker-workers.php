@@ -496,6 +496,7 @@ sudo ./setup-docker-worker.sh</code></pre>
                     let html = '<div class="table-responsive"><table class="table">';
                     html += '<thead><tr>';
                     html += '<th><?php _e('container_name'); ?></th>';
+                    html += '<th><?php _e('username'); ?></th>';
                     html += '<th><?php _e('container_image'); ?></th>';
                     html += '<th><?php _e('container_state'); ?></th>';
                     html += '<th><?php _e('status'); ?></th>';
@@ -511,6 +512,7 @@ sudo ./setup-docker-worker.sh</code></pre>
                         
                         html += '<tr>';
                         html += '<td><code>' + sanitizeHtml(container.name) + '</code></td>';
+                        html += '<td>' + (container.username ? sanitizeHtml(container.username) : '-') + '</td>';
                         html += '<td>' + sanitizeHtml(container.image) + '</td>';
                         html += '<td><span class="badge ' + stateClass + '">' + sanitizeHtml(state) + '</span></td>';
                         html += '<td>' + sanitizeHtml(container.status) + '</td>';
