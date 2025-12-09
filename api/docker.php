@@ -261,7 +261,7 @@ try {
                         $container['username'] = null;
                     }
                 }
-                unset($container); // Break reference
+                unset($container); // Break reference to avoid unintended modifications to the last array element
                 
                 jsonSuccess([
                     'containers' => $containers,
