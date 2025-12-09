@@ -365,7 +365,8 @@ function getJsTranslations() {
         'time_second', 'time_seconds', 'time_minute', 'time_minutes',
         'time_hour', 'time_hours', 'time_day', 'time_days',
         'time_week', 'time_weeks', 'time_month', 'time_months',
-        'time_year', 'time_years', 'time_about', 'time_less_than'
+        'time_year', 'time_years', 'time_about', 'time_less_than',
+        'running_status'
     ];
     
     foreach ($commonKeys as $key) {
