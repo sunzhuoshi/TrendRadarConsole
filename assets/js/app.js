@@ -420,11 +420,12 @@ function setButtonLoading(button, isLoading) {
  * @returns {string} - The localized status string
  */
 function localizeDockerStatus(status) {
+    const TIME_UNIT_PATTERN = '(second|minute|hour|day|week|month|year)s?';
     if (!status) return status;
     
     // Pattern 1: "Up X time_unit" or "Up X time_units"
     // Examples: "Up 40 hours", "Up 2 days", "Up 3 weeks"
-    let match = status.match(/^Up (\d+) (second|minute|hour|day|week|month|year)s?$/i);
+    let match = status.match(new RegExp(`^Up (\\d+) ${TIME_UNIT_PATTERN}$`, 'i'));
     if (match) {
         const count = parseInt(match[1]);
         const unit = match[2].toLowerCase();
