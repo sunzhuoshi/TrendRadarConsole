@@ -307,6 +307,16 @@ sudo ./setup-docker-worker.sh</code></pre>
     <script>var i18n = <?php echo getJsTranslations(); ?>;</script>
     <script src="assets/js/app.js"></script>
     <script>
+        // Constants
+        const SCROLL_ANIMATION_DELAY = 300; // ms - Time to wait for smooth scroll animation
+        const CONTAINER_STATE_CLASSES = {
+            'running': 'badge-success',
+            'exited': 'badge-secondary',
+            'paused': 'badge-warning',
+            'restarting': 'badge-info',
+            'created': 'badge-info'
+        };
+        
         // Workers data for editing
         const workersData = <?php echo json_encode($userWorkers); ?>;
         
@@ -464,15 +474,6 @@ sudo ./setup-docker-worker.sh</code></pre>
                 if (containers.length === 0) {
                     contentDiv.innerHTML = '<div class="alert alert-info"><?php _e('no_containers_found'); ?></div>';
                 } else {
-                    // State to badge class mapping
-                    const stateClasses = {
-                        'running': 'badge-success',
-                        'exited': 'badge-secondary',
-                        'paused': 'badge-warning',
-                        'restarting': 'badge-info',
-                        'created': 'badge-info'
-                    };
-                    
                     let html = '<div class="table-responsive"><table class="table">';
                     html += '<thead><tr>';
                     html += '<th><?php _e('container_name'); ?></th>';
@@ -483,7 +484,7 @@ sudo ./setup-docker-worker.sh</code></pre>
                     html += '</tr></thead><tbody>';
                     
                     containers.forEach(container => {
-                        const stateClass = stateClasses[container.state] || 'badge-warning';
+                        const stateClass = CONTAINER_STATE_CLASSES[container.state] || 'badge-warning';
                         
                         html += '<tr>';
                         html += '<td><code>' + sanitizeHtml(container.name) + '</code></td>';
@@ -533,7 +534,7 @@ sudo ./setup-docker-worker.sh</code></pre>
                 // Wait for smooth scroll animation to complete before loading containers
                 setTimeout(() => {
                     loadContainers();
-                }, 300); // 300ms matches typical smooth scroll duration
+                }, SCROLL_ANIMATION_DELAY);
             } catch (error) {
                 showToast('<?php _e('worker_select_failed'); ?>: ' + error.message, 'error');
             }

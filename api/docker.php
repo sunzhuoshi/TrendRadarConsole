@@ -10,6 +10,9 @@ require_once '../includes/auth.php';
 require_once '../includes/ssh.php';
 require_once '../includes/configuration.php';
 
+// Constants
+define('CONTAINER_NAME_PREFIX', 'trendradar-');
+
 header('Content-Type: application/json; charset=utf-8');
 
 // Require login for API
@@ -190,7 +193,8 @@ try {
             
             // List all containers with "trendradar-" prefix
             // Using --format to get JSON output for easier parsing
-            $result = $ssh->exec('docker ps -a --filter "name=trendradar-" --format "{{json .}}" 2>&1');
+            $filterPattern = CONTAINER_NAME_PREFIX;
+            $result = $ssh->exec('docker ps -a --filter "name=' . $filterPattern . '" --format "{{json .}}" 2>&1');
             
             if ($result['success']) {
                 $containers = [];
