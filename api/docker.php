@@ -218,7 +218,8 @@ try {
                         
                         // Extract user ID from container name (format: trendradar-{userId} or trendradar-{userId}-dev)
                         $extractedUserId = null;
-                        if (preg_match('/^trendradar-(\d+)(?:-dev)?$/', $containerName, $matches)) {
+                        $prefix = preg_quote(CONTAINER_NAME_PREFIX, '/');
+                        if (preg_match('/^' . $prefix . '(\d+)(?:-dev)?$/', $containerName, $matches)) {
                             $extractedUserId = (int)$matches[1];
                             $userIds[] = $extractedUserId;
                         }
@@ -239,7 +240,8 @@ try {
                 // Fetch usernames for all extracted user IDs
                 $usernames = [];
                 if (!empty($userIds)) {
-                    $uniqueUserIds = array_unique($userIds);
+                    // Ensure all user IDs are integers for security
+                    $uniqueUserIds = array_unique(array_map('intval', $userIds));
                     $placeholders = implode(',', array_fill(0, count($uniqueUserIds), '?'));
                     $db = Database::getInstance();
                     $stmt = $db->query(
