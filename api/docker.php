@@ -202,7 +202,8 @@ try {
                     
                     $containerData = json_decode($line, true);
                     if (json_last_error() !== JSON_ERROR_NONE) {
-                        // Skip malformed JSON entries
+                        // Log malformed JSON for debugging (but don't expose to client)
+                        error_log("Docker container JSON parse error: " . json_last_error_msg() . " - Line: " . $line);
                         continue;
                     }
                     if ($containerData) {

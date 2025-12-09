@@ -42,6 +42,9 @@ if (!$isAdvancedMode) {
 // Get user's Docker workers
 $userWorkers = $auth->getUserDockerWorkers($userId);
 
+// Check if user is admin (admins can view all containers on any worker)
+$isAdmin = $auth->isAdmin($userId);
+
 $flash = getFlash();
 $currentPage = 'docker-workers';
 
@@ -222,7 +225,7 @@ sudo ./setup-docker-worker.sh</code></pre>
             </div>
             
             <!-- Container Status Section (only for owner and admins) -->
-            <?php if (!empty($userWorkers)): ?>
+            <?php if (!empty($userWorkers) || $isAdmin): ?>
             <div class="card" id="container-status-card">
                 <div class="card-header">
                     <h3>📦 <?php _e('container_status'); ?></h3>
