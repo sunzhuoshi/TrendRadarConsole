@@ -359,7 +359,13 @@ function getJsTranslations() {
         'workflow_status', 'workflow_enabled', 'workflow_disabled', 'workflow_enable',
         'workflow_disable', 'workflow_enable_confirm', 'workflow_disable_confirm',
         'workflow_enabled_success', 'workflow_disabled_success', 'workflow_enable_failed',
-        'workflow_disable_failed', 'workflow_status_loading'
+        'workflow_disable_failed', 'workflow_status_loading',
+        // Docker status localization keys
+        'status_up', 'status_exited', 'status_ago',
+        'time_second', 'time_seconds', 'time_minute', 'time_minutes',
+        'time_hour', 'time_hours', 'time_day', 'time_days',
+        'time_week', 'time_weeks', 'time_month', 'time_months',
+        'time_year', 'time_years', 'time_about', 'time_less_than'
     ];
     
     foreach ($commonKeys as $key) {
