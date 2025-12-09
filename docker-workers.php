@@ -510,7 +510,12 @@ sudo ./setup-docker-worker.sh</code></pre>
                                          CONTAINER_STATE_CLASSES[state] : 'badge-warning';
                         
                         html += '<tr>';
-                        html += '<td><code>' + sanitizeHtml(container.name) + '</code></td>';
+                        // Display container name with username if available
+                        html += '<td><code>' + sanitizeHtml(container.name) + '</code>';
+                        if (container.username) {
+                            html += ' <small class="text-muted">(' + sanitizeHtml(container.username) + ')</small>';
+                        }
+                        html += '</td>';
                         html += '<td>' + sanitizeHtml(container.image) + '</td>';
                         html += '<td><span class="badge ' + stateClass + '">' + sanitizeHtml(state) + '</span></td>';
                         html += '<td>' + sanitizeHtml(container.status) + '</td>';

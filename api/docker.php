@@ -9,6 +9,7 @@ require_once '../includes/helpers.php';
 require_once '../includes/auth.php';
 require_once '../includes/ssh.php';
 require_once '../includes/configuration.php';
+require_once '../includes/database.php';
 
 // Constants
 define('CONTAINER_NAME_PREFIX', 'trendradar-');
@@ -199,6 +200,7 @@ try {
             
             if ($result['success']) {
                 $containers = [];
+                $userIds = [];
                 $lines = explode("\n", trim($result['output']));
                 
                 foreach ($lines as $line) {
@@ -212,17 +214,52 @@ try {
                         continue;
                     }
                     if ($containerData) {
+                        $containerName = $containerData['Names'] ?? '';
+                        
+                        // Extract user ID from container name (format: trendradar-{userId} or trendradar-{userId}-dev)
+                        $extractedUserId = null;
+                        if (preg_match('/^trendradar-(\d+)(?:-dev)?$/', $containerName, $matches)) {
+                            $extractedUserId = (int)$matches[1];
+                            $userIds[] = $extractedUserId;
+                        }
+                        
                         $containers[] = [
                             'id' => $containerData['ID'] ?? '',
-                            'name' => $containerData['Names'] ?? '',
+                            'name' => $containerName,
                             'image' => $containerData['Image'] ?? '',
                             'status' => $containerData['Status'] ?? '',
                             'state' => $containerData['State'] ?? '',
                             'created' => $containerData['CreatedAt'] ?? '',
-                            'ports' => $containerData['Ports'] ?? ''
+                            'ports' => $containerData['Ports'] ?? '',
+                            'user_id' => $extractedUserId
                         ];
                     }
                 }
+                
+                // Fetch usernames for all extracted user IDs
+                $usernames = [];
+                if (!empty($userIds)) {
+                    $uniqueUserIds = array_unique($userIds);
+                    $placeholders = implode(',', array_fill(0, count($uniqueUserIds), '?'));
+                    $db = Database::getInstance();
+                    $stmt = $db->query(
+                        "SELECT id, username FROM users WHERE id IN ($placeholders)",
+                        $uniqueUserIds
+                    );
+                    while ($row = $stmt->fetch()) {
+                        $usernames[$row['id']] = $row['username'];
+                    }
+                }
+                
+                // Add usernames to containers
+                foreach ($containers as &$container) {
+                    if ($container['user_id'] !== null && isset($usernames[$container['user_id']])) {
+                        $container['username'] = $usernames[$container['user_id']];
+                    } else {
+                        $container['username'] = null;
+                    }
+                }
+                unset($container); // Break reference
                 
                 jsonSuccess([
                     'containers' => $containers,
