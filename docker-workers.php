@@ -499,7 +499,7 @@ sudo ./setup-docker-worker.sh</code></pre>
                     html += '<th><?php _e('username'); ?></th>';
                     html += '<th><?php _e('container_image'); ?></th>';
                     html += '<th><?php _e('container_state'); ?></th>';
-                    html += '<th><?php _e('status'); ?></th>';
+                    html += '<th><?php _e('running_status'); ?></th>';
                     html += '<th><?php _e('container_created'); ?></th>';
                     html += '</tr></thead><tbody>';
                     
@@ -514,8 +514,8 @@ sudo ./setup-docker-worker.sh</code></pre>
                         html += '<td><code>' + sanitizeHtml(container.name) + '</code></td>';
                         html += '<td>' + (container.username ? sanitizeHtml(container.username) : '-') + '</td>';
                         html += '<td>' + sanitizeHtml(container.image) + '</td>';
-                        html += '<td><span class="badge ' + stateClass + '">' + sanitizeHtml(state) + '</span></td>';
-                        html += '<td>' + sanitizeHtml(container.status) + '</td>';
+                        html += '<td><span class="badge ' + stateClass + '">' + sanitizeHtml(localizeContainerState(state)) + '</span></td>';
+                        html += '<td>' + sanitizeHtml(localizeDockerStatus(container.status)) + '</td>';
                         html += '<td>' + sanitizeHtml(container.created) + '</td>';
                         html += '</tr>';
                     });

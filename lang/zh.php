@@ -621,6 +621,28 @@ return [
     'containers_loaded' => '容器列表加载成功',
     'containers_load_failed' => '加载容器列表失败',
     'view_all_containers' => '查看所有容器',
+    'running_status' => '运行状态',
+    
+    // Docker Status Localization
+    'status_up' => '运行',
+    'status_exited' => '已退出',
+    'status_ago' => '前',
+    'time_second' => '秒',
+    'time_seconds' => '秒',
+    'time_minute' => '分钟',
+    'time_minutes' => '分钟',
+    'time_hour' => '小时',
+    'time_hours' => '小时',
+    'time_day' => '天',
+    'time_days' => '天',
+    'time_week' => '周',
+    'time_weeks' => '周',
+    'time_month' => '个月',
+    'time_months' => '个月',
+    'time_year' => '年',
+    'time_years' => '年',
+    'time_about' => '约',
+    'time_less_than' => '不到',
     
     // Admin Features
     'admin_panel' => '管理面板',

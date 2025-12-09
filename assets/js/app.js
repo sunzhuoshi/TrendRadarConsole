@@ -411,3 +411,106 @@ function setButtonLoading(button, isLoading) {
         }
     }
 }
+
+/**
+ * Localize Docker container status strings
+ * Translates status strings like "Up 40 hours", "Exited (0) About an hour ago"
+ * 
+ * @param {string} status - The Docker status string to localize
+ * @returns {string} - The localized status string
+ */
+function localizeDockerStatus(status) {
+    const TIME_UNIT_PATTERN = '(second|minute|hour|day|week|month|year)s?';
+    if (!status) return status;
+    
+    // Pattern 1: "Up X time_unit" or "Up X time_units"
+    // Examples: "Up 40 hours", "Up 2 days", "Up 3 weeks"
+    let match = status.match(new RegExp(`^Up (\\d+) ${TIME_UNIT_PATTERN}$`, 'i'));
+    if (match) {
+        const count = parseInt(match[1]);
+        const unit = match[2].toLowerCase();
+        const timeKey = count === 1 ? `time_${unit}` : `time_${unit}s`;
+        return `${__('status_up')} ${count} ${__(timeKey)}`;
+    }
+    
+    // Pattern 2: "Up About an hour" or "Up About a day"
+    // Examples: "Up About an hour", "Up About a minute"
+    match = status.match(/^Up About an? (.+)$/i);
+    if (match) {
+        const unit = match[1].toLowerCase();
+        const timeKey = `time_${unit}`;
+        return `${__('status_up')} ${__('time_about')} 1 ${__(timeKey)}`;
+    }
+    
+    // Pattern 3: "Up Less than a second"
+    match = status.match(/^Up Less than a (.+)$/i);
+    if (match) {
+        const unit = match[1].toLowerCase();
+        const timeKey = `time_${unit}`;
+        return `${__('status_up')} ${__('time_less_than')} 1 ${__(timeKey)}`;
+    }
+    
+    // Pattern 4: "Exited (X) Y time_units ago"
+    // Examples: "Exited (0) 39 hours ago", "Exited (1) 2 days ago"
+    match = status.match(/^Exited \((\d+)\) (\d+) (second|minute|hour|day|week|month|year)s? ago$/i);
+    if (match) {
+        const exitCode = match[1];
+        const count = parseInt(match[2]);
+        const unit = match[3].toLowerCase();
+        const timeKey = count === 1 ? `time_${unit}` : `time_${unit}s`;
+        // For Chinese: "已退出 (0) 39 小时前"
+        // For English: "Exited (0) 39 hours ago"
+        return `${__('status_exited')} (${exitCode}) ${count} ${__(timeKey)}${__('status_ago')}`;
+    }
+    
+    // Pattern 5: "Exited (X) About an hour ago" or "Exited (X) About a day ago"
+    // Examples: "Exited (0) About an hour ago", "Exited (1) About a minute ago"
+    match = status.match(/^Exited \((\d+)\) About an? (.+) ago$/i);
+    if (match) {
+        const exitCode = match[1];
+        const unit = match[2].toLowerCase();
+        const timeKey = `time_${unit}`;
+        return `${__('status_exited')} (${exitCode}) ${__('time_about')} 1 ${__(timeKey)}${__('status_ago')}`;
+    }
+    
+    // Pattern 6: "Exited (X) Less than a second ago"
+    match = status.match(/^Exited \((\d+)\) Less than a (.+) ago$/i);
+    if (match) {
+        const exitCode = match[1];
+        const unit = match[2].toLowerCase();
+        const timeKey = `time_${unit}`;
+        return `${__('status_exited')} (${exitCode}) ${__('time_less_than')} 1 ${__(timeKey)}${__('status_ago')}`;
+    }
+    
+    // If no pattern matches, return original status
+    return status;
+}
+
+/**
+ * Localize Docker container state
+ * Translates state strings like "running", "exited", "paused"
+ * 
+ * @param {string} state - The Docker container state to localize
+ * @returns {string} - The localized state string
+ */
+function localizeContainerState(state) {
+    if (!state) return state;
+    
+    // Convert to lowercase for consistent matching
+    const stateLower = state.toLowerCase();
+    
+    // Map state to localization key
+    const stateKeyMap = {
+        'running': 'container_running',
+        'exited': 'container_exited',
+        'created': 'container_created_state',
+        'paused': 'container_paused',
+        'restarting': 'container_restarting'
+    };
+    
+    // Get the localization key
+    const key = stateKeyMap[stateLower];
+    
+    // Return localized string if key exists, otherwise return original
+    return key ? __(key) : state;
+}
