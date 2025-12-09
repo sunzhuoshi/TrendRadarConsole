@@ -201,6 +201,10 @@ try {
                     if (empty($line)) continue;
                     
                     $containerData = json_decode($line, true);
+                    if (json_last_error() !== JSON_ERROR_NONE) {
+                        // Skip malformed JSON entries
+                        continue;
+                    }
                     if ($containerData) {
                         $containers[] = [
                             'id' => $containerData['ID'] ?? '',

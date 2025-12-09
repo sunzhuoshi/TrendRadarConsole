@@ -461,6 +461,15 @@ sudo ./setup-docker-worker.sh</code></pre>
                 if (containers.length === 0) {
                     contentDiv.innerHTML = '<div class="alert alert-info"><?php _e('no_containers_found'); ?></div>';
                 } else {
+                    // State to badge class mapping
+                    const stateClasses = {
+                        'running': 'badge-success',
+                        'exited': 'badge-secondary',
+                        'paused': 'badge-warning',
+                        'restarting': 'badge-info',
+                        'created': 'badge-info'
+                    };
+                    
                     let html = '<div class="table-responsive"><table class="table">';
                     html += '<thead><tr>';
                     html += '<th><?php _e('container_name'); ?></th>';
@@ -471,8 +480,7 @@ sudo ./setup-docker-worker.sh</code></pre>
                     html += '</tr></thead><tbody>';
                     
                     containers.forEach(container => {
-                        const stateClass = container.state === 'running' ? 'badge-success' : 
-                                         container.state === 'exited' ? 'badge-secondary' : 'badge-warning';
+                        const stateClass = stateClasses[container.state] || 'badge-warning';
                         
                         html += '<tr>';
                         html += '<td><code>' + sanitizeHtml(container.name) + '</code></td>';
@@ -519,10 +527,10 @@ sudo ./setup-docker-worker.sh</code></pre>
                     block: 'start' 
                 });
                 
-                // Wait a bit for scroll, then load containers
+                // Wait for smooth scroll animation to complete before loading containers
                 setTimeout(() => {
                     loadContainers();
-                }, 300);
+                }, 300); // 300ms matches typical smooth scroll duration
             } catch (error) {
                 showToast('<?php _e('worker_select_failed'); ?>: ' + error.message, 'error');
             }
