@@ -499,6 +499,22 @@ class Auth
     }
     
     /**
+     * Get all Docker workers (admin only)
+     */
+    public function getAllDockerWorkers()
+    {
+        $workers = $this->db->fetchAll(
+            'SELECT dw.*, u.username as owner_username 
+             FROM docker_workers dw 
+             LEFT JOIN users u ON dw.user_id = u.id 
+             ORDER BY dw.name ASC',
+            []
+        );
+        
+        return $workers ?: [];
+    }
+    
+    /**
      * Get a specific Docker worker by ID
      */
     public function getDockerWorkerById($workerId)

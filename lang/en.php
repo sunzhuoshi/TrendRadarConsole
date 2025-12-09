@@ -205,6 +205,8 @@ return [
     'keywords_saved' => 'Keywords saved successfully',
     'failed_to_save' => 'Failed to save: ',
     'group' => 'Group',
+    'owner' => 'Owner',
+    'you' => 'You',
     
     // Webhooks/Notifications
     'notification_webhooks' => 'Notification Webhooks',
@@ -564,6 +566,7 @@ return [
     'docker_workers_desc' => 'Manage Docker workers that can be used for container deployment. You can create private workers for yourself or public workers that other users can use.',
     'add_docker_worker' => 'Add Docker Worker',
     'your_docker_workers' => 'Your Docker Workers',
+    'all_docker_workers' => 'All Docker Workers',
     'edit_docker_worker' => 'Edit Docker Worker',
     'worker_name' => 'Worker Name',
     'worker_name_placeholder' => 'e.g., Local Server, Production Server',

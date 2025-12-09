@@ -205,6 +205,8 @@ return [
     'keywords_saved' => '关键词保存成功',
     'failed_to_save' => '保存失败：',
     'group' => '组',
+    'owner' => '所有者',
+    'you' => '您',
     
     // Webhooks/Notifications
     'notification_webhooks' => '通知 Webhooks',
@@ -564,6 +566,7 @@ return [
     'docker_workers_desc' => '管理可用于容器部署的 Docker 工作机。您可以创建仅供自己使用的私有工作机，或其他用户也可以使用的公共工作机。',
     'add_docker_worker' => '添加 Docker 工作机',
     'your_docker_workers' => '您的 Docker 工作机',
+    'all_docker_workers' => '所有 Docker 工作机',
     'edit_docker_worker' => '编辑 Docker 工作机',
     'worker_name' => '工作机名称',
     'worker_name_placeholder' => '例如：本地服务器、生产服务器',

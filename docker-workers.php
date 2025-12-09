@@ -39,11 +39,15 @@ if (!$isAdvancedMode) {
     redirect('docker.php');
 }
 
-// Get user's Docker workers
-$userWorkers = $auth->getUserDockerWorkers($userId);
-
 // Check if user is admin (admins can view all containers on any worker)
 $isAdmin = $auth->isAdmin($userId);
+
+// Get user's Docker workers (admins get all workers)
+if ($isAdmin) {
+    $userWorkers = $auth->getAllDockerWorkers();
+} else {
+    $userWorkers = $auth->getUserDockerWorkers($userId);
+}
 
 $flash = getFlash();
 $currentPage = 'docker-workers';
@@ -149,7 +153,7 @@ sudo ./setup-docker-worker.sh</code></pre>
             <!-- Existing Workers List -->
             <div class="card">
                 <div class="card-header">
-                    <h3>📋 <?php _e('your_docker_workers'); ?></h3>
+                    <h3>📋 <?php $isAdmin ? _e('all_docker_workers') : _e('your_docker_workers'); ?></h3>
                 </div>
                 <div class="card-body">
                     <?php if (empty($userWorkers)): ?>
@@ -162,6 +166,9 @@ sudo ./setup-docker-worker.sh</code></pre>
                             <thead>
                                 <tr>
                                     <th><?php _e('worker_name'); ?></th>
+                                    <?php if ($isAdmin): ?>
+                                    <th><?php _e('owner'); ?></th>
+                                    <?php endif; ?>
                                     <th><?php _e('ssh_host'); ?></th>
                                     <th><?php _e('ssh_port'); ?></th>
                                     <th><?php _e('visibility'); ?></th>
@@ -175,6 +182,14 @@ sudo ./setup-docker-worker.sh</code></pre>
                                     <td>
                                         <strong><?php echo sanitize($worker['name']); ?></strong>
                                     </td>
+                                    <?php if ($isAdmin): ?>
+                                    <td>
+                                        <?php echo sanitize($worker['owner_username'] ?? 'Unknown'); ?>
+                                        <?php if ($worker['user_id'] == $userId): ?>
+                                        <span class="badge badge-primary" style="font-size: 0.7rem; margin-left: 5px;"><?php _e('you'); ?></span>
+                                        <?php endif; ?>
+                                    </td>
+                                    <?php endif; ?>
                                     <td>
                                         <code><?php echo sanitize($worker['ssh_host']); ?></code>
                                     </td>
@@ -197,10 +212,12 @@ sudo ./setup-docker-worker.sh</code></pre>
                                     </td>
                                     <td>
                                         <div class="btn-group">
+                                            <?php if ($worker['user_id'] == $userId): ?>
                                             <button type="button" class="btn btn-sm btn-outline" 
                                                     onclick="editWorker(<?php echo (int)$worker['id']; ?>)">
                                                 ✏️ <?php _e('edit'); ?>
                                             </button>
+                                            <?php endif; ?>
                                             <button type="button" class="btn btn-sm btn-outline" 
                                                     onclick="testWorkerConnection(<?php echo (int)$worker['id']; ?>)">
                                                 🔗 <?php _e('test'); ?>
@@ -209,10 +226,12 @@ sudo ./setup-docker-worker.sh</code></pre>
                                                     onclick="selectAndViewContainers(<?php echo (int)$worker['id']; ?>)">
                                                 📦 <?php _e('view_all_containers'); ?>
                                             </button>
+                                            <?php if ($worker['user_id'] == $userId): ?>
                                             <button type="button" class="btn btn-sm btn-danger" 
                                                     onclick="deleteWorker(<?php echo (int)$worker['id']; ?>)">
                                                 🗑️ <?php _e('delete'); ?>
                                             </button>
+                                            <?php endif; ?>
                                         </div>
                                     </td>
                                 </tr>
