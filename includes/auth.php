@@ -507,8 +507,7 @@ class Auth
             'SELECT dw.*, u.username as owner_username 
              FROM docker_workers dw 
              LEFT JOIN users u ON dw.user_id = u.id 
-             ORDER BY dw.name ASC',
-            []
+             ORDER BY dw.name ASC'
         );
         
         return $workers ?: [];

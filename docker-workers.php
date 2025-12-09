@@ -153,7 +153,7 @@ sudo ./setup-docker-worker.sh</code></pre>
             <!-- Existing Workers List -->
             <div class="card">
                 <div class="card-header">
-                    <h3>📋 <?php $isAdmin ? _e('all_docker_workers') : _e('your_docker_workers'); ?></h3>
+                    <h3>📋 <?php if ($isAdmin) { _e('all_docker_workers'); } else { _e('your_docker_workers'); } ?></h3>
                 </div>
                 <div class="card-body">
                     <?php if (empty($userWorkers)): ?>
