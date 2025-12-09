@@ -486,13 +486,14 @@ sudo ./setup-docker-worker.sh</code></pre>
                     containers.forEach(container => {
                         // Safely check if state exists in mapping, defaulting to warning
                         const state = container.state || '';
-                        const stateClass = (state in CONTAINER_STATE_CLASSES) ? 
+                        // Use hasOwnProperty for safer property checking against prototype pollution
+                        const stateClass = Object.prototype.hasOwnProperty.call(CONTAINER_STATE_CLASSES, state) ? 
                                          CONTAINER_STATE_CLASSES[state] : 'badge-warning';
                         
                         html += '<tr>';
                         html += '<td><code>' + sanitizeHtml(container.name) + '</code></td>';
                         html += '<td>' + sanitizeHtml(container.image) + '</td>';
-                        html += '<td><span class="badge ' + sanitizeHtml(stateClass) + '">' + sanitizeHtml(state) + '</span></td>';
+                        html += '<td><span class="badge ' + stateClass + '">' + sanitizeHtml(state) + '</span></td>';
                         html += '<td>' + sanitizeHtml(container.status) + '</td>';
                         html += '<td>' + sanitizeHtml(container.created) + '</td>';
                         html += '</tr>';

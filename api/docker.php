@@ -194,7 +194,8 @@ try {
             // List all containers with "trendradar-" prefix
             // Using --format to get JSON output for easier parsing
             $filterPattern = escapeshellarg(CONTAINER_NAME_PREFIX);
-            $result = $ssh->exec('docker ps -a --filter "name=' . $filterPattern . '" --format "{{json .}}" 2>&1');
+            // Note: escapeshellarg already adds quotes, so we use name= without additional quotes
+            $result = $ssh->exec('docker ps -a --filter name=' . $filterPattern . ' --format "{{json .}}" 2>&1');
             
             if ($result['success']) {
                 $containers = [];
