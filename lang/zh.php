@@ -621,6 +621,7 @@ return [
     'containers_loaded' => '容器列表加载成功',
     'containers_load_failed' => '加载容器列表失败',
     'view_all_containers' => '查看所有容器',
+    'running_status' => '运行状态',
     
     // Docker Status Localization
     'status_up' => '运行',

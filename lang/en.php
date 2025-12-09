@@ -621,6 +621,7 @@ return [
     'containers_loaded' => 'Containers loaded successfully',
     'containers_load_failed' => 'Failed to load containers',
     'view_all_containers' => 'View All Containers',
+    'running_status' => 'Running Status',
     
     // Docker Status Localization
     'status_up' => 'Up',

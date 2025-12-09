@@ -499,7 +499,7 @@ sudo ./setup-docker-worker.sh</code></pre>
                     html += '<th><?php _e('username'); ?></th>';
                     html += '<th><?php _e('container_image'); ?></th>';
                     html += '<th><?php _e('container_state'); ?></th>';
-                    html += '<th><?php _e('status'); ?></th>';
+                    html += '<th><?php _e('running_status'); ?></th>';
                     html += '<th><?php _e('container_created'); ?></th>';
                     html += '</tr></thead><tbody>';
                     
