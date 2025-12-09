@@ -484,12 +484,15 @@ sudo ./setup-docker-worker.sh</code></pre>
                     html += '</tr></thead><tbody>';
                     
                     containers.forEach(container => {
-                        const stateClass = CONTAINER_STATE_CLASSES[container.state] || 'badge-warning';
+                        // Safely check if state exists in mapping, defaulting to warning
+                        const state = container.state || '';
+                        const stateClass = (state in CONTAINER_STATE_CLASSES) ? 
+                                         CONTAINER_STATE_CLASSES[state] : 'badge-warning';
                         
                         html += '<tr>';
                         html += '<td><code>' + sanitizeHtml(container.name) + '</code></td>';
                         html += '<td>' + sanitizeHtml(container.image) + '</td>';
-                        html += '<td><span class="badge ' + stateClass + '">' + sanitizeHtml(container.state) + '</span></td>';
+                        html += '<td><span class="badge ' + sanitizeHtml(stateClass) + '">' + sanitizeHtml(state) + '</span></td>';
                         html += '<td>' + sanitizeHtml(container.status) + '</td>';
                         html += '<td>' + sanitizeHtml(container.created) + '</td>';
                         html += '</tr>';
