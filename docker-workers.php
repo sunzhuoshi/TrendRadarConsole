@@ -39,8 +39,15 @@ if (!$isAdvancedMode) {
     redirect('docker.php');
 }
 
-// Get user's Docker workers
-$userWorkers = $auth->getUserDockerWorkers($userId);
+// Check if user is admin (admins can view all containers on any worker)
+$isAdmin = $auth->isAdmin($userId);
+
+// Get user's Docker workers (admins get all workers)
+if ($isAdmin) {
+    $userWorkers = $auth->getAllDockerWorkers();
+} else {
+    $userWorkers = $auth->getUserDockerWorkers($userId);
+}
 
 $flash = getFlash();
 $currentPage = 'docker-workers';
@@ -146,7 +153,7 @@ sudo ./setup-docker-worker.sh</code></pre>
             <!-- Existing Workers List -->
             <div class="card">
                 <div class="card-header">
-                    <h3>📋 <?php _e('your_docker_workers'); ?></h3>
+                    <h3>📋 <?php echo $isAdmin ? _e('all_docker_workers') : _e('your_docker_workers'); ?></h3>
                 </div>
                 <div class="card-body">
                     <?php if (empty($userWorkers)): ?>
@@ -159,6 +166,9 @@ sudo ./setup-docker-worker.sh</code></pre>
                             <thead>
                                 <tr>
                                     <th><?php _e('worker_name'); ?></th>
+                                    <?php if ($isAdmin): ?>
+                                    <th><?php _e('owner'); ?></th>
+                                    <?php endif; ?>
                                     <th><?php _e('ssh_host'); ?></th>
                                     <th><?php _e('ssh_port'); ?></th>
                                     <th><?php _e('visibility'); ?></th>
@@ -172,6 +182,14 @@ sudo ./setup-docker-worker.sh</code></pre>
                                     <td>
                                         <strong><?php echo sanitize($worker['name']); ?></strong>
                                     </td>
+                                    <?php if ($isAdmin): ?>
+                                    <td>
+                                        <?php echo sanitize($worker['owner_username'] ?? 'Unknown'); ?>
+                                        <?php if ($worker['user_id'] == $userId): ?>
+                                        <span class="badge badge-primary" style="font-size: 0.7rem; margin-left: 5px;"><?php _e('you'); ?></span>
+                                        <?php endif; ?>
+                                    </td>
+                                    <?php endif; ?>
                                     <td>
                                         <code><?php echo sanitize($worker['ssh_host']); ?></code>
                                     </td>
@@ -194,18 +212,26 @@ sudo ./setup-docker-worker.sh</code></pre>
                                     </td>
                                     <td>
                                         <div class="btn-group">
+                                            <?php if ($worker['user_id'] == $userId): ?>
                                             <button type="button" class="btn btn-sm btn-outline" 
                                                     onclick="editWorker(<?php echo (int)$worker['id']; ?>)">
                                                 ✏️ <?php _e('edit'); ?>
                                             </button>
+                                            <?php endif; ?>
                                             <button type="button" class="btn btn-sm btn-outline" 
                                                     onclick="testWorkerConnection(<?php echo (int)$worker['id']; ?>)">
                                                 🔗 <?php _e('test'); ?>
                                             </button>
+                                            <button type="button" class="btn btn-sm btn-info" 
+                                                    onclick="selectAndViewContainers(<?php echo (int)$worker['id']; ?>)">
+                                                📦 <?php _e('view_all_containers'); ?>
+                                            </button>
+                                            <?php if ($worker['user_id'] == $userId): ?>
                                             <button type="button" class="btn btn-sm btn-danger" 
                                                     onclick="deleteWorker(<?php echo (int)$worker['id']; ?>)">
                                                 🗑️ <?php _e('delete'); ?>
                                             </button>
+                                            <?php endif; ?>
                                         </div>
                                     </td>
                                 </tr>
@@ -216,6 +242,33 @@ sudo ./setup-docker-worker.sh</code></pre>
                     <?php endif; ?>
                 </div>
             </div>
+            
+            <!-- Container Status Section (only for owner and admins) -->
+            <?php if (!empty($userWorkers) || $isAdmin): ?>
+            <div class="card" id="container-status-card">
+                <div class="card-header">
+                    <h3>📦 <?php _e('container_status'); ?></h3>
+                    <button type="button" class="btn btn-sm btn-outline" onclick="loadContainers()">
+                        🔄 <?php _e('refresh_containers'); ?>
+                    </button>
+                </div>
+                <div class="card-body">
+                    <p class="text-muted mb-3"><?php _e('container_status_desc'); ?></p>
+                    
+                    <div id="container-status-loading" style="display: none; text-align: center; padding: 20px;">
+                        <div class="spinner-border" role="status">
+                            <span class="sr-only">Loading...</span>
+                        </div>
+                    </div>
+                    
+                    <div id="container-status-content">
+                        <div class="alert alert-info">
+                            <?php _e('select_worker_first'); ?>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <?php endif; ?>
             
             <!-- Back to Docker Deployment -->
             <div class="mt-3">
@@ -273,6 +326,16 @@ sudo ./setup-docker-worker.sh</code></pre>
     <script>var i18n = <?php echo getJsTranslations(); ?>;</script>
     <script src="assets/js/app.js"></script>
     <script>
+        // Constants
+        const SCROLL_ANIMATION_DELAY = 300; // ms - Time to wait for smooth scroll animation
+        const CONTAINER_STATE_CLASSES = {
+            'running': 'badge-success',
+            'exited': 'badge-secondary',
+            'paused': 'badge-warning',
+            'restarting': 'badge-info',
+            'created': 'badge-info'
+        };
+        
         // Workers data for editing
         const workersData = <?php echo json_encode($userWorkers); ?>;
         
@@ -408,6 +471,95 @@ sudo ./setup-docker-worker.sh</code></pre>
                 }
             } catch (error) {
                 showToast('<?php _e('connection_failed'); ?>: ' + error.message, 'error');
+            }
+        }
+        
+        // Load containers for selected worker
+        async function loadContainers() {
+            const loadingDiv = document.getElementById('container-status-loading');
+            const contentDiv = document.getElementById('container-status-content');
+            
+            loadingDiv.style.display = 'block';
+            contentDiv.style.display = 'none';
+            
+            try {
+                const result = await apiRequest('api/docker.php', 'POST', {
+                    action: 'list_all_containers'
+                });
+                
+                const data = result.data;
+                const containers = data.containers || [];
+                
+                if (containers.length === 0) {
+                    contentDiv.innerHTML = '<div class="alert alert-info"><?php _e('no_containers_found'); ?></div>';
+                } else {
+                    let html = '<div class="table-responsive"><table class="table">';
+                    html += '<thead><tr>';
+                    html += '<th><?php _e('container_name'); ?></th>';
+                    html += '<th><?php _e('container_image'); ?></th>';
+                    html += '<th><?php _e('container_state'); ?></th>';
+                    html += '<th><?php _e('status'); ?></th>';
+                    html += '<th><?php _e('container_created'); ?></th>';
+                    html += '</tr></thead><tbody>';
+                    
+                    containers.forEach(container => {
+                        // Safely check if state exists in mapping, defaulting to warning
+                        const state = container.state || '';
+                        // Use hasOwnProperty for safer property checking against prototype pollution
+                        const stateClass = Object.prototype.hasOwnProperty.call(CONTAINER_STATE_CLASSES, state) ? 
+                                         CONTAINER_STATE_CLASSES[state] : 'badge-warning';
+                        
+                        html += '<tr>';
+                        html += '<td><code>' + sanitizeHtml(container.name) + '</code></td>';
+                        html += '<td>' + sanitizeHtml(container.image) + '</td>';
+                        html += '<td><span class="badge ' + stateClass + '">' + sanitizeHtml(state) + '</span></td>';
+                        html += '<td>' + sanitizeHtml(container.status) + '</td>';
+                        html += '<td>' + sanitizeHtml(container.created) + '</td>';
+                        html += '</tr>';
+                    });
+                    
+                    html += '</tbody></table></div>';
+                    contentDiv.innerHTML = html;
+                }
+                
+                showToast('<?php _e('containers_loaded'); ?>', 'success');
+            } catch (error) {
+                contentDiv.innerHTML = '<div class="alert alert-danger"><?php _e('containers_load_failed'); ?>: ' + sanitizeHtml(error.message) + '</div>';
+                showToast('<?php _e('containers_load_failed'); ?>: ' + error.message, 'error');
+            } finally {
+                loadingDiv.style.display = 'none';
+                contentDiv.style.display = 'block';
+            }
+        }
+        
+        // Helper function to sanitize HTML
+        function sanitizeHtml(str) {
+            const div = document.createElement('div');
+            div.textContent = str;
+            return div.innerHTML;
+        }
+        
+        // Select worker and view containers
+        async function selectAndViewContainers(workerId) {
+            try {
+                // First, select the worker
+                await apiRequest('api/docker-workers.php', 'POST', {
+                    action: 'select',
+                    worker_id: workerId
+                });
+                
+                // Scroll to container status section
+                document.getElementById('container-status-card').scrollIntoView({ 
+                    behavior: 'smooth', 
+                    block: 'start' 
+                });
+                
+                // Wait for smooth scroll animation to complete before loading containers
+                setTimeout(() => {
+                    loadContainers();
+                }, SCROLL_ANIMATION_DELAY);
+            } catch (error) {
+                showToast('<?php _e('worker_select_failed'); ?>: ' + error.message, 'error');
             }
         }
     </script>

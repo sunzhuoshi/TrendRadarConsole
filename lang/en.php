@@ -205,6 +205,8 @@ return [
     'keywords_saved' => 'Keywords saved successfully',
     'failed_to_save' => 'Failed to save: ',
     'group' => 'Group',
+    'owner' => 'Owner',
+    'you' => 'You',
     
     // Webhooks/Notifications
     'notification_webhooks' => 'Notification Webhooks',
@@ -564,6 +566,7 @@ return [
     'docker_workers_desc' => 'Manage Docker workers that can be used for container deployment. You can create private workers for yourself or public workers that other users can use.',
     'add_docker_worker' => 'Add Docker Worker',
     'your_docker_workers' => 'Your Docker Workers',
+    'all_docker_workers' => 'All Docker Workers',
     'edit_docker_worker' => 'Edit Docker Worker',
     'worker_name' => 'Worker Name',
     'worker_name_placeholder' => 'e.g., Local Server, Production Server',
@@ -598,6 +601,26 @@ return [
     'worker_selected' => 'Docker worker selected',
     'worker_select_failed' => 'Failed to select Docker worker',
     'select_worker_first' => 'Please select a worker first',
+    
+    // Docker Container Status
+    'container_status' => 'Container Status',
+    'all_containers' => 'All Containers',
+    'container_status_desc' => 'View all TrendRadar containers running on this Docker worker',
+    'container_id' => 'Container ID',
+    'container_name' => 'Container Name',
+    'container_image' => 'Image',
+    'container_state' => 'State',
+    'container_created' => 'Created',
+    'no_containers_found' => 'No containers found with "trendradar-" prefix',
+    'refresh_containers' => 'Refresh',
+    'container_running' => 'Running',
+    'container_exited' => 'Exited',
+    'container_created_state' => 'Created',
+    'container_paused' => 'Paused',
+    'container_restarting' => 'Restarting',
+    'containers_loaded' => 'Containers loaded successfully',
+    'containers_load_failed' => 'Failed to load containers',
+    'view_all_containers' => 'View All Containers',
     
     // Admin Features
     'admin_panel' => 'Admin Panel',
