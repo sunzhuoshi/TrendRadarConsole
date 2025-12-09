@@ -366,7 +366,10 @@ function getJsTranslations() {
         'time_hour', 'time_hours', 'time_day', 'time_days',
         'time_week', 'time_weeks', 'time_month', 'time_months',
         'time_year', 'time_years', 'time_about', 'time_less_than',
-        'running_status'
+        'running_status',
+        // Docker container state localization keys
+        'container_running', 'container_exited', 'container_created_state',
+        'container_paused', 'container_restarting'
     ];
     
     foreach ($commonKeys as $key) {

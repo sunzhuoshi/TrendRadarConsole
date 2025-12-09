@@ -485,3 +485,32 @@ function localizeDockerStatus(status) {
     // If no pattern matches, return original status
     return status;
 }
+
+/**
+ * Localize Docker container state
+ * Translates state strings like "running", "exited", "paused"
+ * 
+ * @param {string} state - The Docker container state to localize
+ * @returns {string} - The localized state string
+ */
+function localizeContainerState(state) {
+    if (!state) return state;
+    
+    // Convert to lowercase for consistent matching
+    const stateLower = state.toLowerCase();
+    
+    // Map state to localization key
+    const stateKeyMap = {
+        'running': 'container_running',
+        'exited': 'container_exited',
+        'created': 'container_created_state',
+        'paused': 'container_paused',
+        'restarting': 'container_restarting'
+    };
+    
+    // Get the localization key
+    const key = stateKeyMap[stateLower];
+    
+    // Return localized string if key exists, otherwise return original
+    return key ? __(key) : state;
+}

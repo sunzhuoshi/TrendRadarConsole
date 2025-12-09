@@ -514,7 +514,7 @@ sudo ./setup-docker-worker.sh</code></pre>
                         html += '<td><code>' + sanitizeHtml(container.name) + '</code></td>';
                         html += '<td>' + (container.username ? sanitizeHtml(container.username) : '-') + '</td>';
                         html += '<td>' + sanitizeHtml(container.image) + '</td>';
-                        html += '<td><span class="badge ' + stateClass + '">' + sanitizeHtml(state) + '</span></td>';
+                        html += '<td><span class="badge ' + stateClass + '">' + sanitizeHtml(localizeContainerState(state)) + '</span></td>';
                         html += '<td>' + sanitizeHtml(localizeDockerStatus(container.status)) + '</td>';
                         html += '<td>' + sanitizeHtml(container.created) + '</td>';
                         html += '</tr>';
