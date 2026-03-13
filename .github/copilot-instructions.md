@@ -6,7 +6,7 @@ Use [Conventional Commits 1.0.0](https://www.conventionalcommits.org/en/v1.0.0/)
 - `<type>(optional-scope): <short description>`
 - Use lowercase (except proper nouns and acronyms), imperative tone, no trailing period; keep the summary under 72 characters.
 - Add a body when helpful (what/why), wrapping lines at ~72 characters.
-- For breaking changes, either mark the type/scope as breaking with `!` (e.g. `feat(api)!: <short description>`) or add a footer `BREAKING CHANGE: <details>`. This repo prefers the footer style; Copilot should default to using the `BREAKING CHANGE:` footer unless the surrounding context clearly uses `!`.
+- For breaking changes, either mark the type/scope as breaking with `!` (e.g. `feat(api)!: <short description>`) or add a footer `BREAKING CHANGE: <details>`. Prefer the `BREAKING CHANGE:` footer for breaking changes unless the surrounding context clearly uses `!`.
 - Reference issues in footers, e.g. `Refs #123` or `Fixes #123`.
 
 ## Common commit types (recommended)
