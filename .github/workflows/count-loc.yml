@@ -19,10 +19,10 @@ jobs:
 
       - name: 📊 Count lines of code
         run: |
-          echo "# Lines of Code Report" >> $GITHUB_STEP_SUMMARY
-          echo "" >> $GITHUB_STEP_SUMMARY
-          echo "Generated on: $(date -u '+%Y-%m-%d %H:%M:%S UTC')" >> $GITHUB_STEP_SUMMARY
-          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "# Lines of Code Report" >> "$GITHUB_STEP_SUMMARY"
+          echo "" >> "$GITHUB_STEP_SUMMARY"
+          echo "Generated on: $(date -u '+%Y-%m-%d %H:%M:%S UTC')" >> "$GITHUB_STEP_SUMMARY"
+          echo "" >> "$GITHUB_STEP_SUMMARY"
 
           # Count PHP files
           php_files=$(find . -type f -name "*.php" ! -path "*/vendor/*" ! -path "*/node_modules/*" | wc -l)
