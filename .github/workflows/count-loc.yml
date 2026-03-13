@@ -45,7 +45,7 @@ jobs:
           # Count HTML files
           html_files=$(find . $PRUNE_ARGS -name "*.html" -print | wc -l)
           html_lines=$(find . $PRUNE_ARGS -name "*.html" -exec cat {} + | wc -l)
-          sh_lines=$(find . $PRUNE_ARGS -name "*.sh" -exec cat {} + | wc -l)
+
           # Count Shell scripts
           sh_files=$(find . $PRUNE_ARGS -name "*.sh" -print | wc -l)
           sh_lines=$(find . $PRUNE_ARGS -name "*.sh" -exec cat {} + | wc -l)
