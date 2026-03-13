@@ -25,20 +25,20 @@ jobs:
           echo "" >> "$GITHUB_STEP_SUMMARY"
 
           # Count PHP files
-          php_files=$(find . -type f -name "*.php" ! -path "*/vendor/*" ! -path "*/node_modules/*" | wc -l)
-          php_lines=$(find . -type f -name "*.php" ! -path "*/vendor/*" ! -path "*/node_modules/*" -exec cat {} + | wc -l)
+          php_files=$(find . -type d \( -name vendor -o -name node_modules \) -prune -o -type f -name "*.php" -print | wc -l)
+          php_lines=$(find . -type d \( -name vendor -o -name node_modules \) -prune -o -type f -name "*.php" -exec cat {} + | wc -l)
 
           # Count JavaScript files
-          js_files=$(find . -type f -name "*.js" ! -path "*/vendor/*" ! -path "*/node_modules/*" | wc -l)
-          js_lines=$(find . -type f -name "*.js" ! -path "*/vendor/*" ! -path "*/node_modules/*" -exec cat {} + | wc -l)
+          js_files=$(find . -type d \( -name vendor -o -name node_modules \) -prune -o -type f -name "*.js" -print | wc -l)
+          js_lines=$(find . -type d \( -name vendor -o -name node_modules \) -prune -o -type f -name "*.js" -exec cat {} + | wc -l)
 
           # Count CSS files
-          css_files=$(find . -type f -name "*.css" ! -path "*/vendor/*" ! -path "*/node_modules/*" | wc -l)
-          css_lines=$(find . -type f -name "*.css" ! -path "*/vendor/*" ! -path "*/node_modules/*" -exec cat {} + | wc -l)
+          css_files=$(find . -type d \( -name vendor -o -name node_modules \) -prune -o -type f -name "*.css" -print | wc -l)
+          css_lines=$(find . -type d \( -name vendor -o -name node_modules \) -prune -o -type f -name "*.css" -exec cat {} + | wc -l)
 
           # Count HTML files
-          html_files=$(find . -type f -name "*.html" ! -path "*/vendor/*" ! -path "*/node_modules/*" | wc -l)
-          html_lines=$(find . -type f -name "*.html" ! -path "*/vendor/*" ! -path "*/node_modules/*" -exec cat {} + | wc -l)
+          html_files=$(find . -type d \( -name vendor -o -name node_modules \) -prune -o -type f -name "*.html" -print | wc -l)
+          html_lines=$(find . -type d \( -name vendor -o -name node_modules \) -prune -o -type f -name "*.html" -exec cat {} + | wc -l)
 
           # Count Shell scripts
           sh_files=$(find . -type f -name "*.sh" ! -path "*/vendor/*" ! -path "*/node_modules/*" | wc -l)
@@ -57,19 +57,19 @@ jobs:
           total_lines=$((php_lines + js_lines + css_lines + html_lines + sh_lines + yaml_lines + sql_lines))
 
           # Display results in table format
-          echo "## Summary by File Type" >> $GITHUB_STEP_SUMMARY
-          echo "" >> $GITHUB_STEP_SUMMARY
-          echo "| File Type | Files | Lines of Code |" >> $GITHUB_STEP_SUMMARY
-          echo "|-----------|-------|---------------|" >> $GITHUB_STEP_SUMMARY
-          echo "| PHP | $php_files | $php_lines |" >> $GITHUB_STEP_SUMMARY
-          echo "| JavaScript | $js_files | $js_lines |" >> $GITHUB_STEP_SUMMARY
-          echo "| CSS | $css_files | $css_lines |" >> $GITHUB_STEP_SUMMARY
-          echo "| HTML | $html_files | $html_lines |" >> $GITHUB_STEP_SUMMARY
-          echo "| Shell | $sh_files | $sh_lines |" >> $GITHUB_STEP_SUMMARY
-          echo "| YAML | $yaml_files | $yaml_lines |" >> $GITHUB_STEP_SUMMARY
-          echo "| SQL | $sql_files | $sql_lines |" >> $GITHUB_STEP_SUMMARY
-          echo "| **Total** | **$total_files** | **$total_lines** |" >> $GITHUB_STEP_SUMMARY
-          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "## Summary by File Type" >> "$GITHUB_STEP_SUMMARY"
+          echo "" >> "$GITHUB_STEP_SUMMARY"
+          echo "| File Type | Files | Lines of Code |" >> "$GITHUB_STEP_SUMMARY"
+          echo "|-----------|-------|---------------|" >> "$GITHUB_STEP_SUMMARY"
+          echo "| PHP | $php_files | $php_lines |" >> "$GITHUB_STEP_SUMMARY"
+          echo "| JavaScript | $js_files | $js_lines |" >> "$GITHUB_STEP_SUMMARY"
+          echo "| CSS | $css_files | $css_lines |" >> "$GITHUB_STEP_SUMMARY"
+          echo "| HTML | $html_files | $html_lines |" >> "$GITHUB_STEP_SUMMARY"
+          echo "| Shell | $sh_files | $sh_lines |" >> "$GITHUB_STEP_SUMMARY"
+          echo "| YAML | $yaml_files | $yaml_lines |" >> "$GITHUB_STEP_SUMMARY"
+          echo "| SQL | $sql_files | $sql_lines |" >> "$GITHUB_STEP_SUMMARY"
+          echo "| **Total** | **$total_files** | **$total_lines** |" >> "$GITHUB_STEP_SUMMARY"
+          echo "" >> "$GITHUB_STEP_SUMMARY"
 
           # Also output to console
           echo "========================================="
