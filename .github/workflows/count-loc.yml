@@ -52,8 +52,8 @@ jobs:
           yaml_lines=$(find . -type f \( -name "*.yml" -o -name "*.yaml" \) ! -path "*/vendor/*" ! -path "*/node_modules/*" -exec cat {} + | wc -l)
 
           # Count SQL files
-          sql_files=$(find . -type f -name "*.sql" ! -path "*/vendor/*" ! -path "*/node_modules/*" | wc -l)
-          sql_lines=$(find . -type f -name "*.sql" ! -path "*/vendor/*" ! -path "*/node_modules/*" -exec cat {} + | wc -l)
+          sql_files=$(find . $PRUNE_ARGS -name "*.sql" -print | wc -l)
+          sql_lines=$(find . $PRUNE_ARGS -name "*.sql" -exec cat {} + | wc -l)
 
           # Calculate totals
           total_files=$((php_files + js_files + css_files + html_files + sh_files + yaml_files + sql_files))
