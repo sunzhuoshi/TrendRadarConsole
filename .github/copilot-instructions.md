@@ -1,6 +1,6 @@
-# GitHub Copilot Commit Message Instructions
+# GitHub Copilot Commit Message and PR Title Instructions
 
-Use [Conventional Commits 1.0.0](https://www.conventionalcommits.org/en/v1.0.0/) for **all** commit messages that Copilot suggests.
+Use [Conventional Commits 1.0.0](https://www.conventionalcommits.org/en/v1.0.0/) for **all** commit messages and **pull request titles** that Copilot suggests.
 
 ## Format
 - `<type>(optional-scope): <short description>`
