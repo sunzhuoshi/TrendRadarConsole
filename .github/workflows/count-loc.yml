@@ -29,23 +29,23 @@ jobs:
 
           # Count PHP files
           php_files=$(find . -type f -name "*.php" ! -path "*/vendor/*" ! -path "*/node_modules/*" | wc -l)
-          php_lines=$(find . -type f -name "*.php" ! -path "*/vendor/*" ! -path "*/node_modules/*" -exec wc -l {} + | awk '{sum+=$1} END{print sum}')
+          php_lines=$(find . -type f -name "*.php" ! -path "*/vendor/*" ! -path "*/node_modules/*" -exec cat {} + | wc -l)
 
           # Count JavaScript files
           js_files=$(find . -type f -name "*.js" ! -path "*/vendor/*" ! -path "*/node_modules/*" | wc -l)
-          js_lines=$(find . -type f -name "*.js" ! -path "*/vendor/*" ! -path "*/node_modules/*" -exec wc -l {} + | awk '{sum+=$1} END{print sum}')
+          js_lines=$(find . -type f -name "*.js" ! -path "*/vendor/*" ! -path "*/node_modules/*" -exec cat {} + | wc -l)
 
           # Count CSS files
           css_files=$(find . -type f -name "*.css" ! -path "*/vendor/*" ! -path "*/node_modules/*" | wc -l)
-          css_lines=$(find . -type f -name "*.css" ! -path "*/vendor/*" ! -path "*/node_modules/*" -exec wc -l {} + | awk '{sum+=$1} END{print sum}')
+          css_lines=$(find . -type f -name "*.css" ! -path "*/vendor/*" ! -path "*/node_modules/*" -exec cat {} + | wc -l)
 
           # Count HTML files
           html_files=$(find . -type f -name "*.html" ! -path "*/vendor/*" ! -path "*/node_modules/*" | wc -l)
-          html_lines=$(find . -type f -name "*.html" ! -path "*/vendor/*" ! -path "*/node_modules/*" -exec wc -l {} + | awk '{sum+=$1} END{print sum}')
+          html_lines=$(find . -type f -name "*.html" ! -path "*/vendor/*" ! -path "*/node_modules/*" -exec cat {} + | wc -l)
 
           # Count Shell scripts
           sh_files=$(find . -type f -name "*.sh" ! -path "*/vendor/*" ! -path "*/node_modules/*" | wc -l)
-          sh_lines=$(find . -type f -name "*.sh" ! -path "*/vendor/*" ! -path "*/node_modules/*" -exec wc -l {} + | awk '{sum+=$1} END{print sum}')
+          sh_lines=$(find . -type f -name "*.sh" ! -path "*/vendor/*" ! -path "*/node_modules/*" -exec cat {} + | wc -l)
 
           # Count YAML files
           yaml_files=$(find . -type f \( -name "*.yml" -o -name "*.yaml" \) ! -path "*/vendor/*" ! -path "*/node_modules/*" | wc -l)
