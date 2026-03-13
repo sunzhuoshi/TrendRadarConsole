@@ -7,7 +7,7 @@ permissions:
   contents: read
 
 concurrency:
-  group: count-loc-${{ github.ref }}
+  group: count-loc-${{ github.ref_name }}
   cancel-in-progress: true
 
 jobs:
