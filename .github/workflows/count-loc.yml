@@ -2,9 +2,6 @@ name: Count Lines of Code
 
 on:
   workflow_dispatch:
-  push:
-    branches:
-      - '**'
 
 permissions:
   contents: read
