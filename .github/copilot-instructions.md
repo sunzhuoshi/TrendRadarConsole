@@ -9,7 +9,7 @@ Use [Conventional Commits 1.0.0](https://www.conventionalcommits.org/en/v1.0.0/)
 - For breaking changes, either mark the type/scope as breaking with `!` (e.g. `feat(api)!: <short description>`) or add a footer `BREAKING CHANGE: <details>`. This repo prefers the footer style; Copilot should default to using the `BREAKING CHANGE:` footer unless the surrounding context clearly uses `!`.
 - Reference issues in footers, e.g. `Refs #123` or `Fixes #123`.
 
-## Allowed types (common)
+## Common commit types (recommended)
 - `feat` — new feature
 - `fix` — bug fix
 - `docs` — documentation only
@@ -21,6 +21,8 @@ Use [Conventional Commits 1.0.0](https://www.conventionalcommits.org/en/v1.0.0/)
 - `ci` — CI configuration or scripts
 - `chore` — maintenance tasks
 - `revert` — reverts a previous commit
+
+Copilot should prefer these types, but may use other valid Conventional Commit types when clearly appropriate; this list is not exhaustive.
 
 ## Examples
 - `feat(api): add keyword throttling`
