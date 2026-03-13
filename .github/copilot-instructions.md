@@ -25,5 +25,5 @@ Use [Conventional Commits 1.0.0](https://www.conventionalcommits.org/en/v1.0.0/)
 ## Examples
 - `feat(api): add keyword throttling`
 - `fix(auth): handle expired sessions`
-- `docs: add setup guide for docker workers`
+- `docs: add setup guide for Docker workers`
 - `chore: update deployment script paths`
