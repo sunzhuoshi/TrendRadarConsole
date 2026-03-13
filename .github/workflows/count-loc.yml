@@ -2,6 +2,9 @@ name: Count Lines of Code
 
 on:
   workflow_dispatch:
+  push:
+    branches:
+      - '**'
 
 permissions:
   contents: read
@@ -45,11 +48,11 @@ jobs:
 
           # Count Shell scripts
           sh_files=$(find . $PRUNE_ARGS -name "*.sh" -print | wc -l)
-          sh_lines=$(find . -type f -name "*.sh" ! -path "*/vendor/*" ! -path "*/node_modules/*" -exec cat {} + | wc -l)
+          sh_lines=$(find . $PRUNE_ARGS -name "*.sh" -exec cat {} + | wc -l)
 
           # Count YAML files
-          yaml_files=$(find . -type f \( -name "*.yml" -o -name "*.yaml" \) ! -path "*/vendor/*" ! -path "*/node_modules/*" | wc -l)
-          yaml_lines=$(find . -type f \( -name "*.yml" -o -name "*.yaml" \) ! -path "*/vendor/*" ! -path "*/node_modules/*" -exec cat {} + | wc -l)
+          yaml_files=$(find . $PRUNE_ARGS \( -name "*.yml" -o -name "*.yaml" \) -print | wc -l)
+          yaml_lines=$(find . $PRUNE_ARGS \( -name "*.yml" -o -name "*.yaml" \) -exec cat {} + | wc -l)
 
           # Count SQL files
           sql_files=$(find . $PRUNE_ARGS -name "*.sql" -print | wc -l)
