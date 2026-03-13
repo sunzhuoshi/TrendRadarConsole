@@ -1,0 +1,94 @@
+name: Count Lines of Code
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - '**'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: count-loc-${{ github.ref_name }}
+  cancel-in-progress: true
+
+jobs:
+  count-lines-of-code:
+    runs-on: ubuntu-latest
+    steps:
+      - name: 🛎️ Checkout code
+        uses: actions/checkout@v4
+
+      - name: 📊 Count lines of code
+        run: |
+          set -euo pipefail
+          echo "# Lines of Code Report" >> "$GITHUB_STEP_SUMMARY"
+          echo "" >> "$GITHUB_STEP_SUMMARY"
+          echo "Generated on: $(date -u '+%Y-%m-%d %H:%M:%S UTC')" >> "$GITHUB_STEP_SUMMARY"
+          echo "" >> "$GITHUB_STEP_SUMMARY"
+
+          # Count PHP files
+          php_files=$(find . -type d \( -name .git -o -name vendor -o -name node_modules \) -prune -o -type f -name "*.php" -print | wc -l | awk '{print $1}')
+          php_lines=$(find . -type d \( -name .git -o -name vendor -o -name node_modules \) -prune -o -type f -name "*.php" -exec cat {} + | wc -l | awk '{print $1}')
+
+          # Count JavaScript files
+          js_files=$(find . -type d \( -name .git -o -name vendor -o -name node_modules \) -prune -o -type f -name "*.js" -print | wc -l | awk '{print $1}')
+          js_lines=$(find . -type d \( -name .git -o -name vendor -o -name node_modules \) -prune -o -type f -name "*.js" -exec cat {} + | wc -l | awk '{print $1}')
+
+          # Count CSS files
+          css_files=$(find . -type d \( -name .git -o -name vendor -o -name node_modules \) -prune -o -type f -name "*.css" -print | wc -l | awk '{print $1}')
+          css_lines=$(find . -type d \( -name .git -o -name vendor -o -name node_modules \) -prune -o -type f -name "*.css" -exec cat {} + | wc -l | awk '{print $1}')
+
+          # Count HTML files
+          html_files=$(find . -type d \( -name .git -o -name vendor -o -name node_modules \) -prune -o -type f -name "*.html" -print | wc -l | awk '{print $1}')
+          html_lines=$(find . -type d \( -name .git -o -name vendor -o -name node_modules \) -prune -o -type f -name "*.html" -exec cat {} + | wc -l | awk '{print $1}')
+
+          # Count Shell scripts
+          sh_files=$(find . -type d \( -name .git -o -name vendor -o -name node_modules \) -prune -o -type f -name "*.sh" -print | wc -l | awk '{print $1}')
+          sh_lines=$(find . -type d \( -name .git -o -name vendor -o -name node_modules \) -prune -o -type f -name "*.sh" -exec cat {} + | wc -l | awk '{print $1}')
+
+          # Count YAML files
+          yaml_files=$(find . -type d \( -name .git -o -name vendor -o -name node_modules \) -prune -o -type f \( -name "*.yml" -o -name "*.yaml" \) -print | wc -l | awk '{print $1}')
+          yaml_lines=$(find . -type d \( -name .git -o -name vendor -o -name node_modules \) -prune -o -type f \( -name "*.yml" -o -name "*.yaml" \) -exec cat {} + | wc -l | awk '{print $1}')
+
+          # Count SQL files
+          sql_files=$(find . -type d \( -name .git -o -name vendor -o -name node_modules \) -prune -o -type f -name "*.sql" -print | wc -l | awk '{print $1}')
+          sql_lines=$(find . -type d \( -name .git -o -name vendor -o -name node_modules \) -prune -o -type f -name "*.sql" -exec cat {} + | wc -l | awk '{print $1}')
+
+
+          # Calculate totals
+          total_files=$((php_files + js_files + css_files + html_files + sh_files + yaml_files + sql_files))
+          total_lines=$((php_lines + js_lines + css_lines + html_lines + sh_lines + yaml_lines + sql_lines))
+
+          # Display results in table format
+          echo "## Summary by File Type" >> "$GITHUB_STEP_SUMMARY"
+          echo "" >> "$GITHUB_STEP_SUMMARY"
+          echo "| File Type | Files | Lines of Code |" >> "$GITHUB_STEP_SUMMARY"
+          echo "|-----------|-------|---------------|" >> "$GITHUB_STEP_SUMMARY"
+          echo "| PHP | $php_files | $php_lines |" >> "$GITHUB_STEP_SUMMARY"
+          echo "| JavaScript | $js_files | $js_lines |" >> "$GITHUB_STEP_SUMMARY"
+          echo "| CSS | $css_files | $css_lines |" >> "$GITHUB_STEP_SUMMARY"
+          echo "| HTML | $html_files | $html_lines |" >> "$GITHUB_STEP_SUMMARY"
+          echo "| Shell | $sh_files | $sh_lines |" >> "$GITHUB_STEP_SUMMARY"
+          echo "| YAML | $yaml_files | $yaml_lines |" >> "$GITHUB_STEP_SUMMARY"
+          echo "| SQL | $sql_files | $sql_lines |" >> "$GITHUB_STEP_SUMMARY"
+          echo "| **Total** | **$total_files** | **$total_lines** |" >> "$GITHUB_STEP_SUMMARY"
+          echo "" >> "$GITHUB_STEP_SUMMARY"
+
+          # Also output to console
+          echo "========================================="
+          echo "Lines of Code Summary"
+          echo "========================================="
+          printf "%-15s %10s %15s\n" "File Type" "Files" "Lines of Code"
+          echo "-----------------------------------------"
+          printf "%-15s %10s %15s\n" "PHP" "$php_files" "$php_lines"
+          printf "%-15s %10s %15s\n" "JavaScript" "$js_files" "$js_lines"
+          printf "%-15s %10s %15s\n" "CSS" "$css_files" "$css_lines"
+          printf "%-15s %10s %15s\n" "HTML" "$html_files" "$html_lines"
+          printf "%-15s %10s %15s\n" "Shell" "$sh_files" "$sh_lines"
+          printf "%-15s %10s %15s\n" "YAML" "$yaml_files" "$yaml_lines"
+          printf "%-15s %10s %15s\n" "SQL" "$sql_files" "$sql_lines"
+          echo "-----------------------------------------"
+          printf "%-15s %10s %15s\n" "Total" "$total_files" "$total_lines"
+          echo "========================================="
