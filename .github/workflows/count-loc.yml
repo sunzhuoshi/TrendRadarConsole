@@ -42,22 +42,20 @@ jobs:
 
           # Count HTML files
           html_files=$(find . -type d \( -name .git -o -name vendor -o -name node_modules \) -prune -o -type f -name "*.html" -print | wc -l | awk '{print $1}')
-          html_lines=$(find . -type d \( -name .git -o -name vendor -o -name node_modules \) -prune -o -type f -name "*.html" -exec cat {} + | wc -l)
-
-          # Base find command to exclude common directories
-          FIND_BASE='find . -type d \( -name .git -o -name vendor -o -name node_modules \) -prune -o -type f'
+          html_lines=$(find . -type d \( -name .git -o -name vendor -o -name node_modules \) -prune -o -type f -name "*.html" -exec cat {} + | wc -l | awk '{print $1}')
 
           # Count Shell scripts
-          sh_files=$($FIND_BASE -name "*.sh" -print | wc -l)
-          sh_lines=$($FIND_BASE -name "*.sh" -exec cat {} + | wc -l)
+          sh_files=$(find . -type d \( -name .git -o -name vendor -o -name node_modules \) -prune -o -type f -name "*.sh" -print | wc -l | awk '{print $1}')
+          sh_lines=$(find . -type d \( -name .git -o -name vendor -o -name node_modules \) -prune -o -type f -name "*.sh" -exec cat {} + | wc -l | awk '{print $1}')
 
           # Count YAML files
-          yaml_files=$($FIND_BASE \( -name "*.yml" -o -name "*.yaml" \) -print | wc -l)
-          yaml_lines=$($FIND_BASE \( -name "*.yml" -o -name "*.yaml" \) -exec cat {} + | wc -l)
+          yaml_files=$(find . -type d \( -name .git -o -name vendor -o -name node_modules \) -prune -o -type f \( -name "*.yml" -o -name "*.yaml" \) -print | wc -l | awk '{print $1}')
+          yaml_lines=$(find . -type d \( -name .git -o -name vendor -o -name node_modules \) -prune -o -type f \( -name "*.yml" -o -name "*.yaml" \) -exec cat {} + | wc -l | awk '{print $1}')
 
           # Count SQL files
-          sql_files=$($FIND_BASE -name "*.sql" -print | wc -l)
-          sql_lines=$($FIND_BASE -name "*.sql" -exec cat {} + | wc -l)
+          sql_files=$(find . -type d \( -name .git -o -name vendor -o -name node_modules \) -prune -o -type f -name "*.sql" -print | wc -l | awk '{print $1}')
+          sql_lines=$(find . -type d \( -name .git -o -name vendor -o -name node_modules \) -prune -o -type f -name "*.sql" -exec cat {} + | wc -l | awk '{print $1}')
+
 
           # Calculate totals
           total_files=$((php_files + js_files + css_files + html_files + sh_files + yaml_files + sql_files))
