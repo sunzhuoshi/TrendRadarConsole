@@ -22,6 +22,7 @@ jobs:
 
       - name: 📊 Count lines of code
         run: |
+          set -euo pipefail
           echo "# Lines of Code Report" >> "$GITHUB_STEP_SUMMARY"
           echo "" >> "$GITHUB_STEP_SUMMARY"
           echo "Generated on: $(date -u '+%Y-%m-%d %H:%M:%S UTC')" >> "$GITHUB_STEP_SUMMARY"
