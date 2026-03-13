@@ -24,24 +24,27 @@ jobs:
           echo "Generated on: $(date -u '+%Y-%m-%d %H:%M:%S UTC')" >> "$GITHUB_STEP_SUMMARY"
           echo "" >> "$GITHUB_STEP_SUMMARY"
 
+          # Common find prune expression to skip large dependency and VCS directories
+          PRUNE_ARGS='-type d \( -name .git -o -name vendor -o -name node_modules \) -prune -o -type f'
+
           # Count PHP files
-          php_files=$(find . -type d \( -name vendor -o -name node_modules \) -prune -o -type f -name "*.php" -print | wc -l)
-          php_lines=$(find . -type d \( -name vendor -o -name node_modules \) -prune -o -type f -name "*.php" -exec cat {} + | wc -l)
+          php_files=$(find . $PRUNE_ARGS -name "*.php" -print | wc -l)
+          php_lines=$(find . $PRUNE_ARGS -name "*.php" -exec cat {} + | wc -l)
 
           # Count JavaScript files
-          js_files=$(find . -type d \( -name vendor -o -name node_modules \) -prune -o -type f -name "*.js" -print | wc -l)
-          js_lines=$(find . -type d \( -name vendor -o -name node_modules \) -prune -o -type f -name "*.js" -exec cat {} + | wc -l)
+          js_files=$(find . $PRUNE_ARGS -name "*.js" -print | wc -l)
+          js_lines=$(find . $PRUNE_ARGS -name "*.js" -exec cat {} + | wc -l)
 
           # Count CSS files
-          css_files=$(find . -type d \( -name vendor -o -name node_modules \) -prune -o -type f -name "*.css" -print | wc -l)
-          css_lines=$(find . -type d \( -name vendor -o -name node_modules \) -prune -o -type f -name "*.css" -exec cat {} + | wc -l)
+          css_files=$(find . $PRUNE_ARGS -name "*.css" -print | wc -l)
+          css_lines=$(find . $PRUNE_ARGS -name "*.css" -exec cat {} + | wc -l)
 
           # Count HTML files
-          html_files=$(find . -type d \( -name vendor -o -name node_modules \) -prune -o -type f -name "*.html" -print | wc -l)
-          html_lines=$(find . -type d \( -name vendor -o -name node_modules \) -prune -o -type f -name "*.html" -exec cat {} + | wc -l)
+          html_files=$(find . $PRUNE_ARGS -name "*.html" -print | wc -l)
+          html_lines=$(find . $PRUNE_ARGS -name "*.html" -exec cat {} + | wc -l)
 
           # Count Shell scripts
-          sh_files=$(find . -type f -name "*.sh" ! -path "*/vendor/*" ! -path "*/node_modules/*" | wc -l)
+          sh_files=$(find . $PRUNE_ARGS -name "*.sh" -print | wc -l)
           sh_lines=$(find . -type f -name "*.sh" ! -path "*/vendor/*" ! -path "*/node_modules/*" -exec cat {} + | wc -l)
 
           # Count YAML files
