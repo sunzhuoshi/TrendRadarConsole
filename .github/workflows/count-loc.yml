@@ -6,6 +6,10 @@ on:
     branches:
       - '**'
 
+concurrency:
+  group: count-loc-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   count-lines-of-code:
     runs-on: ubuntu-latest
