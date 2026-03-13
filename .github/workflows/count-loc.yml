@@ -29,19 +29,19 @@ jobs:
           echo "" >> "$GITHUB_STEP_SUMMARY"
 
           # Count PHP files
-          php_files=$(find . -type d \( -name .git -o -name vendor -o -name node_modules \) -prune -o -type f -name "*.php" -print | wc -l)
-          php_lines=$(find . -type d \( -name .git -o -name vendor -o -name node_modules \) -prune -o -type f -name "*.php" -exec cat {} + | wc -l)
+          php_files=$(find . -type d \( -name .git -o -name vendor -o -name node_modules \) -prune -o -type f -name "*.php" -print | wc -l | awk '{print $1}')
+          php_lines=$(find . -type d \( -name .git -o -name vendor -o -name node_modules \) -prune -o -type f -name "*.php" -exec cat {} + | wc -l | awk '{print $1}')
 
           # Count JavaScript files
-          js_files=$(find . -type d \( -name .git -o -name vendor -o -name node_modules \) -prune -o -type f -name "*.js" -print | wc -l)
-          js_lines=$(find . -type d \( -name .git -o -name vendor -o -name node_modules \) -prune -o -type f -name "*.js" -exec cat {} + | wc -l)
+          js_files=$(find . -type d \( -name .git -o -name vendor -o -name node_modules \) -prune -o -type f -name "*.js" -print | wc -l | awk '{print $1}')
+          js_lines=$(find . -type d \( -name .git -o -name vendor -o -name node_modules \) -prune -o -type f -name "*.js" -exec cat {} + | wc -l | awk '{print $1}')
 
           # Count CSS files
-          css_files=$(find . -type d \( -name .git -o -name vendor -o -name node_modules \) -prune -o -type f -name "*.css" -print | wc -l)
-          css_lines=$(find . -type d \( -name .git -o -name vendor -o -name node_modules \) -prune -o -type f -name "*.css" -exec cat {} + | wc -l)
+          css_files=$(find . -type d \( -name .git -o -name vendor -o -name node_modules \) -prune -o -type f -name "*.css" -print | wc -l | awk '{print $1}')
+          css_lines=$(find . -type d \( -name .git -o -name vendor -o -name node_modules \) -prune -o -type f -name "*.css" -exec cat {} + | wc -l | awk '{print $1}')
 
           # Count HTML files
-          html_files=$(find . -type d \( -name .git -o -name vendor -o -name node_modules \) -prune -o -type f -name "*.html" -print | wc -l)
+          html_files=$(find . -type d \( -name .git -o -name vendor -o -name node_modules \) -prune -o -type f -name "*.html" -print | wc -l | awk '{print $1}')
           html_lines=$(find . -type d \( -name .git -o -name vendor -o -name node_modules \) -prune -o -type f -name "*.html" -exec cat {} + | wc -l)
 
           # Base find command to exclude common directories
